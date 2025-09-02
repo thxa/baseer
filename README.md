@@ -36,26 +36,25 @@ Extensions add advanced capabilities:
 1. Compile the Core (C-based):
 
 ```bash
-gcc core.c -o baseer
-
+make
 ```
 
 
 2. Run the Core and specify the file:
 ```bash
-./baseer --file sample.bin
+./baseer sample.bin
 ```
 
 
 3. Enable desired extensions:
 ```bash
-./baseer --file sample.bin --extensions fix_header identify_block disassembler
+./baseer sample.bin --extensions fix_header identify_block disassembler
 ```
 
 
 4. Use a pipeline of extensions:
 ```bash
-./baseer --file sample.bin --pipeline fix_header|identify_block|disassembler
+./baseer sample.bin --pipeline fix_header|identify_block|disassembler
 ```
 
 ## Features

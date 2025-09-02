@@ -1,3 +1,8 @@
+/**
+ * @file baseer.h
+ * @brief Core function
+ */
+
 /* Baseer 0.1.0a */
 #ifndef BASEER_H
 #define BASEER_H

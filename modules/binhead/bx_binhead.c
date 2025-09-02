@@ -1,3 +1,8 @@
+/**
+ * @file bx_binhead.c
+ * @brief function that handle magic number of header file.
+ */
+
 #include "bx_binhead.h"
 
 // const unsigned long long int BYTE = 8;
@@ -18,39 +23,6 @@ int reverse_4bytes(int n) {
  *
  */
 
-// unsigned long long int reverse_8byte_bin(unsigned long long int n) {
-//      return (
-//          ((n & 0xFFULL) << (BYTE * 7) )                  |
-//          ((n & (0xFFULL << (BYTE * 7)) >> (BYTE * 7)))    |
-
-//          ((n & (0xFFULL << (BYTE * 1)) << (BYTE * 5)))    |
-//          ((n & (0xFFULL << (BYTE * 6)) >> (BYTE * 5)))    |
-
-
-//          ((n & (0xFFULL << (BYTE * 2)) << (BYTE * 3)))    |
-//          ((n & (0xFFULL  << (BYTE * 5)) >> (BYTE * 3)))    |
-
-
-//          ((n & (0xFFULL << (BYTE * 3)) << (BYTE * 1)))    |
-//          ((n & (0xFFULL << (BYTE * 4)) >> (BYTE * 1)))
-//          );
-//
-    // unsigned long long int x = 0;
-    // printf("n -> %064b\n", n);
-    // printf("x -> %064b\n", x);
-    // int i = 0;
-    // while(n) {
-        // printf("x -> %064b\n", x);
-        // x |= n & 1;
-        // x<<=1, n>>=1;
-        // i++;
-    // }
-    // while(i < 64) {
-    //     x <<= 1;
-        // i++;
-    // }
-    // return x;
-// }
 
 unsigned long long int reverse_8byte_bin(unsigned long long int n) {
     return

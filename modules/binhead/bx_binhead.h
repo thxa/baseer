@@ -1,3 +1,9 @@
+/**
+ * @file bx_binhead.h
+ * @brief function that handle magic number of header file.
+ */
+
+
 #ifndef BX_DEFAULT_H
 #define BX_DEFAULT_H
 #include <stdbool.h>

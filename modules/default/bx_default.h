@@ -1,3 +1,7 @@
+/**
+ * @file bx_default.h
+ * @brief default header file
+ */
 #ifndef BX_DEFAULT_H
 #define BX_DEFAULT_H
 #include <stdbool.h>

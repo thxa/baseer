@@ -1,3 +1,7 @@
+/**
+ * @file bx_default.c
+ * @brief default function
+ */
 #include "bx_default.h"
 bool bx_default(baseer_target_t *target, unsigned int index, void *arg)
 {

@@ -1,4 +1,9 @@
 /* Baseer 0.1.0a */
+/**
+ * @file baseer.c
+ * @brief Core function
+ */
+
 #include "baseer.h"
 
 baseer_partition_t *baseer_partitionize(baseer_target_t *target)

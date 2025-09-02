@@ -30,6 +30,8 @@ Extensions add advanced capabilities:
 - **Debugger**: Dynamically monitor and analyze files.
 
 ---
+[docs](./html)
+
 
 ## Usage
 

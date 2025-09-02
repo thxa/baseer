@@ -1,0 +1,118 @@
+\doxysection{baseer.\+h File Reference}
+\hypertarget{baseer_8h}{}\label{baseer_8h}\index{baseer.h@{baseer.h}}
+
+
+Core function.  
+
+
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$sys/stat.\+h$>$}\newline
+{\ttfamily \#include $<$stdbool.\+h$>$}\newline
+{\ttfamily \#include $<$assert.\+h$>$}\newline
+{\ttfamily \#include $<$string.\+h$>$}\newline
+{\ttfamily \#include $<$ctype.\+h$>$}\newline
+\doxysubsubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structbaseer__partition__t}{baseer\+\_\+partition\+\_\+t}}
+\item 
+struct \mbox{\hyperlink{structbaseer__target__t}{baseer\+\_\+target\+\_\+t}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{baseer_8h_aa69821511ee6d0207ca409db244ccb38}\label{baseer_8h_aa69821511ee6d0207ca409db244ccb38} 
+\#define {\bfseries BASEER\+\_\+\+VERSION}~1
+\item 
+\Hypertarget{baseer_8h_a7358167c931b8133c55cb658a41b52ed}\label{baseer_8h_a7358167c931b8133c55cb658a41b52ed} 
+\#define {\bfseries BASEER\+\_\+\+DEFAULT\+\_\+\+PARTITION\+\_\+\+COUNT}~8
+\item 
+\Hypertarget{baseer_8h_af4b41731c799aea6025edfd36ffbce8d}\label{baseer_8h_af4b41731c799aea6025edfd36ffbce8d} 
+\#define {\bfseries BASEER\+\_\+\+MAX\+\_\+\+FILE\+\_\+\+SIZE}~1024 \texorpdfstring{$\ast$}{*} 1024 \texorpdfstring{$\ast$}{*} 4
+\item 
+\#define \mbox{\hyperlink{baseer_8h_adea3bb2f4f65095827fcd08f4736e1be}{RETURN\+\_\+\+NULL\+\_\+\+IF}}(con)
+\item 
+\#define \mbox{\hyperlink{baseer_8h_ad8fa62f850908606457b5e6fc7666b41}{BASEER\+\_\+\+BASE\+\_\+\+OFFSET}}(b,  i,  sf)
+\item 
+\#define \mbox{\hyperlink{baseer_8h_a45447fc6e7680e309923cc29b5308c1d}{BASEER\+\_\+\+BLOCK\+\_\+\+OFFSET}}(t,  i)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{baseer_8h_af06fab8270684c79b21df5f35f7b6ed0}\label{baseer_8h_af06fab8270684c79b21df5f35f7b6ed0} 
+typedef struct baseer\+\_\+target\+\_\+t {\bfseries baseer\+\_\+target\+\_\+t}
+\item 
+\Hypertarget{baseer_8h_a417fb24384c85399e6607acb1a274bab}\label{baseer_8h_a417fb24384c85399e6607acb1a274bab} 
+typedef struct baseer\+\_\+partition\+\_\+t {\bfseries baseer\+\_\+partition\+\_\+t}
+\item 
+\Hypertarget{baseer_8h_a9edbd6de7c716484e494ae481bb608e6}\label{baseer_8h_a9edbd6de7c716484e494ae481bb608e6} 
+typedef bool(\texorpdfstring{$\ast$}{*} {\bfseries baseer\+\_\+partition\+\_\+callback\+\_\+t}) (\mbox{\hyperlink{structbaseer__target__t}{baseer\+\_\+target\+\_\+t}} \texorpdfstring{$\ast$}{*}, unsigned int index, void \texorpdfstring{$\ast$}{*}arg)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{baseer_8h_a4a537faf6b8f2c19c581cc9850edc701}\label{baseer_8h_a4a537faf6b8f2c19c581cc9850edc701} 
+\mbox{\hyperlink{structbaseer__partition__t}{baseer\+\_\+partition\+\_\+t}} \texorpdfstring{$\ast$}{*} {\bfseries baseer\+\_\+partitionize} (\mbox{\hyperlink{structbaseer__target__t}{baseer\+\_\+target\+\_\+t}} \texorpdfstring{$\ast$}{*}target)
+\item 
+\Hypertarget{baseer_8h_a522054a80aa7268334e55d6864a5c5e2}\label{baseer_8h_a522054a80aa7268334e55d6864a5c5e2} 
+void {\bfseries baseer\+\_\+departitionize} (\mbox{\hyperlink{structbaseer__partition__t}{baseer\+\_\+partition\+\_\+t}} \texorpdfstring{$\ast$}{*}partitions)
+\item 
+\Hypertarget{baseer_8h_afd300f77e1e1e55ac2eff0b1a5e23fe9}\label{baseer_8h_afd300f77e1e1e55ac2eff0b1a5e23fe9} 
+\mbox{\hyperlink{structbaseer__target__t}{baseer\+\_\+target\+\_\+t}} \texorpdfstring{$\ast$}{*} {\bfseries baseer\+\_\+open} (char \texorpdfstring{$\ast$}{*}file\+\_\+path, unsigned int partition\+\_\+count)
+\item 
+\Hypertarget{baseer_8h_a6c7d20aa4157fb69030fc25171cdc916}\label{baseer_8h_a6c7d20aa4157fb69030fc25171cdc916} 
+void {\bfseries baseer\+\_\+close} (\mbox{\hyperlink{structbaseer__target__t}{baseer\+\_\+target\+\_\+t}} \texorpdfstring{$\ast$}{*}target)
+\item 
+\Hypertarget{baseer_8h_ab32e495d6af677e7772ccc0d19ad8d5d}\label{baseer_8h_ab32e495d6af677e7772ccc0d19ad8d5d} 
+void {\bfseries baseer\+\_\+print} (\mbox{\hyperlink{structbaseer__target__t}{baseer\+\_\+target\+\_\+t}} \texorpdfstring{$\ast$}{*}target)
+\item 
+\Hypertarget{baseer_8h_ab8d1bc04985ff8c2836236eecab367a0}\label{baseer_8h_ab8d1bc04985ff8c2836236eecab367a0} 
+bool {\bfseries baseer\+\_\+execute} (\mbox{\hyperlink{structbaseer__target__t}{baseer\+\_\+target\+\_\+t}} \texorpdfstring{$\ast$}{*}target, baseer\+\_\+partition\+\_\+callback\+\_\+t callback, void \texorpdfstring{$\ast$}{*}arg)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Core function. 
+
+
+
+\label{doc-define-members}
+\Hypertarget{baseer_8h_doc-define-members}
+\doxysubsection{Macro Definition Documentation}
+\Hypertarget{baseer_8h_ad8fa62f850908606457b5e6fc7666b41}\index{baseer.h@{baseer.h}!BASEER\_BASE\_OFFSET@{BASEER\_BASE\_OFFSET}}
+\index{BASEER\_BASE\_OFFSET@{BASEER\_BASE\_OFFSET}!baseer.h@{baseer.h}}
+\doxysubsubsection{\texorpdfstring{BASEER\_BASE\_OFFSET}{BASEER\_BASE\_OFFSET}}
+{\footnotesize\ttfamily \label{baseer_8h_ad8fa62f850908606457b5e6fc7666b41} 
+\#define BASEER\+\_\+\+BASE\+\_\+\+OFFSET(\begin{DoxyParamCaption}\item[{}]{b}{, }\item[{}]{i}{, }\item[{}]{sf}{}\end{DoxyParamCaption})}
+
+{\bfseries Value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{(b)\ +\ ((i)\ *\ (sf))}
+
+\end{DoxyCode}
+\Hypertarget{baseer_8h_a45447fc6e7680e309923cc29b5308c1d}\index{baseer.h@{baseer.h}!BASEER\_BLOCK\_OFFSET@{BASEER\_BLOCK\_OFFSET}}
+\index{BASEER\_BLOCK\_OFFSET@{BASEER\_BLOCK\_OFFSET}!baseer.h@{baseer.h}}
+\doxysubsubsection{\texorpdfstring{BASEER\_BLOCK\_OFFSET}{BASEER\_BLOCK\_OFFSET}}
+{\footnotesize\ttfamily \label{baseer_8h_a45447fc6e7680e309923cc29b5308c1d} 
+\#define BASEER\+\_\+\+BLOCK\+\_\+\+OFFSET(\begin{DoxyParamCaption}\item[{}]{t}{, }\item[{}]{i}{}\end{DoxyParamCaption})}
+
+{\bfseries Value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{BASEER\_BASE\_OFFSET(((t)-\/>block),\ (i),\ ((t)-\/>partition\_size))}
+
+\end{DoxyCode}
+\Hypertarget{baseer_8h_adea3bb2f4f65095827fcd08f4736e1be}\index{baseer.h@{baseer.h}!RETURN\_NULL\_IF@{RETURN\_NULL\_IF}}
+\index{RETURN\_NULL\_IF@{RETURN\_NULL\_IF}!baseer.h@{baseer.h}}
+\doxysubsubsection{\texorpdfstring{RETURN\_NULL\_IF}{RETURN\_NULL\_IF}}
+{\footnotesize\ttfamily \label{baseer_8h_adea3bb2f4f65095827fcd08f4736e1be} 
+\#define RETURN\+\_\+\+NULL\+\_\+\+IF(\begin{DoxyParamCaption}\item[{}]{con}{}\end{DoxyParamCaption})}
+
+{\bfseries Value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\ \ \ \ \textcolor{keywordflow}{if}\ ((con))\ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}
+\DoxyCodeLine{\ \ \ \ \{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ NULL;\ \ \ \ \ \ \ \ \(\backslash\)}
+\DoxyCodeLine{\ \ \ \ \}}
+
+\end{DoxyCode}

@@ -1,4 +1,4 @@
-/* Mojibake 1.0.0a */
+/* Baseer 0.1.0a */
 #include "baseer.h"
 
 baseer_partition_t *baseer_partitionize(baseer_target_t *target)

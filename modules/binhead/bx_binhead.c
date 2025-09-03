@@ -5,24 +5,12 @@
 
 #include "bx_binhead.h"
 
-// const unsigned long long int BYTE = 8;
-
 int reverse_4bytes(int n) {
     return ((n & 0xFF) << (BYTE * 3) )     |
         ((n & (0xFF << BYTE*3)) >> BYTE*3) |
         ((n & (0xFF << BYTE*1)) << BYTE*1) | 
         ((n & (0xFF << BYTE*2)) >> BYTE*1);
 }
-
-
-/*
- * [0] [1] [2] [3] [4] [5] [6] [7]
- * [7] [6] [5] [4] [3] [2] [1] [0]
- *
- *
- *
- */
-
 
 unsigned long long int reverse_8byte_bin(unsigned long long int n) {
     return
@@ -68,8 +56,6 @@ unsigned int count_bytes(unsigned long long n) {
 unsigned long long int reverse_bytes(unsigned long long int n) {
     unsigned long long int result = 0;
     unsigned int cnt = count_bytes(n);
-
-    printf("%d\n", cnt);
     for (int i = 0; i < cnt; i++) {
         result <<= BYTE;         
         result |= (n & 0xFF); 
@@ -84,10 +70,6 @@ bool check_4bytes(unsigned int magic_value, unsigned int magic_number) {
 
 bool check(unsigned long long int magic_value, unsigned long long int magic_number) {
     unsigned long long int clean_bytes = 0xFFULL << (BYTE * 7);
-    for(int i=0; i<count_bytes(magic_value); i++) {
-
-    }
-
     return magic_value == magic_number || magic_value == reverse_bytes(magic_number);
 }
 
@@ -97,25 +79,68 @@ bool bx_binhead(baseer_target_t *target, unsigned int index, void *arg)
     if (target == NULL || target->block == NULL || index >= target->partition_count)
         return false;
 
-    void *partition = BASEER_BLOCK_OFFSET(target, index);
+    void *block = BASEER_BLOCK_OFFSET(target, index);
+    bparser* bp= bparser_load(BPARSER_MEM, block);
+    bp ->source.mem.pos = 0;
+    bp ->source.mem.size = target ->size;
+
+    magic_number magics[] = {
+        {"ELF", ELF_MAGIC, reverse_bytes(ELF_MAGIC)},
+        {"PDF", PDF_MAGIC, reverse_bytes(PDF_MAGIC)},
+        {"PNG", PNG_MAGIC, reverse_bytes(PNG_MAGIC)},
+    };
+
+    for(int i=0; i< sizeof(magics)/ sizeof(magics[0]); i++)
+    {
+        int len = count_bytes(magics[i].number);
+        void* pattern = malloc(len);
+        size_t n = bparser_read(bp, pattern, len);
+        unsigned char* p = (unsigned char*)pattern;
+        unsigned char* mgn = (unsigned char*)&magics[i].number;
+        unsigned char* mgn_r = (unsigned char*)&magics[i].rnumber;
+
+        bool flag = 1;
+        for(int j=0; j< n; j++) {
+            flag &= (*mgn == *p) || (*mgn_r == *p); 
+            if(!flag) {
+                break;
+            }
+            p++, mgn++, mgn_r++;
+        }
+        printf("\n");
+
+        if(flag) {
+            printf("%s\n", magics[i].name);
+            break;
+        }
+
+        free(pattern);
+        pattern = NULL;
+    }
+    free(bp);
+
+
+
+    // printf("%d\n", bp ->source.mem.size);
 
     // TODO: handle most of magic numbers.
-    unsigned int magic_value_4byte = *((unsigned int*)partition);
-    if(check_4bytes(magic_value_4byte, ELF_MAGIC)){
-        printf("This is ELF file\n");
-        return true;
-    }
+    // unsigned int magic_value_4byte = *((unsigned int*)block);
+    // if(check_4bytes(magic_value_4byte, ELF_MAGIC)){
+    //     printf("This is ELF file\n");
+    //     return true;
+    // }
 
-    unsigned long long magic_value = *((unsigned long long*)partition);
-    if(check(magic_value, PNG_MAGIC)){
-        printf("This is PNG file\n");
-        return true;
-    }
+    // if(check(magic_value_4byte, PDF_MAGIC)){
+    //     printf("This is PDF file\n");
+    //     return true;
+    // }
 
-    if(check(magic_value, PDF_MAGIC)){
-        printf("This is PDF file\n");
-        return true;
-    }
 
+
+    // unsigned long long magic_value = *((unsigned long long*)block);
+    // if(check(magic_value, PNG_MAGIC)){
+    //     printf("This is PNG file\n");
+    //     return true;
+    // }
     return true;
 }

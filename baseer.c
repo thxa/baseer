@@ -1,8 +1,8 @@
-/* Baseer 0.1.0a */
 /**
  * @file baseer.c
- * @brief Core function
+ * @brief Core 
  */
+/* Baseer 0.1.0a */
 
 #include "baseer.h"
 

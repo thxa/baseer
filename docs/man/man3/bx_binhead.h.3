@@ -1,0 +1,45 @@
+.TH "modules/binhead/bx_binhead.h" 3 "Version 0.1.0" "Baseer" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+modules/binhead/bx_binhead.h \- function that handle magic number of header file\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fR#include <stdbool\&.h>\fP
+.br
+\fR#include '\&.\&./\&.\&./baseer\&.h'\fP
+.br
+
+.SS "Macros"
+
+.in +1c
+.ti -1c
+.RI "#define \fBELF_MAGIC\fP   0x7F454C46"
+.br
+.ti -1c
+.RI "#define \fBPNG_MAGIC\fP   0x89504e470d0a1a0a"
+.br
+.ti -1c
+.RI "#define \fBPDF_MAGIC\fP   0x255044462D"
+.br
+.ti -1c
+.RI "#define \fBBYTE\fP   8"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "bool \fBbx_binhead\fP (\fBbaseer_target_t\fP *target, unsigned int index, void *arg)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+function that handle magic number of header file\&. 
+
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Baseer from the source code\&.

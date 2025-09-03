@@ -1,6 +1,7 @@
 #include "baseer.h"
 // #include "modules/default/bx_default.h"
 #include "modules/binhead/bx_binhead.h"
+#include "modules/bparser/bparser.h"
 
 
 int main(int argc, char**args)
@@ -15,9 +16,13 @@ int main(int argc, char**args)
 
     // if (!baseer_execute(target, bx_default, NULL))
     //     printf("Execution error\n");
-    printf("%s\n", args[1]);
+    
+    // printf("%s\n", args[1]);
     if (!baseer_execute(target, bx_binhead, NULL))
         printf("Execution error\n");
+
+    // if (!baseer_execute(target, bparser_load, NULL))
+    //     printf("Execution error\n");
 
 
     baseer_close(target);

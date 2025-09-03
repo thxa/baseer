@@ -1,0 +1,51 @@
+.TH "modules/binhead/bx_binhead.c" 3 "Version 0.1.0" "Baseer" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+modules/binhead/bx_binhead.c \- function that handle magic number of header file\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fR#include 'bx_binhead\&.h'\fP
+.br
+
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "int \fBreverse_4bytes\fP (int n)"
+.br
+.ti -1c
+.RI "unsigned long long int \fBreverse_8byte_bin\fP (unsigned long long int n)"
+.br
+.ti -1c
+.RI "unsigned long long int \fBreverse_bin\fP (unsigned long long int n)"
+.br
+.ti -1c
+.RI "unsigned int \fBcount_bits\fP (unsigned long long int n)"
+.br
+.ti -1c
+.RI "unsigned int \fBcount_bytes\fP (unsigned long long n)"
+.br
+.ti -1c
+.RI "unsigned long long int \fBreverse_bytes\fP (unsigned long long int n)"
+.br
+.ti -1c
+.RI "bool \fBcheck_4bytes\fP (unsigned int magic_value, unsigned int magic_number)"
+.br
+.ti -1c
+.RI "bool \fBcheck\fP (unsigned long long int magic_value, unsigned long long int magic_number)"
+.br
+.ti -1c
+.RI "bool \fBbx_binhead\fP (\fBbaseer_target_t\fP *target, unsigned int index, void *arg)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+function that handle magic number of header file\&. 
+
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Baseer from the source code\&.

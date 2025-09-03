@@ -10,19 +10,20 @@ CORE = main.c baseer.c
 TARGET = baseer
 DEFAULT = modules/default/bx_default.c
 BX_BINHEAD = modules/binhead/bx_binhead.c
+BPARSER = modules/bparser/bparser.c
 
 
 # Default target: build executable and extensions
 # all: $(TARGET) $(EXT1_SO) $(EXT2_SO)
-all: $(TARGET) $(DEFAULT) $(BX_BINHEAD)
+all: $(TARGET) $(DEFAULT) $(BX_BINHEAD) $(BPARSER)
 
 # Build core executable
 # $(TARGET): $(CORE) baseer.h
 # 	$(CC) $(CFLAGS) $(CORE) -o $(TARGET) $(LDFLAGS)
 
 
-$(TARGET): $(CORE) baseer.h $(DEFAULT) $(BX_BINHEAD)
-	$(CC) $(CORE) $(DEFAULT) $(BX_BINHEAD) -o $(TARGET)
+$(TARGET): $(CORE) baseer.h $(DEFAULT) $(BX_BINHEAD) $(BPARSER)
+	$(CC) $(CORE) $(DEFAULT) $(BPARSER)  $(BX_BINHEAD) -o $(TARGET)
 
 # gcc main.c baseer.c modules/default/mbx_default.c -o main                                                                                                                                                                                                             
 # Build dynamic extension 1

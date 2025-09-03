@@ -2,7 +2,7 @@
 
 **بصير (Baseer)** is a flexible, C-based reverse engineering analysis tool built on a **Core + Extensions** architecture. It can handle files from **any programming language** and allows you to open files, extract byte blocks, and analyze them using modular, customizable extensions.
 
-<!-- بصير (Baseer) – a high-performance, C-based tool for reverse engineering and analyzing files from any programming language. -->
+> ⚠️ Note: This project is still under development and may change frequently.
 
 ---
 
@@ -44,19 +44,19 @@ make
 
 2. Run the Core and specify the file:
 ```bash
-./baseer sample.bin
+baseer sample.bin
 ```
 
 
 3. Enable desired extensions:
 ```bash
-./baseer sample.bin --extensions fix_header identify_block disassembler
+baseer sample.bin --extensions fix_header identify_block disassembler
 ```
 
 
 4. Use a pipeline of extensions:
 ```bash
-./baseer sample.bin --pipeline fix_header|identify_block|disassembler
+baseer sample.bin --pipeline fix_header|identify_block|disassembler
 ```
 
 ## Features

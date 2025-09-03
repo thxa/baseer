@@ -18,8 +18,6 @@ bparser* bparser_load(bparser_type type, void *data) {
     return p;
 }
 
-
-
 size_t bparser_read(bparser* parser, void* buf, size_t size) {
     if (!parser || !buf) return 0;
     if (parser->type == BPARSER_FILE) {
@@ -32,10 +30,10 @@ size_t bparser_read(bparser* parser, void* buf, size_t size) {
 }
 
 int bparser_apply(bparser* parser, bparser_callback_t callback, void* arg) {
-    // if(parser == NULL || parser->source == NULL || parser -> source.mem == NULL || parser ->source.mem.size == NULL) {
-
-    // }
-    // TODO: apply struct using callback such as ELF struct, PDF or so on.
+    if(parser == NULL || callback == NULL) {
+        return 1;
+    }
+    callback(parser, arg);
     return 0;
 }
 

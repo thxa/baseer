@@ -1,0 +1,43 @@
+# Compiled object files
+*.o
+*.obj
+
+# Compiled Dynamic libraries
+*.so
+*.so.*
+*.dylib
+*.dll
+
+# Compiled Static libraries
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+a.out
+
+# Debug / profiling
+*.dSYM/
+*.stackdump
+*.core
+*.gmon
+*.gcno
+*.gcda
+*.gcov
+
+# Logs
+*.log
+
+# Build directories
+/build/
+/bin/
+/lib/
+/dist/
+
+# Temporary files
+*.swp
+*.swo
+*~
+

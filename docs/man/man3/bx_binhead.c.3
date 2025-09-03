@@ -2,26 +2,19 @@
 .ad l
 .nh
 .SH NAME
-modules/binhead/bx_binhead.c \- function that handle magic number of header file\&.  
+modules/binhead/bx_binhead.c \- Handle the magic number of a file header and trigger extensions\&.  
 
 .SH SYNOPSIS
 .br
 .PP
 \fR#include 'bx_binhead\&.h'\fP
 .br
+\fR#include '\&.\&./bx_elf/bx_elf\&.h'\fP
+.br
 
 .SS "Functions"
 
 .in +1c
-.ti -1c
-.RI "int \fBreverse_4bytes\fP (int n)"
-.br
-.ti -1c
-.RI "unsigned long long int \fBreverse_8byte_bin\fP (unsigned long long int n)"
-.br
-.ti -1c
-.RI "unsigned long long int \fBreverse_bin\fP (unsigned long long int n)"
-.br
 .ti -1c
 .RI "unsigned int \fBcount_bits\fP (unsigned long long int n)"
 .br
@@ -32,18 +25,12 @@ modules/binhead/bx_binhead.c \- function that handle magic number of header file
 .RI "unsigned long long int \fBreverse_bytes\fP (unsigned long long int n)"
 .br
 .ti -1c
-.RI "bool \fBcheck_4bytes\fP (unsigned int magic_value, unsigned int magic_number)"
-.br
-.ti -1c
-.RI "bool \fBcheck\fP (unsigned long long int magic_value, unsigned long long int magic_number)"
-.br
-.ti -1c
 .RI "bool \fBbx_binhead\fP (\fBbaseer_target_t\fP *target, unsigned int index, void *arg)"
 .br
 .in -1c
 .SH "Detailed Description"
 .PP 
-function that handle magic number of header file\&. 
+Handle the magic number of a file header and trigger extensions\&. 
 
 
 .SH "Author"

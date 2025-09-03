@@ -4,6 +4,8 @@
  */
 
 #include "bx_binhead.h"
+#include "../bx_elf/bx_elf.h"
+
 unsigned int count_bits(unsigned long long int n) {
     unsigned int cnt = 0;
     while (n) {
@@ -45,7 +47,7 @@ bool bx_binhead(baseer_target_t *target, unsigned int index, void *arg)
     bp ->source.mem.size = target ->size;
 
     magic_number magics[] = {
-        {"ELF", ELF_MAGIC, reverse_bytes(ELF_MAGIC)},
+        {"ELF", ELF_MAGIC, reverse_bytes(ELF_MAGIC), bx_elf},
         {"PDF", PDF_MAGIC, reverse_bytes(PDF_MAGIC)},
         {"PNG", PNG_MAGIC, reverse_bytes(PNG_MAGIC)},
         {"ZIP", ZIP_MAGIC, reverse_bytes(ZIP_MAGIC)},
@@ -71,8 +73,8 @@ bool bx_binhead(baseer_target_t *target, unsigned int index, void *arg)
         }
 
         if(flag) {
+            bparser_apply(bp, *magics[i].parser, NULL);
             printf("This file is %s\n", magics[i].name);
-            
             break;
         }
 

@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.14.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Baseer: bparser Struct Reference</title>
+<title>Baseer: modules/bx_elf/bx_elf.h Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -62,7 +62,7 @@ $(function() {
   </div>
 </div>
 <script type="text/javascript">
-$(function(){initNavTree('structbparser.html','','structbparser-members'); });
+$(function(){initNavTree('bx__elf_8h_source.html','',''); });
 </script>
 <div id="container">
 <div id="doc-content">
@@ -88,39 +88,28 @@ $(function(){initNavTree('structbparser.html','','structbparser-members'); });
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">bparser Struct Reference</div></div>
+  <div class="headertitle"><div class="title">bx_elf.h</div></div>
 </div><!--header-->
 <div class="contents">
-<table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
-Public Attributes</h2></td></tr>
-<tr class="memitem:a3ae506ce0757bf23d8d9f344aca8f0e9" id="r_a3ae506ce0757bf23d8d9f344aca8f0e9"><td class="memItemLeft" align="right" valign="top"><a id="a3ae506ce0757bf23d8d9f344aca8f0e9" name="a3ae506ce0757bf23d8d9f344aca8f0e9"></a>
-bparser_type&#160;</td><td class="memItemRight" valign="bottom"><b>type</b></td></tr>
-<tr class="memitem:"><td class="memItemLeft anon"><a id="a49a7108d2f45cdfa3465494fb8b31509" name="a49a7108d2f45cdfa3465494fb8b31509"></a>
-union {&#160;</td><td class="memItemRight" valign="bottom"></td></tr>
-<tr class="memitem:a7a0dc4f2beba60e30501083f5e2f4949" id="r_a7a0dc4f2beba60e30501083f5e2f4949"><td class="memItemLeft anon">
-&#160;&#160;&#160;FILE *&#160;&#160;&#160;<b>fp</b>&#160;</td><td class="memItemRight" valign="bottom"></td></tr>
-<tr class="memitem:a706aad4fd85e1a4f113e017cb1409cad" id="r_a706aad4fd85e1a4f113e017cb1409cad"><td class="memItemLeft anon">
-&#160;&#160;&#160;<a class="el" href="structbparser__mem__t.html">bparser_mem_t</a>&#160;&#160;&#160;<b>mem</b>&#160;</td><td class="memItemRight" valign="bottom"></td></tr>
-<tr class="memitem:a49a7108d2f45cdfa3465494fb8b31509" id="r_a49a7108d2f45cdfa3465494fb8b31509"><td class="memItemLeft anonEnd" valign="top">}&#160;</td><td class="memItemRight" valign="bottom"><b>source</b></td></tr>
-</table>
-<hr/>The documentation for this struct was generated from the following file:<ul>
-<li>modules/bparser/<a class="el" href="bparser_8h_source.html">bparser.h</a></li>
-</ul>
-</div><!-- contents -->
+<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#ifndef BX_ELF</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#define BX_ELF</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &quot;../bparser/bparser.h&quot;</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span> </div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span> </div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span> </div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="keyword">typedef</span> bool (*bparser_callback_t)(<a class="code hl_struct" href="structbparser.html">bparser</a>* parser, <span class="keywordtype">void</span>* arg);</div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="keywordtype">bool</span> bx_elf(<a class="code hl_struct" href="structbparser.html">bparser</a>* parser, <span class="keywordtype">void</span> *arg);</div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span> </div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#endif </span></div>
+<div class="ttc" id="astructbparser_html"><div class="ttname"><a href="structbparser.html">bparser</a></div><div class="ttdef"><b>Definition</b> bparser.h:20</div></div>
+</div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
-<div id="page-nav" class="page-nav-panel">
-<div id="page-nav-resize-handle"></div>
-<div id="page-nav-tree">
-<div id="page-nav-contents">
-</div><!-- page-nav-contents -->
-</div><!-- page-nav-tree -->
-</div><!-- page-nav -->
 </div><!-- container -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="structbparser.html">bparser</a></li>
+    <li class="navelem"><a href="dir_e05d7e2b1ecd646af5bb94391405f3b5.html">modules</a></li><li class="navelem"><a href="dir_e9638e13cd84e8d8d55d1076e3a45a29.html">bx_elf</a></li><li class="navelem"><b>bx_elf.h</b></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.14.0 </li>
   </ul>
 </div>

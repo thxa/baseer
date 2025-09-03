@@ -5,7 +5,6 @@
 #include <string.h>
 #include "../../baseer.h"
 
-typedef bool (*bparser_callback_t)(const void* data, size_t len);
 
 typedef enum {
     BPARSER_FILE,
@@ -27,6 +26,8 @@ typedef struct {
     } source;
 } bparser;
 
+
+typedef bool (*bparser_callback_t)(bparser* parser, void* arg);
 
 bparser* bparser_load(bparser_type type, void *data);
 size_t bparser_read(bparser* parser, void* buf, size_t size);

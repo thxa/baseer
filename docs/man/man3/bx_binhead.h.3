@@ -2,7 +2,7 @@
 .ad l
 .nh
 .SH NAME
-modules/binhead/bx_binhead.h \- function that handle magic number of header file\&.  
+modules/binhead/bx_binhead.h \- Functions to handle and identify file types using magic numbers\&.  
 
 .SH SYNOPSIS
 .br
@@ -11,7 +11,16 @@ modules/binhead/bx_binhead.h \- function that handle magic number of header file
 .br
 \fR#include '\&.\&./\&.\&./baseer\&.h'\fP
 .br
+\fR#include '\&.\&./bparser/bparser\&.h'\fP
+.br
 
+.SS "Classes"
+
+.in +1c
+.ti -1c
+.RI "struct \fBmagic_number\fP"
+.br
+.in -1c
 .SS "Macros"
 
 .in +1c
@@ -22,7 +31,10 @@ modules/binhead/bx_binhead.h \- function that handle magic number of header file
 .RI "#define \fBPNG_MAGIC\fP   0x89504e470d0a1a0a"
 .br
 .ti -1c
-.RI "#define \fBPDF_MAGIC\fP   0x255044462D"
+.RI "#define \fBZIP_MAGIC\fP   0x504B"
+.br
+.ti -1c
+.RI "#define \fBPDF_MAGIC\fP   0x25504446"
 .br
 .ti -1c
 .RI "#define \fBBYTE\fP   8"
@@ -37,9 +49,9 @@ modules/binhead/bx_binhead.h \- function that handle magic number of header file
 .in -1c
 .SH "Detailed Description"
 .PP 
-function that handle magic number of header file\&. 
+Functions to handle and identify file types using magic numbers\&. 
 
-
+This header defines the interface for checking a file's magic number and dispatching the appropriate parser/extension based on the file type (e\&.g\&., ELF, PNG, PDF)\&. 
 .SH "Author"
 .PP 
 Generated automatically by Doxygen for Baseer from the source code\&.

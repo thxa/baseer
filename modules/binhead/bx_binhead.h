@@ -1,6 +1,10 @@
 /**
  * @file bx_binhead.h
- * @brief function that handle magic number of header file.
+ * @brief Functions to handle and identify file types using magic numbers.
+ *
+ * This header defines the interface for checking a file's magic number
+ * and dispatching the appropriate parser/extension based on the file type
+ * (e.g., ELF, PNG, PDF).
  */
 
 
@@ -23,9 +27,6 @@ typedef struct{
     unsigned long long int rnumber;
     bparser_callback_t parser;
 } magic_number;
-
-
-
 
 bool bx_binhead(baseer_target_t *target, unsigned int index, void *arg);
 

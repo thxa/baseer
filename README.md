@@ -30,7 +30,7 @@ Extensions add advanced capabilities:
 - **Debugger**: Dynamically monitor and analyze files.
 
 ---
-[docs](./docs)
+[docs](./docs/html)
 
 
 ## Usage

@@ -1,16 +1,16 @@
 #include "baseer.h"
 // #include "modules/default/bx_default.h"
 #include "modules/binhead/bx_binhead.h"
-#include "modules/bparser/bparser.h"
 
 
 int main(int argc, char**args)
 {
     if(argc != 2) {
+        printf("Baseer version: %s\n", BASEER_VERSION);
         return 1;
     }
     
-    baseer_target_t *target = baseer_open(args[1], 1);
+    baseer_target_t *target = baseer_open(args[1]);
     if (target == NULL)
         return 1;
 

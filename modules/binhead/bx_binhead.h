@@ -26,8 +26,8 @@ typedef struct{
     unsigned long long int number;
     unsigned long long int rnumber;
     bparser_callback_t parser;
-} magic_number;
+} bmagic;
 
-bool bx_binhead(baseer_target_t *target, unsigned int index, void *arg);
+bool bx_binhead(baseer_target_t *target, void *arg);
 
 #endif

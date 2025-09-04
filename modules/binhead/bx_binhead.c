@@ -36,17 +36,16 @@ unsigned long long int reverse_bytes(unsigned long long int n) {
     return result;
 }
 
-bool bx_binhead(baseer_target_t *target, unsigned int index, void *arg)
+bool bx_binhead(baseer_target_t *target, void *arg)
 {   
-    if (target == NULL || target->block == NULL || index >= target->partition_count)
+    if (target == NULL || target->block == NULL)
         return false;
 
-    void *block = BASEER_BLOCK_OFFSET(target, index);
+    void *block = target ->block;
     bparser* bp= bparser_load(BPARSER_MEM, block);
-    bp ->source.mem.pos = 0;
     bp ->source.mem.size = target ->size;
 
-    magic_number magics[] = {
+    bmagic magics[] = {
         {"ELF", ELF_MAGIC, reverse_bytes(ELF_MAGIC), bx_elf},
         {"PDF", PDF_MAGIC, reverse_bytes(PDF_MAGIC)},
         {"PNG", PNG_MAGIC, reverse_bytes(PNG_MAGIC)},
@@ -54,9 +53,8 @@ bool bx_binhead(baseer_target_t *target, unsigned int index, void *arg)
         // { NULL, 0,         0,                 NULL }
     };
 
-    // for(int i=0; i< sizeof(magics)/ sizeof(magics[0]); i++)
     bool flag = 1;
-    for(int i=0; i< sizeof(magics)/ sizeof(magics[0]); i++)
+    for(int i=0; i< sizeof(magics)/sizeof(magics[0]); i++)
     {
         int len = count_bytes(magics[i].number);
         void* pattern = malloc(len);

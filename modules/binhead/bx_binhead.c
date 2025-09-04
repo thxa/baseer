@@ -51,9 +51,11 @@ bool bx_binhead(baseer_target_t *target, unsigned int index, void *arg)
         {"PDF", PDF_MAGIC, reverse_bytes(PDF_MAGIC)},
         {"PNG", PNG_MAGIC, reverse_bytes(PNG_MAGIC)},
         {"ZIP", ZIP_MAGIC, reverse_bytes(ZIP_MAGIC)},
-        { NULL, 0,         0,                 NULL }
+        // { NULL, 0,         0,                 NULL }
     };
 
+    // for(int i=0; i< sizeof(magics)/ sizeof(magics[0]); i++)
+    bool flag = 1;
     for(int i=0; i< sizeof(magics)/ sizeof(magics[0]); i++)
     {
         int len = count_bytes(magics[i].number);
@@ -63,7 +65,7 @@ bool bx_binhead(baseer_target_t *target, unsigned int index, void *arg)
         unsigned char* mgn = (unsigned char*)&magics[i].number;
         unsigned char* mgn_r = (unsigned char*)&magics[i].rnumber;
 
-        bool flag = 1;
+        flag = 1;
         for(int j=0; j< n; j++) {
             flag &= (*mgn == *p) || (*mgn_r == *p); 
             if(!flag) {
@@ -73,8 +75,8 @@ bool bx_binhead(baseer_target_t *target, unsigned int index, void *arg)
         }
 
         if(flag) {
-            bparser_apply(bp, *magics[i].parser, NULL);
             printf("This file is %s\n", magics[i].name);
+            bparser_apply(bp, *magics[i].parser, NULL);
             break;
         }
 
@@ -83,5 +85,8 @@ bool bx_binhead(baseer_target_t *target, unsigned int index, void *arg)
     }
     free(bp);
 
+    if(!flag) {
+        printf("unknown file\n");
+    }
     return true;
 }

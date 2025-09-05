@@ -21,9 +21,8 @@ var NAVTREEINDEX0 =
 "files.html":[1,0],
 "index.html":[],
 "pages.html":[],
-"structbaseer__partition__t.html":[0,0,0],
-"structbaseer__target__t.html":[0,0,1],
+"structbaseer__target__t.html":[0,0,0],
+"structbmagic.html":[0,0,1],
 "structbparser.html":[0,0,2],
-"structbparser__mem__t.html":[0,0,3],
-"structmagic__number.html":[0,0,4]
+"structbparser__mem__t.html":[0,0,3]
 };

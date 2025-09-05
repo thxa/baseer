@@ -1,8 +1,8 @@
-.TH "bparser" 3 "Version 0.1.0" "Baseer" \" -*- nroff -*-
+.TH "bmagic" 3 "Version 0.1.0" "Baseer" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-bparser
+bmagic
 .SH SYNOPSIS
 .br
 .PP
@@ -10,19 +10,16 @@ bparser
 
 .in +1c
 .ti -1c
-.RI "union {"
+.RI "char * \fBname\fP"
 .br
 .ti -1c
-.RI "   FILE * \fBfp\fP"
+.RI "unsigned long long int \fBnumber\fP"
 .br
 .ti -1c
-.RI "   \fBbparser_mem_t\fP \fBmem\fP"
+.RI "unsigned long long int \fBrnumber\fP"
 .br
 .ti -1c
-.RI "} \fBsource\fP"
-.br
-.ti -1c
-.RI "bparser_type \fBtype\fP"
+.RI "bparser_callback_t \fBparser\fP"
 .br
 .in -1c
 

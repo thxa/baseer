@@ -14,13 +14,7 @@ baseer.c \- Core\&.
 
 .in +1c
 .ti -1c
-.RI "\fBbaseer_partition_t\fP * \fBbaseer_partitionize\fP (\fBbaseer_target_t\fP *target)"
-.br
-.ti -1c
-.RI "void \fBbaseer_departitionize\fP (\fBbaseer_partition_t\fP *partitions)"
-.br
-.ti -1c
-.RI "\fBbaseer_target_t\fP * \fBbaseer_open\fP (char *file_path, unsigned int partition_count)"
+.RI "\fBbaseer_target_t\fP * \fBbaseer_open\fP (char *file_path)"
 .br
 .ti -1c
 .RI "void \fBbaseer_close\fP (\fBbaseer_target_t\fP *target)"
@@ -29,7 +23,7 @@ baseer.c \- Core\&.
 .RI "void \fBbaseer_print\fP (\fBbaseer_target_t\fP *target)"
 .br
 .ti -1c
-.RI "bool \fBbaseer_execute\fP (\fBbaseer_target_t\fP *target, baseer_partition_callback_t callback, void *arg)"
+.RI "bool \fBbaseer_execute\fP (\fBbaseer_target_t\fP *target, baseer_callback_t callback, void *arg)"
 .br
 .in -1c
 .SH "Detailed Description"

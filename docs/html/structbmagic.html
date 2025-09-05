@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.14.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Baseer: modules/binhead/bx_binhead.c File Reference</title>
+<title>Baseer: bmagic Struct Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -62,7 +62,7 @@ $(function() {
   </div>
 </div>
 <script type="text/javascript">
-$(function(){initNavTree('bx__binhead_8c.html','',''); });
+$(function(){initNavTree('structbmagic.html','','structbmagic-members'); });
 </script>
 <div id="container">
 <div id="doc-content">
@@ -88,29 +88,25 @@ $(function(){initNavTree('bx__binhead_8c.html','',''); });
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">bx_binhead.c File Reference</div></div>
+  <div class="headertitle"><div class="title">bmagic Struct Reference</div></div>
 </div><!--header-->
 <div class="contents">
-
-<p>Handle the magic number of a file header and trigger extensions.  
-<a href="#details">More...</a></p>
-<div class="textblock"><code>#include &quot;<a class="el" href="bx__binhead_8h_source.html">bx_binhead.h</a>&quot;</code><br />
-<code>#include &quot;../bx_elf/bx_elf.h&quot;</code><br />
-</div><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
-Functions</h2></td></tr>
-<tr class="memitem:a9811d7f56473f3f1f99eeb964a641747" id="r_a9811d7f56473f3f1f99eeb964a641747"><td class="memItemLeft" align="right" valign="top"><a id="a9811d7f56473f3f1f99eeb964a641747" name="a9811d7f56473f3f1f99eeb964a641747"></a>
-unsigned int&#160;</td><td class="memItemRight" valign="bottom"><b>count_bits</b> (unsigned long long int n)</td></tr>
-<tr class="memitem:af026e61d85037f9e34fb4b81013456f7" id="r_af026e61d85037f9e34fb4b81013456f7"><td class="memItemLeft" align="right" valign="top"><a id="af026e61d85037f9e34fb4b81013456f7" name="af026e61d85037f9e34fb4b81013456f7"></a>
-unsigned int&#160;</td><td class="memItemRight" valign="bottom"><b>count_bytes</b> (unsigned long long n)</td></tr>
-<tr class="memitem:ac1cea69aee275d117e5d8172193d08fa" id="r_ac1cea69aee275d117e5d8172193d08fa"><td class="memItemLeft" align="right" valign="top"><a id="ac1cea69aee275d117e5d8172193d08fa" name="ac1cea69aee275d117e5d8172193d08fa"></a>
-unsigned long long int&#160;</td><td class="memItemRight" valign="bottom"><b>reverse_bytes</b> (unsigned long long int n)</td></tr>
-<tr class="memitem:a64a458a66e2ec0c1663a59a5d28978b2" id="r_a64a458a66e2ec0c1663a59a5d28978b2"><td class="memItemLeft" align="right" valign="top"><a id="a64a458a66e2ec0c1663a59a5d28978b2" name="a64a458a66e2ec0c1663a59a5d28978b2"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>bx_binhead</b> (<a class="el" href="structbaseer__target__t.html">baseer_target_t</a> *target, void *arg)</td></tr>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:a61eaafea2f30e7773429fe3561a14b14" id="r_a61eaafea2f30e7773429fe3561a14b14"><td class="memItemLeft" align="right" valign="top"><a id="a61eaafea2f30e7773429fe3561a14b14" name="a61eaafea2f30e7773429fe3561a14b14"></a>
+char *&#160;</td><td class="memItemRight" valign="bottom"><b>name</b></td></tr>
+<tr class="memitem:ab814b094c6d45b4f9e2540bb1c56eb21" id="r_ab814b094c6d45b4f9e2540bb1c56eb21"><td class="memItemLeft" align="right" valign="top"><a id="ab814b094c6d45b4f9e2540bb1c56eb21" name="ab814b094c6d45b4f9e2540bb1c56eb21"></a>
+unsigned long long int&#160;</td><td class="memItemRight" valign="bottom"><b>number</b></td></tr>
+<tr class="memitem:a2ffc152a3819af9c039138d2b6f93469" id="r_a2ffc152a3819af9c039138d2b6f93469"><td class="memItemLeft" align="right" valign="top"><a id="a2ffc152a3819af9c039138d2b6f93469" name="a2ffc152a3819af9c039138d2b6f93469"></a>
+unsigned long long int&#160;</td><td class="memItemRight" valign="bottom"><b>rnumber</b></td></tr>
+<tr class="memitem:ac6cdcbe57840c20f3e780581ea9c2fd4" id="r_ac6cdcbe57840c20f3e780581ea9c2fd4"><td class="memItemLeft" align="right" valign="top"><a id="ac6cdcbe57840c20f3e780581ea9c2fd4" name="ac6cdcbe57840c20f3e780581ea9c2fd4"></a>
+bparser_callback_t&#160;</td><td class="memItemRight" valign="bottom"><b>parser</b></td></tr>
 </table>
-<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Handle the magic number of a file header and trigger extensions. </p>
-</div></div><!-- contents -->
+<hr/>The documentation for this struct was generated from the following file:<ul>
+<li>modules/binhead/<a class="el" href="bx__binhead_8h_source.html">bx_binhead.h</a></li>
+</ul>
+</div><!-- contents -->
 </div><!-- doc-content -->
 <div id="page-nav" class="page-nav-panel">
 <div id="page-nav-resize-handle"></div>
@@ -123,7 +119,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>bx_binhead</b> (<a cl
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a href="dir_e05d7e2b1ecd646af5bb94391405f3b5.html">modules</a></li><li class="navelem"><a href="dir_f159bcaa091455d5a70fcd0ed57c32d3.html">binhead</a></li><li class="navelem"><a href="bx__binhead_8c.html">bx_binhead.c</a></li>
+    <li class="navelem"><a href="structbmagic.html">bmagic</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.14.0 </li>
   </ul>
 </div>

@@ -106,53 +106,45 @@ $(function(){initNavTree('baseer_8h_source.html','',''); });
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &lt;ctype.h&gt;</span></div>
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &lt;stdlib.h&gt;</span></div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#define BASEER_VERSION 1</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#define BASEER_DEFAULT_PARTITION_COUNT 8</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#define BASEER_MAX_FILE_SIZE 1024 * 1024 * 4</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#define RETURN_NULL_IF(con) \</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">    if ((con))              \</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">    {                       \</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">        return NULL;        \</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">    }</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#define BASEER_BASE_OFFSET(b, i, sf) (b) + ((i) * (sf))</span></div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#define BASEER_BLOCK_OFFSET(t, i) BASEER_BASE_OFFSET(((t)-&gt;block), (i), ((t)-&gt;partition_size))</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structbaseer__target__t.html">baseer_target_t</a> <a class="code hl_struct" href="structbaseer__target__t.html">baseer_target_t</a>;</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structbaseer__partition__t.html">baseer_partition_t</a> <a class="code hl_struct" href="structbaseer__partition__t.html">baseer_partition_t</a>;</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="keyword">typedef</span> bool (*baseer_partition_callback_t)(<a class="code hl_struct" href="structbaseer__target__t.html">baseer_target_t</a> *, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index, <span class="keywordtype">void</span> *arg);</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
-<div class="foldopen" id="foldopen00036" data-start="{" data-end="};">
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="structbaseer__partition__t.html">   36</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structbaseer__partition__t.html">baseer_partition_t</a></div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>{</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index;</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>};</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#define BASEER_VERSION_MAJOR 0  </span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#define BASEER_VERSION_MINOR 1   </span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#define BASEER_VERSION_MICRO 0  </span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#define STRINGIFY(x) #x</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#define TOSTRING(x) STRINGIFY(x)</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#define BASEER_VERSION  \</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">    TOSTRING(BASEER_VERSION_MAJOR) &quot;.&quot; \</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">    TOSTRING(BASEER_VERSION_MINOR) &quot;.&quot; \</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">    TOSTRING(BASEER_VERSION_MICRO)</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#define BASEER_MAX_FILE_SIZE 1024 * 1024 * 4</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#define RETURN_NULL_IF(con) \</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">    if ((con))              \</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">    {                       \</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">        return NULL;        \</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">    }</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="preprocessor">#define BASEER_BASE_OFFSET(b, i, sf) (b) + ((i) * (sf))</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structbaseer__target__t.html">baseer_target_t</a> <a class="code hl_struct" href="structbaseer__target__t.html">baseer_target_t</a>;</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="keyword">typedef</span> bool (*baseer_callback_t)(<a class="code hl_struct" href="structbaseer__target__t.html">baseer_target_t</a> *, <span class="keywordtype">void</span> *arg);</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="foldopen" id="foldopen00043" data-start="{" data-end="};">
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="structbaseer__target__t.html">   43</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structbaseer__target__t.html">baseer_target_t</a></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>{</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> size;</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="keywordtype">void</span> *block;</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>};</div>
 </div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
-<div class="foldopen" id="foldopen00041" data-start="{" data-end="};">
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="structbaseer__target__t.html">   41</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structbaseer__target__t.html">baseer_target_t</a></div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>{</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> version;</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> partition_size;</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> partition_count;</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> extra;</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> size;</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <span class="keywordtype">void</span> *block;</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <a class="code hl_struct" href="structbaseer__partition__t.html">baseer_partition_t</a> *partitions;</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>};</div>
-</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><a class="code hl_struct" href="structbaseer__partition__t.html">baseer_partition_t</a> *baseer_partitionize(<a class="code hl_struct" href="structbaseer__target__t.html">baseer_target_t</a> *target);</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="keywordtype">void</span> baseer_departitionize(<a class="code hl_struct" href="structbaseer__partition__t.html">baseer_partition_t</a> *partitions);</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><a class="code hl_struct" href="structbaseer__target__t.html">baseer_target_t</a> *baseer_open(<span class="keywordtype">char</span> *file_path, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> partition_count);</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="keywordtype">void</span> baseer_close(<a class="code hl_struct" href="structbaseer__target__t.html">baseer_target_t</a> *target);</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="keywordtype">void</span> baseer_print(<a class="code hl_struct" href="structbaseer__target__t.html">baseer_target_t</a> *target);</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="keywordtype">bool</span> baseer_execute(<a class="code hl_struct" href="structbaseer__target__t.html">baseer_target_t</a> *target, baseer_partition_callback_t callback, <span class="keywordtype">void</span> *arg);</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="preprocessor">#endif</span></div>
-<div class="ttc" id="astructbaseer__partition__t_html"><div class="ttname"><a href="structbaseer__partition__t.html">baseer_partition_t</a></div><div class="ttdef"><b>Definition</b> baseer.h:37</div></div>
-<div class="ttc" id="astructbaseer__target__t_html"><div class="ttname"><a href="structbaseer__target__t.html">baseer_target_t</a></div><div class="ttdef"><b>Definition</b> baseer.h:42</div></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><a class="code hl_struct" href="structbaseer__target__t.html">baseer_target_t</a> *baseer_open(<span class="keywordtype">char</span> *file_path);</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="keywordtype">void</span> baseer_close(<a class="code hl_struct" href="structbaseer__target__t.html">baseer_target_t</a> *target);</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="keywordtype">void</span> baseer_print(<a class="code hl_struct" href="structbaseer__target__t.html">baseer_target_t</a> *target);</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="keywordtype">bool</span> baseer_execute(<a class="code hl_struct" href="structbaseer__target__t.html">baseer_target_t</a> *target, baseer_callback_t callback, <span class="keywordtype">void</span> *arg);</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="astructbaseer__target__t_html"><div class="ttname"><a href="structbaseer__target__t.html">baseer_target_t</a></div><div class="ttdef"><b>Definition</b> baseer.h:44</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->

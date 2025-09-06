@@ -56,7 +56,9 @@ bool bx_binhead(baseer_target_t *target, void *arg)
         // { NULL, 0,         0,                 NULL }
     };
 
-    bool flag = 1;
+
+
+    bool flag_1 = 1, flag_2 = 1;
     for(int i=0; i< sizeof(magics)/sizeof(magics[0]); i++)
     {
         int len = count_bytes(magics[i].number);
@@ -66,16 +68,17 @@ bool bx_binhead(baseer_target_t *target, void *arg)
         unsigned char* mgn = (unsigned char*)&magics[i].number;
         unsigned char* mgn_r = (unsigned char*)&magics[i].rnumber;
 
-        flag = 1;
+        flag_1 = 1, flag_2 = 1;
         for(int j=0; j< n; j++) {
-            flag &= (*mgn == *p) || (*mgn_r == *p); 
-            if(!flag) {
+            flag_1 &= (*mgn == *p);
+            flag_2 &= (*mgn_r == *p); 
+            if(!flag_1 && !flag_2) {
                 break;
             }
             p++, mgn++, mgn_r++;
         }
 
-        if(flag) {
+        if(flag_1 || flag_2) {
             printf("This file is %s\n", magics[i].name);
             bparser_apply(bp, *magics[i].parser, arg);
             break;
@@ -86,7 +89,8 @@ bool bx_binhead(baseer_target_t *target, void *arg)
     }
     free(bp);
 
-    if(!flag) {
+
+    if(!flag_1 && !flag_2) {
         printf("unknown file\n");
     }
     return true;

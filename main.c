@@ -15,16 +15,17 @@ int main(int argc, char**args)
     }
     inputs input = {&argc, args};
 
-    baseer_target_t *target = baseer_open(args[1]);
+    baseer_target_t *target = baseer_open(args[1]);     
+
     if (target == NULL)
         return 1;
 
+
+
+//     printf("%s\n", args[1]);
     
-    // printf("%s\n", args[1]);
     if (!baseer_execute(target, bx_binhead, &input))
         printf("Execution error\n");
-
-
 
     baseer_close(target);
     return 0;

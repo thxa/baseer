@@ -7,7 +7,6 @@
 #include "../b_debugger/debugger.h"
 #include "../b_elf_metadata/b_elf_metadata.h"
 
-typedef bool (*bparser_callback_t)(bparser* parser, void* arg);
 bool bx_elf(bparser* parser, void *arg);
 
 #endif 

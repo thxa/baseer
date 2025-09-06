@@ -38,6 +38,8 @@ unsigned long long int reverse_bytes(unsigned long long int n) {
 
 bool bx_binhead(baseer_target_t *target, void *arg)
 {   
+
+    // printf("This is from binhead: %p\n", ((inputs*)arg));
     if (target == NULL || target->block == NULL)
         return false;
 
@@ -50,6 +52,7 @@ bool bx_binhead(baseer_target_t *target, void *arg)
         {"PDF", PDF_MAGIC, reverse_bytes(PDF_MAGIC)},
         {"PNG", PNG_MAGIC, reverse_bytes(PNG_MAGIC)},
         {"ZIP", ZIP_MAGIC, reverse_bytes(ZIP_MAGIC)},
+        {"Mach-o", MACHO_MAGIC, reverse_bytes(MACHO_MAGIC)},
         // { NULL, 0,         0,                 NULL }
     };
 
@@ -74,7 +77,7 @@ bool bx_binhead(baseer_target_t *target, void *arg)
 
         if(flag) {
             printf("This file is %s\n", magics[i].name);
-            bparser_apply(bp, *magics[i].parser, NULL);
+            bparser_apply(bp, *magics[i].parser, arg);
             break;
         }
 

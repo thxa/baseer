@@ -40,6 +40,11 @@
 typedef struct baseer_target_t baseer_target_t;
 typedef bool (*baseer_callback_t)(baseer_target_t *, void *arg);
 
+typedef struct {
+    int* argc;
+    char**args;
+} inputs;
+
 struct baseer_target_t
 {
     unsigned int size;

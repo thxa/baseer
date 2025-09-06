@@ -1,5 +1,5 @@
 #include "bx_elf.h"
-#include <elf.h>
+#include <string.h>
 
 // #define EI_NIDENT (16)
 
@@ -158,22 +158,107 @@ const char* elf_machine_to_str(int machine)
     }
 }
 
+const char* sh_type_to_str(int sh_type) {
+    char* result;
+    switch (sh_type) {
+        case SHT_NULL:          result = "NULL"; break;
+        case SHT_PROGBITS:      result = "PROGBITS"; break;
+        case SHT_SYMTAB:        result = "SYMTAB"; break;
+        case SHT_STRTAB:        result = "STRTAB"; break;
+        case SHT_RELA:          result = "RELA"; break;
+        case SHT_HASH:          result = "HASH"; break;
+        case SHT_DYNAMIC:       result = "DYNAMIC"; break;
+        case SHT_NOTE:          result = "NOTE"; break;
+        case SHT_NOBITS:        result = "NOBITS"; break;
+        case SHT_REL:           result = "REL"; break;
+        case SHT_SHLIB:         result = "SHLIB"; break;
+        case SHT_DYNSYM:        result = "DYNSYM"; break;
+        case SHT_INIT_ARRAY:    result = "INIT_ARRAY"; break;
+        case SHT_FINI_ARRAY:    result = "FINI_ARRAY"; break;
+        case SHT_PREINIT_ARRAY: result = "PREINIT_ARRAY"; break;
+        case SHT_GROUP:         result = "GROUP"; break;
+        case SHT_SYMTAB_SHNDX:  result = "SYMTAB_SHNDX"; break;
+        case SHT_RELR:          result = "RELR"; break;
+
+        case SHT_GNU_ATTRIBUTES: result = "GNU_ATTRIBUTES"; break;
+        case SHT_GNU_HASH:       result = "GNU_HASH"; break;
+        case SHT_GNU_LIBLIST:    result = "GNU_LIBLIST"; break;
+        case SHT_CHECKSUM:       result = "CHECKSUM"; break;
+        case SHT_GNU_verdef:     result = "GNU_verdef"; break;
+        case SHT_GNU_verneed:    result = "GNU_verneed"; break;
+        case SHT_GNU_versym:     result = "GNU_versym"; break;
+
+        case SHT_SUNW_move:      result = "SUNW_move"; break;
+        case SHT_SUNW_COMDAT:    result = "SUNW_COMDAT"; break;
+        case SHT_SUNW_syminfo:   result = "SUNW_syminfo"; break;
+
+        default:
+             if (sh_type >= SHT_LOOS && sh_type <= SHT_HIOS)
+                 result = "OS-specific";
+             else if (sh_type >= SHT_LOPROC && sh_type <= SHT_HIPROC)
+                 result = "Processor-specific";
+             else if (sh_type >= SHT_LOUSER && sh_type <= SHT_HIUSER)
+                 result = "Application-specific";
+             else
+                 result = "UNKNOWN";
+             break;
+    }
+    return result;
+}
+
+// const char* p_type_to_str(int p_type)
+// {
+//     static char buffer[64];
+//     switch (p_type) {
+//         case PT_NULL:         snprintf(result, sizeof(buffer), "NULL"); break;
+//         case PT_LOAD:         snprintf(result, sizeof(buffer), "LOAD"); break;
+//         case PT_DYNAMIC:      snprintf(result, sizeof(buffer), "DYNAMIC"); break;
+//         case PT_INTERP:       snprintf(result, sizeof(buffer), "INTERP"); break;
+//         case PT_NOTE:         snprintf(result, sizeof(buffer), "NOTE"); break;
+//         case PT_SHLIB:        snprintf(result, sizeof(buffer), "SHLIB"); break;
+//         case PT_PHDR:         snprintf(result, sizeof(buffer), "PHDR"); break;
+//         case PT_TLS:          snprintf(result, sizeof(buffer), "TLS"); break;
+
+//         case PT_GNU_EH_FRAME: snprintf(result, sizeof(buffer), "GNU_EH_FRAME"); break;
+//         case PT_GNU_STACK:    snprintf(result, sizeof(buffer), "GNU_STACK"); break;
+//         case PT_GNU_RELRO:    snprintf(result, sizeof(buffer), "GNU_RELRO"); break;
+//         case PT_GNU_PROPERTY: snprintf(result, sizeof(buffer), "GNU_PROPERTY"); break;
+
+//         case PT_SUNWBSS:      snprintf(result, sizeof(buffer), "SUNWBSS"); break;
+//         case PT_SUNWSTACK:    snprintf(result, sizeof(buffer), "SUNWSTACK"); break;
+
+//         default:
+//                               if (p_type >= PT_LOOS && p_type <= PT_HIOS)
+//                                   snprintf(result, sizeof(buffer), "OS-specific (0x%x)", p_type);
+//                               else if (p_type >= PT_LOPROC && p_type <= PT_HIPROC)
+//                                   snprintf(result, sizeof(buffer), "Processor-specific (0x%x)", p_type);
+//                               else
+//                                   snprintf(result, sizeof(buffer), "0x%x", p_type);
+//                               break;
+//     }
+//     return result;
+// }
+
+
+
 const char* elf_type_to_str(int type)
 {
+    char *result;
     switch (type) {
-        case ET_NONE:   return "No file type";
-        case ET_REL:    return "Relocatable file";
-        case ET_EXEC:   return "Executable file";
-        case ET_DYN:    return "Shared object file";
-        case ET_CORE:   return "Core file";
-        case ET_NUM:    return "Number of defined types";
+        case ET_NONE:   result = "No file type";
+        case ET_REL:    result = "Relocatable file";
+        case ET_EXEC:   result = "Executable file";
+        case ET_DYN:    result = "Shared object file";
+        case ET_CORE:   result = "Core file";
+        case ET_NUM:    result = "Number of defined types";
         default:
             if (type >= ET_LOOS && type <= ET_HIOS)
-                return "OS-specific file type";
+                result = "OS-specific file type";
             if (type >= ET_LOPROC && type <= ET_HIPROC)
-                return "Processor-specific file type";
-            return "Unknown file type";
+                result = "Processor-specific file type";
+            result = "Unknown file type";
     }
+    return result;
 }
 
 
@@ -208,6 +293,8 @@ void dump_elf64_phdr(Elf64_Ehdr *elf, Elf64_Phdr* phdr, void*data)
     for (int i = 0; i < elf->e_phnum; i++) {
         printf(COLOR_GREEN "[%d] Type: " COLOR_RESET, i);
 
+        // char* p_type = p_type_to_str(phdr[i].p_type);
+        // printf("%s\n", p_type);
         switch (phdr[i].p_type) {
             case PT_NULL:         printf("NULL"); break;
             case PT_LOAD:         printf("LOAD"); break;
@@ -235,6 +322,7 @@ void dump_elf64_phdr(Elf64_Ehdr *elf, Elf64_Phdr* phdr, void*data)
                   printf("0x%x", phdr[i].p_type);
               break;
         }
+
         printf("\n");        // Flags
         printf(COLOR_GREEN "    Flags: " COLOR_RESET);
         if (phdr[i].p_flags & PF_R) printf("R ");
@@ -263,11 +351,29 @@ void dump_elf64_phdr(Elf64_Ehdr *elf, Elf64_Phdr* phdr, void*data)
     }
 }
 
-
 void dump_elf64_shdr(Elf64_Ehdr* elf , Elf64_Shdr* shdrs, void* data) {
     Elf64_Shdr shstr = shdrs[elf->e_shstrndx];
     const char* shstrtab = (const char*)(data + shstr.sh_offset);
     printf(COLOR_BLUE "\n=== Section Headers ===\n" COLOR_RESET);
+
+    printf(COLOR_GREEN "=== Section Header Flags Legend ===\n" COLOR_RESET);
+    printf("+-----+-----------------------------------+\n");
+    printf("| Flag| Meaning                           |\n");
+    printf("+-----+-----------------------------------+\n");
+    printf("|  W  | SHF_WRITE: Writable               |\n");
+    printf("|  A  | SHF_ALLOC: Occupies memory        |\n");
+    printf("|  X  | SHF_EXECINSTR: Executable code    |\n");
+    printf("|  M  | SHF_MERGE: Might be merged        |\n");
+    printf("|  S  | SHF_STRINGS: Contains strings     |\n");
+    printf("|  I  | SHF_INFO_LINK: sh_info contains   |\n");
+    printf("|     | special meaning                   |\n");
+    printf("|  L  | SHF_LINK_ORDER: Link order        |\n");
+    printf("|  O  | SHF_OS_NONCONFORMING: OS specific |\n");
+    printf("|  G  | SHF_GROUP: Section group          |\n");
+    printf("|  T  | SHF_TLS: Thread-Local Storage     |\n");
+    printf("+-----+-----------------------------------+\n\n");
+
+
     printf(COLOR_GREEN "%-20s %-10s %-6s %-10s %-10s %-8s %-5s %-5s %-10s %-10s\n" COLOR_RESET,
             "Name", "Type", "Flags", "Addr", "Offset", "Size", "Link", "Info", "Align", "EntSize");
 
@@ -275,50 +381,7 @@ void dump_elf64_shdr(Elf64_Ehdr* elf , Elf64_Shdr* shdrs, void* data) {
         const char* name = &shstrtab[shdrs[i].sh_name];
 
         // Type
-        const char* type_str;
-        switch (shdrs[i].sh_type) {
-            case SHT_NULL:          type_str="NULL"; break;
-            case SHT_PROGBITS:      type_str="PROGBITS"; break;
-            case SHT_SYMTAB:        type_str="SYMTAB"; break;
-            case SHT_STRTAB:        type_str="STRTAB"; break;
-            case SHT_RELA:          type_str="RELA"; break;
-            case SHT_HASH:          type_str="HASH"; break;
-            case SHT_DYNAMIC:       type_str="DYNAMIC"; break;
-            case SHT_NOTE:          type_str="NOTE"; break;
-            case SHT_NOBITS:        type_str="NOBITS"; break;
-            case SHT_REL:           type_str="REL"; break;
-            case SHT_SHLIB:         type_str="SHLIB"; break;
-            case SHT_DYNSYM:        type_str="DYNSYM"; break;
-            case SHT_INIT_ARRAY:    type_str="INIT_ARRAY"; break;
-            case SHT_FINI_ARRAY:    type_str="FINI_ARRAY"; break;
-            case SHT_PREINIT_ARRAY: type_str="PREINIT_ARRAY"; break;
-            case SHT_GROUP:         type_str="GROUP"; break;
-            case SHT_SYMTAB_SHNDX:  type_str="SYMTAB_SHNDX"; break;
-            case SHT_RELR:          type_str="RELR"; break;
-
-            case SHT_GNU_ATTRIBUTES: type_str="GNU_ATTRIBUTES"; break;
-            case SHT_GNU_HASH:       type_str="GNU_HASH"; break;
-            case SHT_GNU_LIBLIST:    type_str="GNU_LIBLIST"; break;
-            case SHT_CHECKSUM:       type_str="CHECKSUM"; break;
-            case SHT_GNU_verdef:     type_str="GNU_verdef"; break;
-            case SHT_GNU_verneed:    type_str="GNU_verneed"; break;
-            case SHT_GNU_versym:     type_str="GNU_versym"; break;
-
-            case SHT_SUNW_move:      type_str="SUNW_move"; break;
-            case SHT_SUNW_COMDAT:    type_str="SUNW_COMDAT"; break;
-            case SHT_SUNW_syminfo:   type_str="SUNW_syminfo"; break;
-
-    default:
-        if (shdrs[i].sh_type >= SHT_LOOS && shdrs[i].sh_type <= SHT_HIOS)
-            type_str="OS-specific";
-        else if (shdrs[i].sh_type >= SHT_LOPROC && shdrs[i].sh_type <= SHT_HIPROC)
-            type_str="Processor-specific";
-        else if (shdrs[i].sh_type >= SHT_LOUSER && shdrs[i].sh_type <= SHT_HIUSER)
-            type_str="Application-specific";
-        else
-            type_str="UNKNOWN";
-        break;
-        }
+        const char* type_str = sh_type_to_str(shdrs[i].sh_type);
 
         // Flags
         char flags[4] = "";
@@ -340,11 +403,12 @@ void dump_elf64_shdr(Elf64_Ehdr* elf , Elf64_Shdr* shdrs, void* data) {
     }
 }
 
-bool bx_elf(bparser* parser, void *arg)
-{
+
+bool print_meta_data(bparser* parser) {
     unsigned char *data = (unsigned char*) parser->source.mem.data;
     char bit_type = data[EI_CLASS];
     char endian   = data[EI_DATA];
+
 
     printf(COLOR_BLUE "=== ELF File Metadata ===\n" COLOR_RESET);
 
@@ -369,13 +433,28 @@ bool bx_elf(bparser* parser, void *arg)
         dump_elf64_shdr(elf, shdrs, data);
         dump_elf64_phdr(elf, phdr, data);
 
-
-
     } else {
         printf(COLOR_RED "Unknown ELF class: %d\n" COLOR_RESET, bit_type);
         return false;
     }
 
     printf(COLOR_BLUE "=========================\n" COLOR_RESET);
+    return true;
+}
+
+
+bool bx_elf(bparser* parser, void *arg)
+{
+
+    // if()
+    int argc = *((inputs*)arg) -> argc;
+    char** args = ((inputs*)arg) -> args;
+    // printf("This is from elf: %d\n", argc);
+    // printf("This is from elf: %s\n", args_4);
+    if(strcmp("-m", args[2])  == 0) {
+        print_meta_data(parser);
+    } else {
+        printf("Not %s implement yet.", args[2]);
+    }
     return true;
 }

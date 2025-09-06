@@ -12,11 +12,12 @@ DEFAULT = modules/default/bx_default.c
 BX_BINHEAD = modules/binhead/bx_binhead.c
 BPARSER = modules/bparser/bparser.c
 BX_ELF = modules/bx_elf/bx_elf.c
+B_DEBUG = modules/b_debugger/debugger.c
 
 
 # Default target: build executable and extensions
 # all: $(TARGET) $(EXT1_SO) $(EXT2_SO)
-all: $(TARGET) $(DEFAULT) $(BX_BINHEAD) $(BPARSER) $(BX_ELF )
+all: $(TARGET) $(DEFAULT) $(BX_BINHEAD) $(BPARSER) $(BX_ELF ) 
 
 # Build core executable
 # $(TARGET): $(CORE) baseer.h
@@ -24,7 +25,7 @@ all: $(TARGET) $(DEFAULT) $(BX_BINHEAD) $(BPARSER) $(BX_ELF )
 
 
 $(TARGET): $(CORE) baseer.h $(DEFAULT) $(BX_BINHEAD) $(BPARSER) $(BX_ELF)
-	$(CC) $(CORE) $(DEFAULT) $(BPARSER) $(BX_BINHEAD) $(BX_ELF) -o $(TARGET)
+	$(CC) $(CORE) $(DEFAULT) $(BPARSER) $(BX_BINHEAD) $(BX_ELF) $(B_DEBUG) -ludis86 -o $(TARGET)
 
 # gcc main.c baseer.c modules/default/mbx_default.c -o main 
 # Build dynamic extension 1

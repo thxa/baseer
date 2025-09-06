@@ -1,0 +1,163 @@
+.TH "ud_itab.UdItabGenerator" 3 "Version 0.1.0" "Baseer" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+ud_itab.UdItabGenerator
+.SH SYNOPSIS
+.br
+.PP
+.PP
+Inherits \fBud_opcode\&.UdOpcodeTables\fP\&.
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fB__init__\fP (self)"
+.br
+.ti -1c
+.RI "\fBtoGroupId\fP (self, id)"
+.br
+.ti -1c
+.RI "\fBgenLookupTable\fP (self, table, scope='')"
+.br
+.ti -1c
+.RI "\fBgenLookupTableList\fP (self)"
+.br
+.ti -1c
+.RI "\fBgenInsnTable\fP (self)"
+.br
+.ti -1c
+.RI "\fBgenItabH\fP (self, filePath)"
+.br
+.ti -1c
+.RI "\fBgenItabC\fP (self, filePath)"
+.br
+.ti -1c
+.RI "\fBgenItab\fP (self, location)"
+.br
+.in -1c
+
+Public Member Functions inherited from \fBud_opcode\&.UdOpcodeTables\fP
+.in +1c
+.ti -1c
+.RI "\fBsizeOfTable\fP (self, t)"
+.br
+.ti -1c
+.RI "\fBnameOfTable\fP (self, t)"
+.br
+.ti -1c
+.RI "\fBupdateTable\fP (self, table, index, type, meta)"
+.br
+.ti -1c
+.RI "\fBparse\fP (self, table, insn)"
+.br
+.ti -1c
+.RI "\fBaddInsnDef\fP (self, prefixes, mnemonic, opcodes, operands, vendor)"
+.br
+.ti -1c
+.RI "\fBprint_table\fP (self, table, pfxs)"
+.br
+.ti -1c
+.RI "\fBprint_tree\fP (self)"
+.br
+.in -1c
+.SS "Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "\fBItabH\fP = open( filePath, 'w' )"
+.br
+.ti -1c
+.RI "\fBItabC\fP = open( filePath, 'w' )"
+.br
+.in -1c
+.SS "Static Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "dict \fBOperandDict\fP"
+.br
+.ti -1c
+.RI "dict \fBPrefixDict\fP"
+.br
+.ti -1c
+.RI "int \fBInvalidEntryIdx\fP = 0"
+.br
+.ti -1c
+.RI "dict \fBInvalidEntry\fP"
+.br
+.ti -1c
+.RI "list \fBItab\fP = []"
+.br
+.ti -1c
+.RI "int \fBItabIdx\fP = 1"
+.br
+.ti -1c
+.RI "int \fBGtabIdx\fP = 0"
+.br
+.ti -1c
+.RI "list \fBGtabMeta\fP = []"
+.br
+.ti -1c
+.RI "dict \fBItabLookup\fP = {}"
+.br
+.ti -1c
+.RI "tuple \fBMnemonicAliases\fP = ( 'invalid', '3dnow', 'none', 'db', 'pause' )"
+.br
+.in -1c
+
+Static Public Attributes inherited from \fBud_opcode\&.UdOpcodeTables\fP
+.in +1c
+.ti -1c
+.RI "dict \fBTableInfo\fP"
+.br
+.ti -1c
+.RI "dict \fBOpcodeTable0\fP"
+.br
+.ti -1c
+.RI "dict \fBOpcExtIndex\fP"
+.br
+.ti -1c
+.RI "list \fBInsnTable\fP = []"
+.br
+.ti -1c
+.RI "list \fBMnemonicsTable\fP = []"
+.br
+.in -1c
+.SH "Member Data Documentation"
+.PP 
+.SS "ud_itab\&.UdItabGenerator\&.InvalidEntry\fR [static]\fP"
+\fBInitial value:\fP
+.nf
+=  { 'type'     : 'invalid', 
+                     'mnemonic' : 'invalid', 
+                     'operands' : '', 
+                     'prefixes' : '',
+                     'meta'     : '' }
+.PP
+.fi
+
+.SS "dict ud_itab\&.UdItabGenerator\&.PrefixDict\fR [static]\fP"
+\fBInitial value:\fP
+.nf
+=  { 
+        "rep"      : "P_str",   
+        "repz"     : "P_strz",   
+        "aso"      : "P_aso",   
+        "oso"      : "P_oso",   
+        "rexw"     : "P_rexw", 
+        "rexb"     : "P_rexb",  
+        "rexx"     : "P_rexx",  
+        "rexr"     : "P_rexr",
+        "seg"      : "P_seg",
+        "inv64"    : "P_inv64", 
+        "def64"    : "P_def64", 
+        "cast"     : "P_cast",
+    }
+.PP
+.fi
+
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Baseer from the source code\&.

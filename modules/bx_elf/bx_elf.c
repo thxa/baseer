@@ -453,6 +453,8 @@ bool bx_elf(bparser* parser, void *arg)
     // printf("This is from elf: %s\n", args_4);
     if(strcmp("-m", args[2])  == 0) {
         print_meta_data(parser);
+    } else if(strcmp("-d", args[2]) == 0) {
+        bparser_apply(parser, b_debugger, arg);
     } else {
         printf("Not %s implement yet.", args[2]);
     }

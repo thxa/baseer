@@ -1,0 +1,85 @@
+.TH "ud_opcode.UdOpcodeTables.Insn" 3 "Version 0.1.0" "Baseer" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+ud_opcode.UdOpcodeTables.Insn
+.SH SYNOPSIS
+.br
+.PP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fB__init__\fP (self, prefixes, mnemonic, opcodes, operands, vendor)"
+.br
+.in -1c
+.SS "Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "list \fBopcodes\fP = []"
+.br
+.ti -1c
+.RI "\fBprefixes\fP = prefixes"
+.br
+.ti -1c
+.RI "\fBmnemonic\fP = mnemonic"
+.br
+.ti -1c
+.RI "\fBoperands\fP = operands"
+.br
+.ti -1c
+.RI "\fBvendor\fP = vendor"
+.br
+.ti -1c
+.RI "dict \fBopcext\fP = {}"
+.br
+.in -1c
+.SS "Static Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "dict \fBOpcExtMap\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+
+.PP
+.nf
+An abstract type representing an instruction in the opcode map\&.
+
+.fi
+.PP
+ 
+.SH "Member Data Documentation"
+.PP 
+.SS "dict ud_opcode\&.UdOpcodeTables\&.Insn\&.OpcExtMap\fR [static]\fP"
+\fBInitial value:\fP
+.nf
+=  {
+            '/rm'    : lambda v: "%02x" % int(v, 16),
+            '/x87'   : lambda v: "%02x" % int(v, 16),
+            '/3dnow' : lambda v: "%02x" % int(v, 16),
+            '/reg'   : lambda v: "%02x" % int(v, 16),
+            # modrm\&.mod
+            # (!11, 11)    => (00, 01)
+            '/mod'   : lambda v: '00' if v == '!11' else '01',
+            # Mode extensions:
+            # (16, 32, 64) => (00, 01, 02)
+            '/o'     : lambda v: "%02x" % (int(v) / 32),
+            '/a'     : lambda v: "%02x" % (int(v) / 32),
+            '/m'     : lambda v: '00' if v == '!64' else '01',
+            # SSE
+            '/sse'   : lambda v: UdOpcodeTables\&.OpcExtIndex['sse'][v],
+            # AVX
+            '/vex\&.p' : lambda v: UdOpcodeTables\&.OpcExtIndex['vex\&.p'][v],
+            '/vex\&.m' : lambda v: UdOpcodeTables\&.OpcExtIndex['vex\&.m'][v]
+        }
+.PP
+.fi
+
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Baseer from the source code\&.

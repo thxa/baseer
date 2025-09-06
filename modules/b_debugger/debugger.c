@@ -10,6 +10,7 @@
 #include <sys/wait.h>
 #include "debugger.h"
 #include <sys/ptrace.h>
+
 void parseCmd(context *ctx){
 	char cmd[1024] = {0} ;
 	char *tokens[3];
@@ -280,7 +281,7 @@ void dis_ctx(context *ctx){
 
 	restore_all_BP(ctx,0);
 }
-void init_values(baseer_target_t *target, context *ctx){
+void init_values(bparser *target, context *ctx){
 	bp_list *list = malloc(sizeof(bp_list));
 	char mmaps[512]= {0};
 	char line[512]= {0};
@@ -288,7 +289,7 @@ void init_values(baseer_target_t *target, context *ctx){
 	memset(list, 0, sizeof(bp_list));
 	list->counter = 0;
 	ctx->list = list;
-	Elf64_Ehdr *ehdr = target->block;
+	Elf64_Ehdr *ehdr = (Elf64_Ehdr*)target->source.mem.data;
 	if(ehdr->e_type == ET_EXEC){
 		ctx->entry = ehdr->e_entry;
 	}else {
@@ -302,7 +303,7 @@ void init_values(baseer_target_t *target, context *ctx){
 
 }
 
-bool b_debugger(baseer_target_t *target,void *arg){
+bool b_debugger(bparser *target, void *arg){
 	setbuf(stdout, NULL);
 	context *ctx  = malloc(sizeof(context));
 	memset(ctx, 0, sizeof(bp_list));
@@ -318,8 +319,8 @@ bool b_debugger(baseer_target_t *target,void *arg){
 			return -1;
 		}
 
-		ssize_t written = write(fd, target->block, target->size);
-		if (written == -1 || (size_t)written != target->size) {
+		ssize_t written = write(fd, target->source.mem.data,  target->source.mem.size);
+		if (written == -1 || (size_t)written != target->source.mem.size) {
 			perror("write failed");
 			close(fd);
 			return -1;

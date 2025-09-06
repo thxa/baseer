@@ -1,0 +1,142 @@
+.TH "ud" 3 "Version 0.1.0" "Baseer" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+ud
+.SH SYNOPSIS
+.br
+.PP
+.SS "Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "int(* \fBinp_hook\fP )(struct \fBud\fP *)"
+.br
+.ti -1c
+.RI "FILE * \fBinp_file\fP"
+.br
+.ti -1c
+.RI "const uint8_t * \fBinp_buf\fP"
+.br
+.ti -1c
+.RI "size_t \fBinp_buf_size\fP"
+.br
+.ti -1c
+.RI "size_t \fBinp_buf_index\fP"
+.br
+.ti -1c
+.RI "uint8_t \fBinp_curr\fP"
+.br
+.ti -1c
+.RI "size_t \fBinp_ctr\fP"
+.br
+.ti -1c
+.RI "uint8_t \fBinp_sess\fP [64]"
+.br
+.ti -1c
+.RI "int \fBinp_end\fP"
+.br
+.ti -1c
+.RI "void(* \fBtranslator\fP )(struct \fBud\fP *)"
+.br
+.ti -1c
+.RI "uint64_t \fBinsn_offset\fP"
+.br
+.ti -1c
+.RI "char \fBinsn_hexcode\fP [64]"
+.br
+.ti -1c
+.RI "char * \fBasm_buf\fP"
+.br
+.ti -1c
+.RI "size_t \fBasm_buf_size\fP"
+.br
+.ti -1c
+.RI "size_t \fBasm_buf_fill\fP"
+.br
+.ti -1c
+.RI "char \fBasm_buf_int\fP [128]"
+.br
+.ti -1c
+.RI "const char *(* \fBsym_resolver\fP )(struct \fBud\fP *, uint64_t addr, int64_t *offset)"
+.br
+.ti -1c
+.RI "uint8_t \fBdis_mode\fP"
+.br
+.ti -1c
+.RI "uint64_t \fBpc\fP"
+.br
+.ti -1c
+.RI "uint8_t \fBvendor\fP"
+.br
+.ti -1c
+.RI "enum ud_mnemonic_code \fBmnemonic\fP"
+.br
+.ti -1c
+.RI "struct \fBud_operand\fP \fBoperand\fP [3]"
+.br
+.ti -1c
+.RI "uint8_t \fBerror\fP"
+.br
+.ti -1c
+.RI "uint8_t \fBpfx_rex\fP"
+.br
+.ti -1c
+.RI "uint8_t \fBpfx_seg\fP"
+.br
+.ti -1c
+.RI "uint8_t \fBpfx_opr\fP"
+.br
+.ti -1c
+.RI "uint8_t \fBpfx_adr\fP"
+.br
+.ti -1c
+.RI "uint8_t \fBpfx_lock\fP"
+.br
+.ti -1c
+.RI "uint8_t \fBpfx_str\fP"
+.br
+.ti -1c
+.RI "uint8_t \fBpfx_rep\fP"
+.br
+.ti -1c
+.RI "uint8_t \fBpfx_repe\fP"
+.br
+.ti -1c
+.RI "uint8_t \fBpfx_repne\fP"
+.br
+.ti -1c
+.RI "uint8_t \fBopr_mode\fP"
+.br
+.ti -1c
+.RI "uint8_t \fBadr_mode\fP"
+.br
+.ti -1c
+.RI "uint8_t \fBbr_far\fP"
+.br
+.ti -1c
+.RI "uint8_t \fBbr_near\fP"
+.br
+.ti -1c
+.RI "uint8_t \fBhave_modrm\fP"
+.br
+.ti -1c
+.RI "uint8_t \fBmodrm\fP"
+.br
+.ti -1c
+.RI "uint8_t \fBprimary_opcode\fP"
+.br
+.ti -1c
+.RI "void * \fBuser_opaque_data\fP"
+.br
+.ti -1c
+.RI "struct \fBud_itab_entry\fP * \fBitab_entry\fP"
+.br
+.ti -1c
+.RI "struct \fBud_lookup_table_list_entry\fP * \fBle\fP"
+.br
+.in -1c
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Baseer from the source code\&.

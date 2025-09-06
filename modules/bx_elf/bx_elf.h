@@ -4,6 +4,7 @@
 #include "../../baseer.h"
 #include <elf.h>
 #include<string.h>
+#include "../b_debugger/debugger.h"
 
 typedef bool (*bparser_callback_t)(bparser* parser, void* arg);
 bool bx_elf(bparser* parser, void *arg);

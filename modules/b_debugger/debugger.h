@@ -1,8 +1,9 @@
 #ifndef DEBUG_H
 #define DEBUG_H
-#include "../../baseer.h"
+#include "../bparser/bparser.h"
 #include <stdint.h>
 #include <sys/user.h>
+
 
 typedef struct bp_list bp_list;
 typedef struct bp bp;
@@ -52,8 +53,8 @@ typedef struct{
 /*
  * bp commands
  * */
-void init_values(baseer_target_t *target,context *ctx);
-bool b_debugger(baseer_target_t *target,void *arg);
+void init_values(bparser *target,context *ctx);
+bool b_debugger(bparser *target,void *arg);
 void dis_ctx(context *ctx);
 void handle_bpoint(context *ctx);
 void setBP(context *ctx, uint64_t addr);

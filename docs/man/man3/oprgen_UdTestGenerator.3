@@ -1,0 +1,679 @@
+.TH "oprgen.UdTestGenerator" 3 "Version 0.1.0" "Baseer" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+oprgen.UdTestGenerator
+.SH SYNOPSIS
+.br
+.PP
+.PP
+Inherits \fBud_opcode\&.UdOpcodeTables\fP\&.
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fB__init__\fP (self, mode)"
+.br
+.ti -1c
+.RI "\fBOprMem\fP (self, size=None, cast=False)"
+.br
+.ti -1c
+.RI "\fBOprImm\fP (self, size, cast=False)"
+.br
+.ti -1c
+.RI "\fBGpr\fP (self, size)"
+.br
+.ti -1c
+.RI "\fBXmm\fP (self)"
+.br
+.ti -1c
+.RI "\fBMmx\fP (self)"
+.br
+.ti -1c
+.RI "\fBModrm_RM_GPR\fP (self, size, cast=False)"
+.br
+.ti -1c
+.RI "\fBModrm_RM_XMM\fP (self, size, cast=False)"
+.br
+.ti -1c
+.RI "\fBOprRxb\fP (self, n)"
+.br
+.ti -1c
+.RI "\fBOprRxw\fP (self, n)"
+.br
+.ti -1c
+.RI "\fBOprRxd\fP (self, n)"
+.br
+.ti -1c
+.RI "\fBOprRxq\fP (self, n)"
+.br
+.ti -1c
+.RI "\fBOprRxv\fP (self, n)"
+.br
+.ti -1c
+.RI "\fBOprRxz\fP (self, n)"
+.br
+.ti -1c
+.RI "\fBOprRxy\fP (self, n)"
+.br
+.ti -1c
+.RI "\fBInsn_Av\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_R\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_C\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_D\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_S\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_ST0\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_ST1\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_ST2\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_ST3\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_ST4\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_ST5\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_ST6\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_ST7\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_CS\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_GS\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_ES\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_FS\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_DS\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_SS\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_Ib\fP (self, cast=False)"
+.br
+.ti -1c
+.RI "\fBOpr_Iw\fP (self, cast=False)"
+.br
+.ti -1c
+.RI "\fBOpr_Id\fP (self, cast=False)"
+.br
+.ti -1c
+.RI "\fBOpr_Iq\fP (self, cast=False)"
+.br
+.ti -1c
+.RI "\fBOpr_Iz\fP (self, cast=False)"
+.br
+.ti -1c
+.RI "\fBOpr_Iw\fP (self, cast=False)"
+.br
+.ti -1c
+.RI "\fBOpr_I1\fP (self, cast=False)"
+.br
+.ti -1c
+.RI "\fBOpr_eAX\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_rAX\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_rAX_Iz\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_Rxv_Iv\fP (self, n)"
+.br
+.ti -1c
+.RI "\fBInsn_Rxv_rAX\fP (self, n)"
+.br
+.ti -1c
+.RI "\fBOpr_Gb\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_Gw\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_Gd\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_Gq\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_Gz\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_Gv\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_Gy\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_M\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_U\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_N\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_Mb\fP (self, cast=False)"
+.br
+.ti -1c
+.RI "\fBOpr_Mw\fP (self, cast=False)"
+.br
+.ti -1c
+.RI "\fBOpr_Md\fP (self, cast=False)"
+.br
+.ti -1c
+.RI "\fBOpr_Mq\fP (self, cast=False)"
+.br
+.ti -1c
+.RI "\fBOpr_Mt\fP (self, cast=True)"
+.br
+.ti -1c
+.RI "\fBOpr_MwRd\fP (self, cast=True)"
+.br
+.ti -1c
+.RI "\fBOpr_MwRv\fP (self, cast=False)"
+.br
+.ti -1c
+.RI "\fBOpr_MwRy\fP (self, cast=True)"
+.br
+.ti -1c
+.RI "\fBOpr_MdRy\fP (self, cast=False)"
+.br
+.ti -1c
+.RI "\fBOpr_MbRv\fP (self, cast=False)"
+.br
+.ti -1c
+.RI "\fBOpr_MbRd\fP (self, cast=False)"
+.br
+.ti -1c
+.RI "\fBOpr_MwRw\fP (self, cast=False)"
+.br
+.ti -1c
+.RI "\fBOpr_MwU\fP (self, cast=False)"
+.br
+.ti -1c
+.RI "\fBOpr_MdU\fP (self, cast=False)"
+.br
+.ti -1c
+.RI "\fBOpr_MqU\fP (self, cast=False)"
+.br
+.ti -1c
+.RI "\fBInsn_V_MwU\fP (self, cast=False)"
+.br
+.ti -1c
+.RI "\fBInsn_V_MdU\fP (self, cast=False)"
+.br
+.ti -1c
+.RI "\fBInsn_V_MqU\fP (self, cast=False)"
+.br
+.ti -1c
+.RI "\fBInsn_MbRv\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_MbRv_V_Ib\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_V_MbRd_Ib\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_MwRv\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_MwRd_V_Ib\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_S_MwRv\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_Mw\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_Md\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_Mq\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_Eb\fP (self, cast=False)"
+.br
+.ti -1c
+.RI "\fBOpr_Ew\fP (self, cast=False)"
+.br
+.ti -1c
+.RI "\fBOpr_Ed\fP (self, cast=False)"
+.br
+.ti -1c
+.RI "\fBOpr_Eq\fP (self, cast=False)"
+.br
+.ti -1c
+.RI "\fBOpr_Ey\fP (self, cast=False)"
+.br
+.ti -1c
+.RI "\fBInsn_Fv\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_V_Ew_Ib\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_V_Eq_Ib\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_V_Mo\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_V_Md_Ib\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_V_Ed_Ib\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_P_Ew_Ib\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_V_Ey\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_Ey_V\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_P_Ey\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_Ey_P\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_Mv\fP (self, cast=False)"
+.br
+.ti -1c
+.RI "\fBOpr_Ev\fP (self, cast=False)"
+.br
+.ti -1c
+.RI "\fBInsn_Ev\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_V\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_W\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_P\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_Q\fP (self, cast=False)"
+.br
+.ti -1c
+.RI "\fBOpr_CL\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_AL\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_Ob\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_rAX_Ov\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_Ov_rAX\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_AX\fP (self)"
+.br
+.ti -1c
+.RI "\fBOpr_DX\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_Eb_CL\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_Ev_CL\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_Eb\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_Ew\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_Ev_Gv\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_Ev_Gy\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_Ev_Gv_CL\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_Gv_Ev_CL\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_Gv_Ev_Ib\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_Gv_Ev_Iz\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_Ev_Ib\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_Gq_Ed\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_Gy_Eb\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_Gy_Ew\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_Ev_Iz\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_Gv_Ev\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_Gy_Ev\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_Gv_Eb\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_Gv_Ew\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_V_Q\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_Eb_Ib\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_Eb_I1\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_Ev_I1\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_Ev_Ib\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_Ev_Gv_Ib\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_Ev_V_Ib\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_Ed_V_Ib\fP (self)"
+.br
+.ti -1c
+.RI "\fBInsn_Ew_V_Ib\fP (self)"
+.br
+.ti -1c
+.RI "\fBgenerate_yasm\fP (self, mode, seed)"
+.br
+.in -1c
+
+Public Member Functions inherited from \fBud_opcode\&.UdOpcodeTables\fP
+.in +1c
+.ti -1c
+.RI "\fBsizeOfTable\fP (self, t)"
+.br
+.ti -1c
+.RI "\fBnameOfTable\fP (self, t)"
+.br
+.ti -1c
+.RI "\fBupdateTable\fP (self, table, index, type, meta)"
+.br
+.ti -1c
+.RI "\fBparse\fP (self, table, insn)"
+.br
+.ti -1c
+.RI "\fBaddInsnDef\fP (self, prefixes, mnemonic, opcodes, operands, vendor)"
+.br
+.ti -1c
+.RI "\fBprint_table\fP (self, table, pfxs)"
+.br
+.ti -1c
+.RI "\fBprint_tree\fP (self)"
+.br
+.in -1c
+.SS "Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "int \fBmode\fP = mode"
+.br
+.in -1c
+.SS "Static Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "list \fBOprTable\fP = []"
+.br
+.ti -1c
+.RI "tuple \fBExcludeList\fP"
+.br
+.ti -1c
+.RI "s \fBOpr_R0b\fP = lambda s\&.OprRxb(0);"
+.br
+.ti -1c
+.RI "s \fBOpr_R1b\fP = lambda s\&.OprRxb(1);"
+.br
+.ti -1c
+.RI "s \fBOpr_R2b\fP = lambda s\&.OprRxb(2);"
+.br
+.ti -1c
+.RI "s \fBOpr_R3b\fP = lambda s\&.OprRxb(3);"
+.br
+.ti -1c
+.RI "s \fBOpr_R4b\fP = lambda s\&.OprRxb(4);"
+.br
+.ti -1c
+.RI "s \fBOpr_R5b\fP = lambda s\&.OprRxb(5);"
+.br
+.ti -1c
+.RI "s \fBOpr_R6b\fP = lambda s\&.OprRxb(6);"
+.br
+.ti -1c
+.RI "s \fBOpr_R7b\fP = lambda s\&.OprRxb(7);"
+.br
+.ti -1c
+.RI "s \fBOpr_R0y\fP = lambda s\&.OprRxy(0);"
+.br
+.ti -1c
+.RI "s \fBOpr_R1y\fP = lambda s\&.OprRxy(1);"
+.br
+.ti -1c
+.RI "s \fBOpr_R2y\fP = lambda s\&.OprRxy(2);"
+.br
+.ti -1c
+.RI "s \fBOpr_R3y\fP = lambda s\&.OprRxy(3);"
+.br
+.ti -1c
+.RI "s \fBOpr_R4y\fP = lambda s\&.OprRxy(4);"
+.br
+.ti -1c
+.RI "s \fBOpr_R5y\fP = lambda s\&.OprRxy(5);"
+.br
+.ti -1c
+.RI "s \fBOpr_R6y\fP = lambda s\&.OprRxy(6);"
+.br
+.ti -1c
+.RI "s \fBOpr_R7y\fP = lambda s\&.OprRxy(7);"
+.br
+.ti -1c
+.RI "s \fBOpr_R0v\fP = lambda s\&.OprRxv(0);"
+.br
+.ti -1c
+.RI "s \fBOpr_R1v\fP = lambda s\&.OprRxv(1);"
+.br
+.ti -1c
+.RI "s \fBOpr_R2v\fP = lambda s\&.OprRxv(2);"
+.br
+.ti -1c
+.RI "s \fBOpr_R3v\fP = lambda s\&.OprRxv(3);"
+.br
+.ti -1c
+.RI "s \fBOpr_R4v\fP = lambda s\&.OprRxv(4);"
+.br
+.ti -1c
+.RI "s \fBOpr_R5v\fP = lambda s\&.OprRxv(5);"
+.br
+.ti -1c
+.RI "s \fBOpr_R6v\fP = lambda s\&.OprRxv(6);"
+.br
+.ti -1c
+.RI "s \fBOpr_R7v\fP = lambda s\&.OprRxv(7);"
+.br
+.ti -1c
+.RI "s \fBOpr_R0z\fP = lambda s\&.OprRxz(0);"
+.br
+.ti -1c
+.RI "s \fBOpr_R1z\fP = lambda s\&.OprRxz(1);"
+.br
+.ti -1c
+.RI "s \fBOpr_R2z\fP = lambda s\&.OprRxz(2);"
+.br
+.ti -1c
+.RI "s \fBOpr_R3z\fP = lambda s\&.OprRxz(3);"
+.br
+.ti -1c
+.RI "s \fBOpr_R4z\fP = lambda s\&.OprRxz(4);"
+.br
+.ti -1c
+.RI "s \fBOpr_R5z\fP = lambda s\&.OprRxz(5);"
+.br
+.ti -1c
+.RI "s \fBOpr_R6z\fP = lambda s\&.OprRxz(6);"
+.br
+.ti -1c
+.RI "s \fBOpr_R7z\fP = lambda s\&.OprRxz(7);"
+.br
+.ti -1c
+.RI "\fBOpr_sIz\fP = Opr_Iz"
+.br
+.ti -1c
+.RI "\fBInsn_rAX_sIz\fP = Insn_rAX_Iz"
+.br
+.ti -1c
+.RI "s \fBInsn_R0v_Iv\fP = lambda s\&.Insn_Rxv_Iv(0)"
+.br
+.ti -1c
+.RI "s \fBInsn_R1v_Iv\fP = lambda s\&.Insn_Rxv_Iv(1)"
+.br
+.ti -1c
+.RI "s \fBInsn_R2v_Iv\fP = lambda s\&.Insn_Rxv_Iv(2)"
+.br
+.ti -1c
+.RI "s \fBInsn_R3v_Iv\fP = lambda s\&.Insn_Rxv_Iv(3)"
+.br
+.ti -1c
+.RI "s \fBInsn_R4v_Iv\fP = lambda s\&.Insn_Rxv_Iv(4)"
+.br
+.ti -1c
+.RI "s \fBInsn_R5v_Iv\fP = lambda s\&.Insn_Rxv_Iv(5)"
+.br
+.ti -1c
+.RI "s \fBInsn_R6v_Iv\fP = lambda s\&.Insn_Rxv_Iv(6)"
+.br
+.ti -1c
+.RI "s \fBInsn_R7v_Iv\fP = lambda s\&.Insn_Rxv_Iv(7)"
+.br
+.ti -1c
+.RI "s \fBInsn_R0v_rAX\fP = lambda s\&.Insn_Rxv_rAX(0)"
+.br
+.ti -1c
+.RI "s \fBInsn_R1v_rAX\fP = lambda s\&.Insn_Rxv_rAX(1)"
+.br
+.ti -1c
+.RI "s \fBInsn_R2v_rAX\fP = lambda s\&.Insn_Rxv_rAX(2)"
+.br
+.ti -1c
+.RI "s \fBInsn_R3v_rAX\fP = lambda s\&.Insn_Rxv_rAX(3)"
+.br
+.ti -1c
+.RI "s \fBInsn_R4v_rAX\fP = lambda s\&.Insn_Rxv_rAX(4)"
+.br
+.ti -1c
+.RI "s \fBInsn_R5v_rAX\fP = lambda s\&.Insn_Rxv_rAX(5)"
+.br
+.ti -1c
+.RI "s \fBInsn_R6v_rAX\fP = lambda s\&.Insn_Rxv_rAX(6)"
+.br
+.ti -1c
+.RI "s \fBInsn_R7v_rAX\fP = lambda s\&.Insn_Rxv_rAX(7)"
+.br
+.ti -1c
+.RI "\fBInsn_Gv_Ev_sIb\fP = Insn_Gv_Ev_Ib"
+.br
+.ti -1c
+.RI "\fBInsn_Ev_sIb\fP = Insn_Ev_Ib"
+.br
+.ti -1c
+.RI "\fBInsn_Ev_sIz\fP = Insn_Ev_Iz"
+.br
+.ti -1c
+.RI "\fBInsn_Ev_Gv_sIb\fP = Insn_Ev_Gv_Ib"
+.br
+.in -1c
+
+Static Public Attributes inherited from \fBud_opcode\&.UdOpcodeTables\fP
+.in +1c
+.ti -1c
+.RI "dict \fBTableInfo\fP"
+.br
+.ti -1c
+.RI "dict \fBOpcodeTable0\fP"
+.br
+.ti -1c
+.RI "dict \fBOpcExtIndex\fP"
+.br
+.ti -1c
+.RI "list \fBInsnTable\fP = []"
+.br
+.ti -1c
+.RI "list \fBMnemonicsTable\fP = []"
+.br
+.in -1c
+.SH "Member Data Documentation"
+.PP 
+.SS "tuple oprgen\&.UdTestGenerator\&.ExcludeList\fR [static]\fP"
+\fBInitial value:\fP
+.nf
+=  ( 'fcomp3', 'fcom2', 'fcomp5', 'fstp1', 'fstp8', 'fstp9',
+                    'fxch4', 'fxch7', 'nop', 'xchg', 'movd',
+                    'pmulhrw' # yasm bug
+                    )
+.PP
+.fi
+
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Baseer from the source code\&.

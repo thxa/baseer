@@ -1,0 +1,99 @@
+.TH "ud_opcode.UdOpcodeTables" 3 "Version 0.1.0" "Baseer" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+ud_opcode.UdOpcodeTables
+.SH SYNOPSIS
+.br
+.PP
+.PP
+Inherited by \fBoprgen\&.UdTestGenerator\fP, and \fBud_itab\&.UdItabGenerator\fP\&.
+.SS "Classes"
+
+.in +1c
+.ti -1c
+.RI "class \fBInsn\fP"
+.br
+.in -1c
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBsizeOfTable\fP (self, t)"
+.br
+.ti -1c
+.RI "\fBnameOfTable\fP (self, t)"
+.br
+.ti -1c
+.RI "\fBupdateTable\fP (self, table, index, type, meta)"
+.br
+.ti -1c
+.RI "\fBparse\fP (self, table, insn)"
+.br
+.ti -1c
+.RI "\fBaddInsnDef\fP (self, prefixes, mnemonic, opcodes, operands, vendor)"
+.br
+.ti -1c
+.RI "\fBprint_table\fP (self, table, pfxs)"
+.br
+.ti -1c
+.RI "\fBprint_tree\fP (self)"
+.br
+.in -1c
+.SS "Static Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "dict \fBTableInfo\fP"
+.br
+.ti -1c
+.RI "dict \fBOpcodeTable0\fP"
+.br
+.ti -1c
+.RI "dict \fBOpcExtIndex\fP"
+.br
+.ti -1c
+.RI "list \fBInsnTable\fP = []"
+.br
+.ti -1c
+.RI "list \fBMnemonicsTable\fP = []"
+.br
+.in -1c
+.SH "Member Data Documentation"
+.PP 
+.SS "ud_opcode\&.UdOpcodeTables\&.OpcodeTable0\fR [static]\fP"
+\fBInitial value:\fP
+.nf
+=  {
+        'type'      : 'opctbl',
+        'entries'   : {},
+        'meta'      : 'table0'
+    }
+.PP
+.fi
+
+.SS "dict ud_opcode\&.UdOpcodeTables\&.TableInfo\fR [static]\fP"
+\fBInitial value:\fP
+.nf
+=  {
+        'opctbl'    : { 'name' : 'UD_TAB__OPC_TABLE',   'size' : 256 },
+        '/sse'      : { 'name' : 'UD_TAB__OPC_SSE',     'size' : 4 },
+        '/reg'      : { 'name' : 'UD_TAB__OPC_REG',     'size' : 8 },
+        '/rm'       : { 'name' : 'UD_TAB__OPC_RM',      'size' : 8 },
+        '/mod'      : { 'name' : 'UD_TAB__OPC_MOD',     'size' : 2 },
+        '/m'        : { 'name' : 'UD_TAB__OPC_MODE',    'size' : 2 },
+        '/x87'      : { 'name' : 'UD_TAB__OPC_X87',     'size' : 64 },
+        '/a'        : { 'name' : 'UD_TAB__OPC_ASIZE',   'size' : 3 },
+        '/o'        : { 'name' : 'UD_TAB__OPC_OSIZE',   'size' : 3 },
+        '/3dnow'    : { 'name' : 'UD_TAB__OPC_3DNOW',   'size' : 256 },
+        'vendor'    : { 'name' : 'UD_TAB__OPC_VENDOR',  'size' : 3 },
+        '/vex\&.p'    : { 'name' : 'UD_TAB__OPC_VEX_P',   'size' : 4 },
+        '/vex\&.m'    : { 'name' : 'UD_TAB__OPC_VEX_M',   'size' : 3 },
+    }
+.PP
+.fi
+
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Baseer from the source code\&.

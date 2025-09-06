@@ -18,6 +18,8 @@ enum {
 	CMD_lp,
 	CMD_C,
 	CMD_si,
+	CMD_h,
+	CMD_q,
 	CMD_COUNT,
 };
 static char *cmds[CMD_COUNT] = {
@@ -26,6 +28,8 @@ static char *cmds[CMD_COUNT] = {
 	"lp",
 	"c",
 	"si",
+	"h",
+	"q",
 };
 typedef struct{
 	char *op;
@@ -53,6 +57,9 @@ typedef struct{
 /*
  * bp commands
  * */
+void destroy_bp(bp *bpoint);
+void destroy_all(context *ctx);
+void print_helpCMD();
 void init_values(bparser *target,context *ctx);
 bool b_debugger(bparser *target,void *arg);
 void dis_ctx(context *ctx);

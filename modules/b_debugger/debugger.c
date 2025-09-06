@@ -11,12 +11,23 @@
 #include "debugger.h"
 #include <sys/ptrace.h>
 
+/**
+ * @file debugger.c
+ * @brief Functions to handle debugging binary and command logic. 
+ *
+ */
+
+
+
 void parseCmd(context *ctx){
+	if(ctx == NULL)
+		return;
 	char cmd[1024] = {0} ;
 	char *tokens[3];
 	unsigned int counter = 0;
+	bool flag = false;
 	int status;
-	while (counter  == 0) {
+	while (counter  == 0 ) {
 		printf("baseer> ");
 		read(0, cmd, 1020);
 		cmd[strcspn(cmd, "\n")] = 0;
@@ -40,6 +51,7 @@ void parseCmd(context *ctx){
 						uint64_t addr = strtol(tokens[1],NULL,16);
 						if(addr == 0)printf("wrong address");
 						setBP(ctx, addr);
+						flag = true;
 						dis_ctx(ctx);
 						break;
 					
@@ -51,9 +63,11 @@ void parseCmd(context *ctx){
 						uint32_t id = strtol(tokens[1],NULL,10);
 						if(addr == 0)printf("wrong id\n");
 						delBP(ctx,id);
+						flag = true;
 						break;
 					case CMD_lp:
 						listBP(ctx);
+						flag = true;
 						break;
 					case CMD_si:
 						if (ptrace(PTRACE_SINGLESTEP, ctx->pid, 0, 0) == -1) {
@@ -65,11 +79,14 @@ void parseCmd(context *ctx){
 							bp *b = findBP(ctx, ctx->regs.rip);
 							if (b) {
 								handle_bpoint(ctx);
+								flag = true;
 							} else {
 								dis_ctx(ctx);
+								flag = true;
 							}
 						} else if (WIFEXITED(status)) {
 							printf(">>> Child exited\n");
+							destroy_all(ctx);
 							exit(0);
 						}
 						break;
@@ -81,18 +98,30 @@ void parseCmd(context *ctx){
 						waitpid(ctx->pid, &status, 0);
 						if (WIFSTOPPED(status) && WSTOPSIG(status) == SIGTRAP) {
 							handle_bpoint(ctx);
+							flag = true;
 						} else if (WIFEXITED(status) || (WIFSTOPPED(status) && WSTOPSIG(status) != SIGTRAP)  ) {
 							printf(">>> Child exited\n");
+							destroy_all(ctx);
 							exit(0);
 						}
 						break;
-					default:
-						printf("unkonw command\n");
+					case CMD_h:
+						print_helpCMD();
+						flag = true;
+					case CMD_q:
+						ptrace(PTRACE_CONT, ctx->pid, NULL, SIGKILL);
+						destroy_all(ctx);
+						flag = true;
+						exit(0);
 
 				}
 				break;
 
 			}
+		}
+		if(!flag){
+			printf("unkonw command\n");
+			print_helpCMD();
 		}
 		free(ctx->cmd.op);
 		ctx->cmd.op = 0;
@@ -100,6 +129,14 @@ void parseCmd(context *ctx){
 	}
 
 
+}
+void print_helpCMD(){
+	printf("bp : set breakpoint {ex: bp 0x12354}\n");
+	printf("dp : delete breakpoint {ex: dp breakpoint_id}\n");
+	printf("lp : list all breakpoints {ex: lp}\n");
+	printf("si : take one step execution {ex: si}\n");
+	printf("c  : continue execution {ex: c}\n");
+	printf("h  : display help commands {ex: h}\n");
 }
 bp* findBP(context *ctx, uint64_t rip) {
 	bp *p = ctx->list->first;
@@ -302,7 +339,22 @@ void init_values(bparser *target, context *ctx){
 	}
 
 }
-
+void destroy_bp(bp *bpoint){
+	bp *ptr = bpoint;
+	bp *tmp = NULL;
+	while (ptr != NULL) {
+		tmp = ptr->next;
+		free(ptr);
+		ptr = tmp;
+	}
+}
+void destroy_all(context *ctx){
+	destroy_bp(ctx->list->first);
+	free(ctx->list);
+	ctx->list = NULL;
+	free(ctx);
+	ctx = NULL;
+}
 bool b_debugger(bparser *target, void *arg){
 	setbuf(stdout, NULL);
 	context *ctx  = malloc(sizeof(context));
@@ -372,9 +424,12 @@ bool b_debugger(bparser *target, void *arg){
 
 		while (1) {
 			parseCmd(ctx);
+			if(ctx == 0)
+				break;
 		
 		}
 	}
 
+	printf("exiting ???\n");
 	return true;
 }

@@ -1,0 +1,83 @@
+.TH "modules/b_debugger/debugger.c" 3 "Version 0.1.0" "Baseer" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+modules/b_debugger/debugger.c \- Functions to handle debugging binary and command logic\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fR#include <elf\&.h>\fP
+.br
+\fR#include <stdio\&.h>\fP
+.br
+\fR#include <udis86\&.h>\fP
+.br
+\fR#include <stdlib\&.h>\fP
+.br
+\fR#include <stdbool\&.h>\fP
+.br
+\fR#include <unistd\&.h>\fP
+.br
+\fR#include <string\&.h>\fP
+.br
+\fR#include <sys/mman\&.h>\fP
+.br
+\fR#include <sys/wait\&.h>\fP
+.br
+\fR#include 'debugger\&.h'\fP
+.br
+\fR#include <sys/ptrace\&.h>\fP
+.br
+
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "void \fBparseCmd\fP (\fBcontext\fP *ctx)"
+.br
+.ti -1c
+.RI "void \fBprint_helpCMD\fP ()"
+.br
+.ti -1c
+.RI "\fBbp\fP * \fBfindBP\fP (\fBcontext\fP *ctx, uint64_t rip)"
+.br
+.ti -1c
+.RI "void \fBdelBP\fP (\fBcontext\fP *ctx, uint32_t id)"
+.br
+.ti -1c
+.RI "void \fBsetBP\fP (\fBcontext\fP *ctx, uint64_t addr)"
+.br
+.ti -1c
+.RI "void \fBhandle_bpoint\fP (\fBcontext\fP *ctx)"
+.br
+.ti -1c
+.RI "void \fBlistBP\fP (\fBcontext\fP *ctx)"
+.br
+.ti -1c
+.RI "void \fBrestore_all_BP\fP (\fBcontext\fP *ctx, int opt)"
+.br
+.ti -1c
+.RI "void \fBdis_ctx\fP (\fBcontext\fP *ctx)"
+.br
+.ti -1c
+.RI "void \fBinit_values\fP (\fBbparser\fP *target, \fBcontext\fP *ctx)"
+.br
+.ti -1c
+.RI "void \fBdestroy_bp\fP (\fBbp\fP *bpoint)"
+.br
+.ti -1c
+.RI "void \fBdestroy_all\fP (\fBcontext\fP *ctx)"
+.br
+.ti -1c
+.RI "bool \fBb_debugger\fP (\fBbparser\fP *target, void *arg)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Functions to handle debugging binary and command logic\&. 
+
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Baseer from the source code\&.

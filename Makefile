@@ -18,7 +18,7 @@ B_DEBUG = modules/b_debugger/debugger.c
 
 # Default target: build executable and extensions
 # all: $(TARGET) $(EXT1_SO) $(EXT2_SO)
-all: $(TARGET) $(DEFAULT) $(BX_BINHEAD) $(BPARSER) $(BX_ELF ) 
+all: $(TARGET) $(DEFAULT) $(BX_BINHEAD) $(BPARSER) $(BX_ELF) $(B_ELF_METADATA) $(B_DEBUG)
 
 # Build core executable
 # $(TARGET): $(CORE) baseer.h
@@ -32,6 +32,8 @@ $(TARGET): $(CORE) baseer.h $(DEFAULT) $(BX_BINHEAD) $(BPARSER) $(BX_ELF) $(B_EL
 # Build dynamic extension 1
 # $(EXT1_SO): $(EXT1) baseer.h
 # 	$(CC) $(CFLAGS) -shared $(EXT1) -o $(EXT1_SO)
+
+
 # Clean generated files
 clean:
 	rm -f $(TARGET)

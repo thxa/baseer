@@ -244,12 +244,12 @@ const char* elf_type_to_str(int type)
 {
     char *result;
     switch (type) {
-        case ET_NONE:   result = "No file type";
-        case ET_REL:    result = "Relocatable file";
-        case ET_EXEC:   result = "Executable file";
-        case ET_DYN:    result = "Shared object file";
-        case ET_CORE:   result = "Core file";
-        case ET_NUM:    result = "Number of defined types";
+        case ET_NONE:   result = "No file type"; break;
+        case ET_REL:    result = "Relocatable file"; break;
+        case ET_EXEC:   result = "Executable file"; break;
+        case ET_DYN:    result = "Shared object file"; break;
+        case ET_CORE:   result = "Core file"; break;
+        case ET_NUM:    result = "Number of defined types"; break;
         default:
             if (type >= ET_LOOS && type <= ET_HIOS)
                 result = "OS-specific file type";
@@ -478,7 +478,6 @@ bool print_meta_data(bparser* parser, void* args) {
         Elf64_Ehdr* elf = (Elf64_Ehdr*) data;
         Elf64_Phdr* phdr = (Elf64_Phdr*) (data + elf->e_phoff);
         Elf64_Shdr* shdrs = (Elf64_Shdr*)(data + elf->e_shoff);
-
         dump_elf64hdr(elf);
         dump_elf64_shdr(elf, shdrs, data);
         dump_elf64_phdr(elf, phdr, data);

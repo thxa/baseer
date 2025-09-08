@@ -100,7 +100,9 @@ bool bx_elf(bparser* parser, void *arg)
         // print_meta_data(parser);
     } else if(strcmp("-d", args[2]) == 0) {
         bparser_apply(parser, b_debugger, arg);
-    } else {
+    } else if (strcmp("-c", args[2]) == 0) {
+        bparser_apply(parser, decompile_elf, arg);
+    }else {
         printf("Not %s implement yet.", args[2]);
     }
 

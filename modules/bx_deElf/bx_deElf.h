@@ -1,48 +1,25 @@
-// retdec_mem_wrapper.cpp
-#include <string>
-#include <vector>
-#include <cstdlib>
-#include <cstring>
-#include <retdec/retdec.h>   // RetDec C++ API headers
-
+#ifndef BX_DECOMPILER_ELF
+#define BX_DECOMPILER_ELF
+#include "../bparser/bparser.h"
+#ifdef __cplusplus
 extern "C" {
+#endif
 
-// Takes a pointer to ELF data in memory and its size.
-// Returns heap-allocated C string with decompiled code, or NULL on error.
-// Caller must free() the returned pointer.
-char* decompile_elf_from_memory(const void* data, size_t size) {
-    if (!data || size == 0) return NULL;
+/**
+ * Pretty-print C-like code returned by retdec_decompile_fp().
+ * If with_line_numbers is nonzero, adds line numbers before each line.
+ */
+void print_decompiled_code(const char *c_code, int with_line_numbers);
+/**
+ * Decompile ELF/binary file using RetDec.
+ * Input comes from a bparser (FILE* or memory buffer).
+ * Returns a malloc'd buffer containing C-like code on success,
+ * or NULL on failure. Caller must free() the returned string.
+ */
+bool decompile_elf(bparser* parser, void *arg);
 
-    try {
-        // Configure RetDec
-        retdec::Settings settings;
-        // Optional: settings.setArchitecture("x86"); // or detect from ELF header
 
-        retdec::Decompiler decompiler(settings);
-
-        // Copy ELF data into a vector<uint8_t>
-        const uint8_t* bytes = static_cast<const uint8_t*>(data);
-        std::vector<uint8_t> buffer(bytes, bytes + size);
-
-        // Start decompilation from memory buffer
-        auto decompilation = decompiler.startDecompilationFromBuffer(buffer);
-
-        // Wait until finished
-        decompilation->waitUntilFinished();
-
-        // Get the C-like output
-        std::string output = decompilation->getOutputHll();
-
-        // Allocate C string
-        char* result = (char*)std::malloc(output.size() + 1);
-        if (!result) return NULL;
-        std::memcpy(result, output.c_str(), output.size() + 1);
-
-        return result;
-    }
-    catch (...) {
-        return NULL;
-    }
+#ifdef __cplusplus
 }
-
-} // extern "C"
+#endif
+#endif // BX_DECOMPILER_ELF

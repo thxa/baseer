@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include <udis86.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <string.h>
 #include <sys/mman.h>
 #include <sys/wait.h>
@@ -19,7 +19,7 @@
 
 
 
-void parseCmd(context *ctx){
+void parse_cmd(context *ctx){
 	if(ctx == NULL)
 		return;
 	char cmd[1024] = {0} ;
@@ -31,7 +31,6 @@ void parseCmd(context *ctx){
 		printf("baseer> ");
 		read(0, cmd, 1020);
 		cmd[strcspn(cmd, "\n")] = 0;
-		//printf("%s",cmd);
 		// tokinze the string
 		char *token = strtok(cmd, " ");
 		while(token != NULL && counter < 3) {
@@ -52,7 +51,7 @@ void parseCmd(context *ctx){
 						if(addr == 0)printf("wrong address");
 						setBP(ctx, addr);
 						flag = true;
-						dis_ctx(ctx);
+						ctx->do_wait = false;
 						break;
 					
 					case CMD_dp:
@@ -64,46 +63,29 @@ void parseCmd(context *ctx){
 						if(addr == 0)printf("wrong id\n");
 						delBP(ctx,id);
 						flag = true;
+						ctx->do_wait = false;
 						break;
 					case CMD_lp:
 						listBP(ctx);
 						flag = true;
+						ctx->do_wait = false;
 						break;
 					case CMD_si:
 						if (ptrace(PTRACE_SINGLESTEP, ctx->pid, 0, 0) == -1) {
 							perror("SINGLESTEP");
 							break;
 						}
-						waitpid(ctx->pid, &status, 0);
-						if (WIFSTOPPED(status) && WSTOPSIG(status) == SIGTRAP) {
-							bp *b = findBP(ctx, ctx->regs.rip);
-							if (b) {
-								handle_bpoint(ctx);
-								flag = true;
-							} else {
-								dis_ctx(ctx);
-								flag = true;
-							}
-						} else if (WIFEXITED(status)) {
-							printf(">>> Child exited\n");
-							destroy_all(ctx);
-							exit(0);
-						}
+						ctx->do_wait = true;
 						break;
 					case CMD_C:
+						restore_all_BP(ctx,0);
+
 						if (ptrace(PTRACE_CONT, ctx->pid, 0, 0) == -1) {
 							printf("error doing CONT\n");
 							break;
 						}
-						waitpid(ctx->pid, &status, 0);
-						if (WIFSTOPPED(status) && WSTOPSIG(status) == SIGTRAP) {
-							handle_bpoint(ctx);
-							flag = true;
-						} else if (WIFEXITED(status) || (WIFSTOPPED(status) && WSTOPSIG(status) != SIGTRAP)  ) {
-							printf(">>> Child exited\n");
-							destroy_all(ctx);
-							exit(0);
-						}
+						flag = true;
+						ctx->do_wait = true;
 						break;
 					case CMD_h:
 						print_helpCMD();
@@ -125,6 +107,7 @@ void parseCmd(context *ctx){
 		}
 		free(ctx->cmd.op);
 		ctx->cmd.op = 0;
+		return;
 
 	}
 
@@ -205,26 +188,21 @@ void handle_bpoint(context *ctx) {
 
 	bp *b = findBP(ctx, ctx->regs.rip);
 	if (!b) {
-		printf(">>> Hit SIGTRAP but no breakpoint at RIP=0x%llx\n",(unsigned long long)ctx->regs.rip);
 		return;
 	}
 
-	// restore original instruction
 	ptrace(PTRACE_POKETEXT, ctx->pid, (void*)b->addr, (void*)b->orig);
 
-	// adjust RIP back
 	ctx->regs.rip = b->addr;
 	ptrace(PTRACE_SETREGS, ctx->pid, 0, &ctx->regs);
 	dis_ctx(ctx);
 
-	// single step over
 	if (ptrace(PTRACE_SINGLESTEP, ctx->pid, 0, 0) == -1) {
 		perror("SINGLESTEP");
 		return;
 	}
 	waitpid(ctx->pid, 0, 0);
 
-	// reinsert trap
 	long trap = (b->orig & ~0xff) | 0xCC;
 	if(ptrace(PTRACE_POKETEXT, ctx->pid, (void*)b->addr, (void*)trap) == -1){
 		perror("PTRACE_POKETEXT");
@@ -273,26 +251,25 @@ void dis_ctx(context *ctx){
 	ud_t ud_obj;
 	uint8_t data[160];
 	restore_all_BP(ctx,1);
-	printf("inside dis_ctx\n");
 	ptrace(PTRACE_GETREGS, ctx->pid, NULL, &ctx->regs);
 	printf("------------- regs ----------------\n");
-	printf("RAX = 0x%llx\n", ctx->regs.rax);
-	printf("RDX = 0x%llx\n", ctx->regs.rdx);
-	printf("RCX = 0x%llx\n", ctx->regs.rcx);
-	printf("RBX = 0x%llx\n", ctx->regs.rbx);
-	printf("RDI = 0x%llx\n", ctx->regs.rdi);
-	printf("RSI = 0x%llx\n", ctx->regs.rsi);
-	printf("R8 = 0x%llx\n", ctx->regs.r8);
-	printf("R9 = 0x%llx\n", ctx->regs.r9);
-	printf("R10 = 0x%llx\n", ctx->regs.r10);
-	printf("R11 = 0x%llx\n", ctx->regs.r11);
-	printf("R12 = 0x%llx\n", ctx->regs.r12);
-	printf("R13 = 0x%llx\n", ctx->regs.r13);
-	printf("R14 = 0x%llx\n", ctx->regs.r14);
-	printf("R15 = 0x%llx\n", ctx->regs.r15);
-	printf("RSP = 0x%llx\n", ctx->regs.rsp);
-	printf("RBP = 0x%llx\n", ctx->regs.rbp);
-	printf("RIP = 0x%llx\n", ctx->regs.rip);
+	printf("\tRAX => 0x%llx\n", ctx->regs.rax);
+	printf("\tRDX => 0x%llx\n", ctx->regs.rdx);
+	printf("\tRCX => 0x%llx\n", ctx->regs.rcx);
+	printf("\tRBX => 0x%llx\n", ctx->regs.rbx);
+	printf("\tRDI => 0x%llx\n", ctx->regs.rdi);
+	printf("\tRSI => 0x%llx\n", ctx->regs.rsi);
+	printf("\tR8  => 0x%llx\n", ctx->regs.r8);
+	printf("\tR9  => 0x%llx\n", ctx->regs.r9);
+	printf("\tR10 => 0x%llx\n", ctx->regs.r10);
+	printf("\tR11 => 0x%llx\n", ctx->regs.r11);
+	printf("\tR12 => 0x%llx\n", ctx->regs.r12);
+	printf("\tR13 => 0x%llx\n", ctx->regs.r13);
+	printf("\tR14 => 0x%llx\n", ctx->regs.r14);
+	printf("\tR15 => 0x%llx\n", ctx->regs.r15);
+	printf("\tRSP => 0x%llx\n", ctx->regs.rsp);
+	printf("\tRBP => 0x%llx\n", ctx->regs.rbp);
+	printf("\tRIP => 0x%llx\n", ctx->regs.rip);
 
 	printf("------------- disass ----------------\n");
 	for(int i = 0; i < 20; i++) {
@@ -305,21 +282,20 @@ void dis_ctx(context *ctx){
 	ud_set_syntax(&ud_obj, UD_SYN_INTEL);
 	ud_set_pc(&ud_obj, ctx->regs.rip);
 	while(ud_disassemble(&ud_obj)){
-		printf("0x%llx: %s\n",(unsigned long long)ud_insn_off(&ud_obj),ud_insn_asm(&ud_obj));
-		if(ud_insn_mnemonic(&ud_obj)  == UD_Iret)
+		printf("\t0x%llx: %s\n",(unsigned long long)ud_insn_off(&ud_obj),ud_insn_asm(&ud_obj));
+		if(ud_insn_mnemonic(&ud_obj)  == UD_Iret )
 			break;
 	}
 
 	printf("------------- stack ----------------\n");
 	for(int i = 0; i < 10; i++) {
 		long v = ptrace(PTRACE_PEEKDATA, ctx->pid, (void*)(ctx->regs.rsp + i*8), NULL);
-		printf("Stack[0x%llx] = 0x%lx\n", (ctx->regs.rsp + i *8), v);
+		printf("\t0x%llx => 0x%lx\n", (ctx->regs.rsp + i *8), v);
 	}
 
-	restore_all_BP(ctx,0);
 }
 void init_values(bparser *target, context *ctx){
-	bp_list *list = malloc(sizeof(bp_list));
+bp_list *list = malloc(sizeof(bp_list));
 	char mmaps[512]= {0};
 	char line[512]= {0};
 	uint64_t start = 0;
@@ -335,9 +311,7 @@ void init_values(bparser *target, context *ctx){
 		fgets(line,sizeof(line),file);
 		sscanf(line, "%lx", &start);
 		ctx->entry = start + ehdr->e_entry;
-	
-	}
-
+	}	
 }
 void destroy_bp(bp *bpoint){
 	bp *ptr = bpoint;
@@ -358,7 +332,7 @@ void destroy_all(context *ctx){
 bool b_debugger(bparser *target, void *arg){
 	setbuf(stdout, NULL);
 	context *ctx  = malloc(sizeof(context));
-	memset(ctx, 0, sizeof(bp_list));
+	memset(ctx, 0, sizeof(ctx));
 	int stats = 0;
 	int pid = fork();
 	if (pid < 0 ){
@@ -420,16 +394,23 @@ bool b_debugger(bparser *target, void *arg){
 			ctx->regs.rip = entry;
 			ptrace(PTRACE_SETREGS, ctx->pid, NULL, &ctx->regs);
 		}
-		dis_ctx(ctx);
 
 		while (1) {
-			parseCmd(ctx);
-			if(ctx == 0)
-				break;
+			dis_ctx(ctx);
+			parse_cmd(ctx);
+			if(ctx->do_wait){
+				waitpid(ctx->pid, &stats, 0);
+				if (WIFSTOPPED(stats) && WSTOPSIG(stats) == SIGTRAP) {
+					handle_bpoint(ctx);
+				} else if (WIFEXITED(stats) || (WIFSTOPPED(stats) && WSTOPSIG(stats) != SIGTRAP)  ) {
+					printf(">>> Child exited %d\n",stats);
+					destroy_all(ctx);
+					exit(0);
+				}
+			}
 		
 		}
 	}
 
-	printf("exiting ???\n");
 	return true;
 }

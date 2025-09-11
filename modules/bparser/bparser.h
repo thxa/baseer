@@ -29,7 +29,7 @@ typedef struct {
 typedef bool (*bparser_callback_t)(bparser* parser, void* arg);
 
 bparser* bparser_load(bparser_type type, void *data);
-size_t bparser_read(bparser* parser, void* buf, size_t size);
+size_t bparser_read(bparser* parser, void* buf, unsigned int pos, size_t size);
 bool bparser_apply(bparser* parser, bparser_callback_t callback, void* arg);
 
 #endif

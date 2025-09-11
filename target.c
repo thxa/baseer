@@ -5,5 +5,6 @@
 int
 main(int argc, char ** args)
 {
+    printf("Hello Abdullah\n");
    return 0;
 }

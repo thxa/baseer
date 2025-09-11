@@ -20,6 +20,9 @@
 #define ZIP_MAGIC 0x504B
 #define PDF_MAGIC 0x255044462D
 #define MACHO_MAGIC 0xCEFAEDFE
+#define TAR_MAGIC 0x7573746172 
+                        // 00 30 30
+                        // 20 20 00
 #define BYTE 8
 
 typedef struct{
@@ -27,6 +30,7 @@ typedef struct{
     unsigned long long int number;
     unsigned long long int rnumber;
     bparser_callback_t parser;
+    unsigned int pos;
 } bmagic;
 
 bool bx_binhead(baseer_target_t *target, void *arg);

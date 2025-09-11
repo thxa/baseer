@@ -5,6 +5,7 @@
 
 #include "bx_binhead.h"
 #include "../bx_elf/bx_elf.h"
+#include "../bx_tar/bx_tar.h"
 
 unsigned int count_bits(unsigned long long int n) {
     unsigned int cnt = 0;
@@ -48,11 +49,12 @@ bool bx_binhead(baseer_target_t *target, void *arg)
     bp ->source.mem.size = target ->size;
 
     bmagic magics[] = {
-        {"ELF", ELF_MAGIC, reverse_bytes(ELF_MAGIC), bx_elf},
-        {"PDF", PDF_MAGIC, reverse_bytes(PDF_MAGIC)},
-        {"PNG", PNG_MAGIC, reverse_bytes(PNG_MAGIC)},
-        {"ZIP", ZIP_MAGIC, reverse_bytes(ZIP_MAGIC)},
-        {"Mach-o", MACHO_MAGIC, reverse_bytes(MACHO_MAGIC)},
+        {"ELF", ELF_MAGIC, reverse_bytes(ELF_MAGIC), bx_elf, 0},
+        {"PDF", PDF_MAGIC, reverse_bytes(PDF_MAGIC), NULL, 0},
+        {"PNG", PNG_MAGIC, reverse_bytes(PNG_MAGIC), NULL, 0},
+        {"ZIP", ZIP_MAGIC, reverse_bytes(ZIP_MAGIC), NULL, 0},
+        {"Mach-o", MACHO_MAGIC, reverse_bytes(MACHO_MAGIC), NULL, 0},
+        {"TAR", TAR_MAGIC, reverse_bytes(TAR_MAGIC), bx_tar, 257}
         // { NULL, 0,         0,                 NULL }
     };
 
@@ -63,7 +65,7 @@ bool bx_binhead(baseer_target_t *target, void *arg)
     {
         int len = count_bytes(magics[i].number);
         void* pattern = malloc(len);
-        size_t n = bparser_read(bp, pattern, len);
+        size_t n = bparser_read(bp, pattern, magics[i].pos, len);
         unsigned char* p = (unsigned char*)pattern;
         unsigned char* mgn = (unsigned char*)&magics[i].number;
         unsigned char* mgn_r = (unsigned char*)&magics[i].rnumber;

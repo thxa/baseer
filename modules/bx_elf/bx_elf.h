@@ -6,6 +6,7 @@
 #include <string.h>
 #include "../b_debugger/debugger.h"
 #include "../b_elf_metadata/b_elf_metadata.h"
+#include "../bx_deElf/bx_deElf.h"
 
 bool bx_elf(bparser* parser, void *arg);
 

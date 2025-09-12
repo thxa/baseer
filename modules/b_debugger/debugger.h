@@ -21,6 +21,7 @@ enum {
     CMD_si,
     CMD_h,
     CMD_q,
+    CMD_so,
     CMD_COUNT,
 };
 static char *cmds[CMD_COUNT] = {
@@ -31,11 +32,12 @@ static char *cmds[CMD_COUNT] = {
     "si",
     "h",
     "q",
+    "so",
 };
 typedef struct{
     char *op;
     uint64_t addr;
-    uint64_t extra; // value or mybe empty
+    uint64_t extra;
 }Cmd;
 struct bp_list{
     bp *first;
@@ -44,22 +46,24 @@ struct bp_list{
 };
 struct bp{
     uint64_t orig;
-    uint64_t addr; // address of the breakpoint
+    uint64_t addr;
     bp *next;
     unsigned int id;
 };
 typedef struct{
-    char *mmaps; // for mapps memory 
-    uint64_t entry;
+    char *mmaps;
+    uint64_t base;
+    unsigned long entry;
     struct user_regs_struct regs;
     bp_list *list;
     Cmd cmd;
     unsigned int pid;
     bool do_wait;
+    uint32_t arch;
 }context;
-/*
- * bp commands
- * */
+
+
+
 void destroy_bp(bp *bpoint);
 void destroy_all(context *ctx);
 void print_helpCMD();
@@ -69,6 +73,7 @@ void dis_ctx(context *ctx);
 void handle_bpoint(context *ctx);
 void setBP(context *ctx, uint64_t addr);
 void delBP(context *ctx, uint32_t id);
+void step_over(context *ctx);
 void listBP(context *ctx);
 bp* findBP(context *ctx, uint64_t rip);
 void restore_all_BP(context *ctx,int opt);

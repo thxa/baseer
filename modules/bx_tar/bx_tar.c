@@ -145,7 +145,7 @@ bool bx_tar(bparser* parser, void *arg)
                 //     fwrite(block_content, 1, write_bytes, fp);
                 //     remaining -= write_bytes;
                 // }
-                for (char* byte = (char*)block_content; byte<block_content+block_size;byte++) {
+                for (char* byte = (char*)block_content; byte<(char*)block_content+block_size;byte++) {
                     printf("%02x", *byte);
                 }
 

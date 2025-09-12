@@ -13,7 +13,7 @@ static int dump_to_temp_file(bparser *parser, const char *path){
 
     char buffer[8192];
     size_t bytesRead;
-    while ((bytesRead = bparser_read(parser, buffer, sizeof(buffer))) > 0) {
+    while ((bytesRead = bparser_read(parser, buffer, 0,sizeof(buffer))) > 0) {
         if (fwrite(buffer, 1, bytesRead, out) != bytesRead) {
             fclose(out);
             return -1;

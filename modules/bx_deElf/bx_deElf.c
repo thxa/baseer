@@ -5,20 +5,49 @@
 #include <string.h>
 #include <unistd.h>
 
-static int dump_to_temp_file(bparser *parser, const char *path){
+// static int dump_to_temp_file(bparser *parser, const char *path){
+//     FILE *out = fopen(path, "wb");
+//     if (!out) {
+//         return -1;
+//     }
+
+//     char buffer[8192];
+//     size_t bytesRead;
+//     while ((bytesRead = bparser_read(parser, buffer, sizeof(buffer))) > 0) {
+//         if (fwrite(buffer, 1, bytesRead, out) != bytesRead) {
+//             fclose(out);
+//             return -1;
+//         }
+//     }
+//     fclose(out);
+//     return 0;
+// }
+
+static int dump_to_temp_file(bparser *parser, const char *path) {
     FILE *out = fopen(path, "wb");
     if (!out) {
+        perror("fopen");
         return -1;
     }
 
     char buffer[8192];
     size_t bytesRead;
-    while ((bytesRead = bparser_read(parser, buffer, 0,sizeof(buffer))) > 0) {
+    printf("meow type: %d", parser->type);
+    while ((bytesRead = bparser_read(parser, buffer, 0, sizeof(buffer))) > 0) {
         if (fwrite(buffer, 1, bytesRead, out) != bytesRead) {
+            perror("fwrite");
             fclose(out);
             return -1;
         }
     }
+
+    // Optional: check if bparser_read failed
+    if (ferror(out)) {
+        perror("write error");
+        fclose(out);
+        return -1;
+    }
+
     fclose(out);
     return 0;
 }
@@ -52,30 +81,40 @@ bool decompile_elf(bparser *parser, void *arg){
         return false;
     }
 
-    char in_path[] = "/tmp/baseer_input_XXXXXX";
-    char out_path[] = "/tmp/baseer_output_XXXXXX.c";
+    printf("meoowwwwwww");
+
+    char in_path[] = "/home/m97/Desktop/baseer/temp/baseer_input_XXXXXX";
+    char out_path[] = "/home/m97/Desktop/baseer/temp/baseer_output_XXXXXX";
 
     int in_fd = mkstemp(in_path);
     if (in_fd < 0) {
+        perror("mkstemp");
+        printf("first meow\n");
         return false;
     }
     close(in_fd);
 
     int out_fd = mkstemp(out_path);
     if (out_fd < 0) {
+        perror("mkstemp");
         unlink(in_path);
+        printf("second meow");
         return false;
     }
     close(out_fd);
 
     if (dump_to_temp_file(parser, in_path) != 0) {
+        perror("dump_tp_temp_file");
         unlink(in_path);
         unlink(out_path);
+        printf("third meow");
         return false;
     }
-
+    
     char cmd[1024];
-    snprintf(cmd, sizeof(cmd), "retdec-decompiler --cleanup -o %s %s > /dev/null 2>&1", out_path, in_path);
+    printf("meow");
+
+    snprintf(cmd, sizeof(cmd), "/home/m97/Desktop/Project_dec/retttt/RetDec-v5.0-Linux-Release/bin/retdec-decompiler -o %s %s > /dev/null 2>&1", out_path, in_path);
     int ret = system(cmd);
     unlink(in_path);
 

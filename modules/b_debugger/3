@@ -75,20 +75,7 @@ void parse_cmd(context *ctx){
 							perror("SINGLESTEP");
 							break;
 						}
-						flag = true;
 						ctx->do_wait = true;
-
-						break;
-
-					case CMD_so:
-						restore_all_BP(ctx, 1);
-						step_over(ctx);
-						if (ptrace(PTRACE_CONT, ctx->pid, 0, 0) == -1) {
-							perror("STEPOVER");
-							break;
-						}
-						ctx->do_wait = true;
-						flag = true;
 						break;
 					case CMD_C:
 						restore_all_BP(ctx,0);
@@ -129,8 +116,7 @@ void print_helpCMD(){
 	printf("bp : set breakpoint {ex: bp 0x12354}\n");
 	printf("dp : delete breakpoint {ex: dp breakpoint_id}\n");
 	printf("lp : list all breakpoints {ex: lp}\n");
-	printf("si : take one step execution (step into) {ex: si}\n");
-	printf("so : take one step execution (step over){ex: so}\n");
+	printf("si : take one step execution {ex: si}\n");
 	printf("c  : continue execution {ex: c}\n");
 	printf("h  : display help commands {ex: h}\n");
 }
@@ -174,26 +160,6 @@ void delBP(context *ctx, uint32_t id){
 	}
 	printf("breakpoint with id: %d not found\n",id);
 	
-}
-void step_over(context *ctx){
-
-	ud_t ud_obj;
-	uint8_t data[160];
-	for(int i = 0; i < 20; i++) {
-		long inst = ptrace(PTRACE_PEEKDATA, ctx->pid, (void*)(ctx->regs.rip + i*8), NULL);
-		memcpy((void*)&data[i*8], (void*)&inst , sizeof(inst));
-	}
-	ud_init(&ud_obj);
-	ud_set_input_buffer(&ud_obj, data, sizeof(data));
-	ud_set_mode(&ud_obj, ctx->arch);
-	ud_set_syntax(&ud_obj, UD_SYN_INTEL);
-	uint64_t eip = (ctx->regs.rip & 0xffffffff);
-	ud_set_pc(&ud_obj, eip);
-	ud_disassemble(&ud_obj);
-	if(ud_disassemble(&ud_obj)){
-		setBP(ctx,(uint64_t)ud_insn_off(&ud_obj));
-		
-	}
 }
 void setBP(context *ctx, uint64_t addr){
 	bp *bpoint = malloc(sizeof(bp));
@@ -335,20 +301,17 @@ void dis_ctx(context *ctx){
 	ud_set_syntax(&ud_obj, UD_SYN_INTEL);
 	ud_set_pc(&ud_obj, ctx->regs.rip);
 	while(ud_disassemble(&ud_obj)){
-		printf("\t0x%llx: %s\n",(uint64_t)ud_insn_off(&ud_obj),ud_insn_asm(&ud_obj));
+		printf("\t0x%llx: %s\n",(unsigned long long)ud_insn_off(&ud_obj),ud_insn_asm(&ud_obj));
 		if(ud_insn_mnemonic(&ud_obj)  == UD_Iret )
 			break;
 	}
 
 	printf("------------- stack ----------------\n");
+	pirntf("%s\n",ctx->mmaps);
 	for(int i = 0; i < 10; i++) {
-		if(ctx->arch == 64){
-			long v = ptrace(PTRACE_PEEKDATA, ctx->pid, (void*)(ctx->regs.rsp + i*8), NULL);
-			printf("\t0x%llx => 0x%lx\n", (ctx->regs.rsp + i *8), v);
-		}else {
-			long v = ptrace(PTRACE_PEEKDATA, ctx->pid, (void*)(ctx->regs.rsp + i*4), NULL);
-			printf("\t0x%llx => 0x%04x\n", (ctx->regs.rsp + i *4), v);
-		}
+		printf("%llx\n",ctx->regs.rsp);
+		long v = ptrace(PTRACE_PEEKDATA, ctx->pid, (void*)(ctx->regs.rsp + i*8), NULL);
+		printf("\t0x%llx => 0x%lx\n", (ctx->regs.rsp + i *8), v);
 	}
 
 }
@@ -357,7 +320,6 @@ void init_values(bparser *target, context *ctx){
 	bp_list *list = malloc(sizeof(bp_list));
 	char mmaps[512]= {0};
 	char line[512]= {0};
-	ctx->do_wait = false;
 	memset(list, 0, sizeof(bp_list));
 	list->counter = 0;
 	ctx->list = list;
@@ -393,6 +355,9 @@ void destroy_all(context *ctx){
 	ctx->list = NULL;
 	free(ctx);
 	ctx = NULL;
+}
+uint64_t convert_to32(uint64_t addr){
+	return addr & 0xffffffff;
 }
 bool b_debugger(bparser *target, void *arg){
 	setbuf(stdout, NULL);
@@ -438,7 +403,7 @@ bool b_debugger(bparser *target, void *arg){
 		init_values(target, ctx);
 		uint64_t entry= 0;
 		if(ctx->arch == 32){
-			 entry = ctx->entry & 0xffffffff;
+			 entry = convert_to32(ctx->entry);
 		}else {
 			entry = ctx->entry ;
 		
@@ -466,15 +431,16 @@ bool b_debugger(bparser *target, void *arg){
 			ptrace(PTRACE_SETREGS, ctx->pid, NULL, &ctx->regs);
 		}
 
-			dis_ctx(ctx);
+		dis_ctx(ctx);
 		while (1) {
 			parse_cmd(ctx);
 			if(ctx->do_wait){
+				dis_ctx(ctx);
 				waitpid(ctx->pid, &stats, 0);
 				if (WIFSTOPPED(stats) && WSTOPSIG(stats) == SIGTRAP) {
-					dis_ctx(ctx);
 					handle_bpoint(ctx);
 				} else if (WIFEXITED(stats) || (WIFSTOPPED(stats) && WSTOPSIG(stats) != SIGTRAP)  ) {
+					printf(">>> Child exited %d\n",stats);
 					destroy_all(ctx);
 					exit(0);
 				}

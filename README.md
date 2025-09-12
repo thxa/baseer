@@ -33,6 +33,17 @@ Extensions add advanced capabilities:
 [docs](./docs/html)
 
 
+
+## Requirements
+- udis86
+
+## Install Baseer 
+```bash 
+make install
+```
+
+
+
 ## Usage
 
 1. Compile the Core (C-based):
@@ -103,6 +114,7 @@ Create new extensions by inheriting from the Extension Base Class. Each extensio
 Use this checklist to see which file types Baseer can currently handle:
 
 - [x] **ELF** - `7F 45 4C 46` (Executable and Linkable Format)
+- [x] **TAR** - `75 73 74 61 72` (TAR archive)
 - [ ] **PDF** - `25 50 44 46` (Portable Document Format)
 - [ ] **PNG** - `89 50 4E 47 0D 0A 1A 0A` (Portable Network Graphics)
 - [ ] **JPEG** - `FF D8 FF` (JPEG image)
@@ -127,7 +139,6 @@ Use this checklist to see which file types Baseer can currently handle:
 - [ ] **SQLite** - `53 51 4C 69 74 65 20 66 69 6C 65` (SQLite database)
 - [ ] **XZ** - `FD 37 7A 58 5A 00` (XZ compressed)
 - [ ] **CAB** - `4D 53 43 46` (Microsoft Cabinet file)
-- [ ] **TAR** - `75 73 74 61 72` (TAR archive)
 - [ ] **LZ4** - `04 22 4D 18` (LZ4 Frame Format)
 
 > This checklist is based on the [Wikipedia list of file signatures](https://en.wikipedia.org/wiki/List_of_file_signatures). You can extend Baseer to support more types in the future.

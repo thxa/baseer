@@ -1,100 +1,5 @@
 #include "b_elf_metadata.h"
 
-// #define EI_NIDENT (16)
-
-// typedef struct
-// {
-//   unsigned char e_ident[EI_NIDENT];     /* Magic number and other info */
-//   Elf32_Half    e_type;                 /* Object file type */
-//   Elf32_Half    e_machine;              /* Architecture */
-//   Elf32_Word    e_version;              /* Object file version */
-//   Elf32_Addr    e_entry;                /* Entry point virtual address */
-//   Elf32_Off     e_phoff;                /* Program header table file offset */
-//   Elf32_Off     e_shoff;                /* Section header table file offset */
-//   Elf32_Word    e_flags;                /* Processor-specific flags */
-//   Elf32_Half    e_ehsize;               /* ELF header size in bytes */
-//   Elf32_Half    e_phentsize;            /* Program header table entry size */
-//   Elf32_Half    e_phnum;                /* Program header table entry count */
-//   Elf32_Half    e_shentsize;            /* Section header table entry size */
-//   Elf32_Half    e_shnum;                /* Section header table entry count */
-//   Elf32_Half    e_shstrndx;             /* Section header string table index */
-// } Elf32_Ehdr;
-
-// typedef struct
-// {
-//   unsigned char e_ident[EI_NIDENT];     /* Magic number and other info */
-//   Elf64_Half    e_type;                 /* Object file type */
-//   Elf64_Half    e_machine;              /* Architecture */
-//   Elf64_Word    e_version;              /* Object file version */
-//   Elf64_Addr    e_entry;                /* Entry point virtual address */
-//   Elf64_Off     e_phoff;                /* Program header table file offset */
-//   Elf64_Off     e_shoff;                /* Section header table file offset */
-//   Elf64_Word    e_flags;                /* Processor-specific flags */
-//   Elf64_Half    e_ehsize;               /* ELF header size in bytes */
-//   Elf64_Half    e_phentsize;            /* Program header table entry size */
-//   Elf64_Half    e_phnum;                /* Program header table entry count */
-//   Elf64_Half    e_shentsize;            /* Section header table entry size */
-//   Elf64_Half    e_shnum;                /* Section header table entry count */
-//   Elf64_Half    e_shstrndx;             /* Section header string table index */
-// } Elf64_Ehdr;
-
-/* Section header.  */
-// typedef struct
-// {
-//   Elf32_Word    sh_name;                /* Section name (string tbl index) */
-//   Elf32_Word    sh_type;                /* Section type */
-//   Elf32_Word    sh_flags;               /* Section flags */
-//   Elf32_Addr    sh_addr;                /* Section virtual addr at execution */
-//   Elf32_Off         sh_offset;          /* Section file offset */
-//   Elf32_Word    sh_size;                /* Section size in bytes */
-//   Elf32_Word    sh_link;                /* Link to another section */
-//   Elf32_Word    sh_info;                /* Additional section information */
-//   Elf32_Word    sh_addralign;           /* Section alignment */
-//   Elf32_Word    sh_entsize;             /* Entry size if section holds table */
-// } Elf32_Shdr;
-
-// typedef struct
-// {
-//   Elf64_Word    sh_name;                /* Section name (string tbl index) */
-//   Elf64_Word    sh_type;                /* Section type */
-//   Elf64_Xword   sh_flags;               /* Section flags */
-//   Elf64_Addr    sh_addr;                /* Section virtual addr at execution */
-//   Elf64_Off     sh_offset;              /* Section file offset */
-//   Elf64_Xword   sh_size;                /* Section size in bytes */
-//   Elf64_Word    sh_link;                /* Link to another section */
-//   Elf64_Word    sh_info;                /* Additional section information */
-//   Elf64_Xword   sh_addralign;           /* Section alignment */
-//   Elf64_Xword   sh_entsize;             /* Entry size if section holds table */
-// } Elf64_Shdr;
-
-
-
-/* Program segment header.  */
-
-// typedef struct
-// {
-//   Elf32_Word    p_type;                 /* Segment type */
-//   Elf32_Off         p_offset;           /* Segment file offset */
-//   Elf32_Addr    p_vaddr;                /* Segment virtual address */
-//   Elf32_Addr    p_paddr;                /* Segment physical address */
-//   Elf32_Word    p_filesz;               /* Segment size in file */
-//   Elf32_Word    p_memsz;                /* Segment size in memory */
-//   Elf32_Word    p_flags;                /* Segment flags */
-//   Elf32_Word    p_align;                /* Segment alignment */
-// } Elf32_Phdr;
-
-// typedef struct
-// {
-//   Elf64_Word    p_type;                 /* Segment type */
-//   Elf64_Word    p_flags;                /* Segment flags */
-//   Elf64_Off         p_offset;           /* Segment file offset */
-//   Elf64_Addr    p_vaddr;                /* Segment virtual address */
-//   Elf64_Addr    p_paddr;                /* Segment physical address */
-//   Elf64_Xword   p_filesz;               /* Segment size in file */
-//   Elf64_Xword   p_memsz;                /* Segment size in memory */
-//   Elf64_Xword   p_align;                /* Segment alignment */
-// } Elf64_Phdr;
-
 #define COLOR_RESET      "\033[0m"
 #define COLOR_GREEN      "\033[1;32m"
 #define COLOR_BLUE       "\033[1;34m"
@@ -103,7 +8,7 @@
 #define COLOR_MAGENTA    "\033[35m"
 #define COLOR_CYAN       "\033[36m"
 #define COLOR_RAND(i, c1, c2) (i & 1)?c1:c2;
-
+#define BLOCK_LENGTH 40
 
 
 const char* elf_machine_to_str(int machine)
@@ -205,41 +110,6 @@ const char* sh_type_to_str(int sh_type) {
     return result;
 }
 
-// const char* p_type_to_str(int p_type)
-// {
-//     static char buffer[64];
-//     switch (p_type) {
-//         case PT_NULL:         snprintf(result, sizeof(buffer), "NULL"); break;
-//         case PT_LOAD:         snprintf(result, sizeof(buffer), "LOAD"); break;
-//         case PT_DYNAMIC:      snprintf(result, sizeof(buffer), "DYNAMIC"); break;
-//         case PT_INTERP:       snprintf(result, sizeof(buffer), "INTERP"); break;
-//         case PT_NOTE:         snprintf(result, sizeof(buffer), "NOTE"); break;
-//         case PT_SHLIB:        snprintf(result, sizeof(buffer), "SHLIB"); break;
-//         case PT_PHDR:         snprintf(result, sizeof(buffer), "PHDR"); break;
-//         case PT_TLS:          snprintf(result, sizeof(buffer), "TLS"); break;
-
-//         case PT_GNU_EH_FRAME: snprintf(result, sizeof(buffer), "GNU_EH_FRAME"); break;
-//         case PT_GNU_STACK:    snprintf(result, sizeof(buffer), "GNU_STACK"); break;
-//         case PT_GNU_RELRO:    snprintf(result, sizeof(buffer), "GNU_RELRO"); break;
-//         case PT_GNU_PROPERTY: snprintf(result, sizeof(buffer), "GNU_PROPERTY"); break;
-
-//         case PT_SUNWBSS:      snprintf(result, sizeof(buffer), "SUNWBSS"); break;
-//         case PT_SUNWSTACK:    snprintf(result, sizeof(buffer), "SUNWSTACK"); break;
-
-//         default:
-//                               if (p_type >= PT_LOOS && p_type <= PT_HIOS)
-//                                   snprintf(result, sizeof(buffer), "OS-specific (0x%x)", p_type);
-//                               else if (p_type >= PT_LOPROC && p_type <= PT_HIPROC)
-//                                   snprintf(result, sizeof(buffer), "Processor-specific (0x%x)", p_type);
-//                               else
-//                                   snprintf(result, sizeof(buffer), "0x%x", p_type);
-//                               break;
-//     }
-//     return result;
-// }
-
-
-
 const char* elf_type_to_str(int type)
 {
     char *result;
@@ -273,20 +143,7 @@ void dump_elf32hdr(Elf32_Ehdr* elf)
     printf(COLOR_GREEN "Machine: " COLOR_RESET "%d\n", elf->e_machine);
 }
 
-void dump_elf64hdr(Elf64_Ehdr *elf)
-{
-    printf(COLOR_GREEN "Class: " COLOR_RESET "64-bit\n");
-    printf(COLOR_GREEN "Entry point: " COLOR_RESET "0x%lx\n", elf->e_entry);
-    printf(COLOR_GREEN "Program headers: " COLOR_RESET "%d (offset: 0x%lx)\n", elf->e_phnum, elf->e_phoff);
-    printf(COLOR_GREEN "Section headers: " COLOR_RESET "%d (offset: 0x%lx)\n", elf->e_shnum, elf->e_shoff);
-    printf(COLOR_GREEN "Section header string table index: " COLOR_RESET "%d\n", elf->e_shstrndx);
-    printf(COLOR_GREEN "File Type: " COLOR_RESET "%s (%d)\n",
-            elf_type_to_str(elf->e_type), elf->e_type);
-    printf(COLOR_GREEN "Machine: " COLOR_RESET "%s (%d)\n",
-            elf_machine_to_str(elf->e_machine), elf->e_machine);
-}
-
-void dump_elf64_phdr(Elf64_Ehdr *elf, Elf64_Phdr* phdr, void*data)
+void dump_elf32_phdr(Elf32_Ehdr *elf, Elf32_Phdr* phdr, bparser*parser)
 {
     printf(COLOR_BLUE "\n=== Program Headers ===\n" COLOR_RESET);
 
@@ -315,70 +172,82 @@ void dump_elf64_phdr(Elf64_Ehdr *elf, Elf64_Phdr* phdr, void*data)
     printf("| " COLOR_YELLOW " X " COLOR_RESET "  | PF_X: Executable                   |\n");
     printf("+-----+-----------------------------------+\n\n");
 
+    printf(COLOR_GREEN 
+            "%-3s %-15s %-8s %-10s %-10s %-10s %-10s %-10s %-10s\n" 
+            COLOR_RESET,
+            "ID", "Type", "Flags", "Offset", "VirtAddr", "PhysAddr", "FileSz", "MemSz", "Align");
+
     for (int i = 0; i < elf->e_phnum; i++) {
-        printf(COLOR_GREEN "[%d] Type: " COLOR_RESET, i);
-
-        // char* p_type = p_type_to_str(phdr[i].p_type);
-        // printf("%s\n", p_type);
+        // --- Type ---
+        const char *type_str;
         switch (phdr[i].p_type) {
-            case PT_NULL:         printf("NULL"); break;
-            case PT_LOAD:         printf("LOAD"); break;
-            case PT_DYNAMIC:      printf("DYNAMIC"); break;
-            case PT_INTERP:       printf("INTERP"); break;
-            case PT_NOTE:         printf("NOTE"); break;
-            case PT_SHLIB:        printf("SHLIB"); break;
-            case PT_PHDR:         printf("PHDR"); break;
-            case PT_TLS:          printf("TLS"); break;
-
-            case PT_GNU_EH_FRAME: printf("GNU_EH_FRAME"); break;
-            case PT_GNU_STACK:    printf("GNU_STACK"); break;
-            case PT_GNU_RELRO:    printf("GNU_RELRO"); break;
-            case PT_GNU_PROPERTY: printf("GNU_PROPERTY"); break;
-
-            case PT_SUNWBSS:      printf("SUNWBSS"); break;
-            case PT_SUNWSTACK:    printf("SUNWSTACK"); break;
-
+            case PT_NULL:         type_str = "NULL"; break;
+            case PT_LOAD:         type_str = "LOAD"; break;
+            case PT_DYNAMIC:      type_str = "DYNAMIC"; break;
+            case PT_INTERP:       type_str = "INTERP"; break;
+            case PT_NOTE:         type_str = "NOTE"; break;
+            case PT_SHLIB:        type_str = "SHLIB"; break;
+            case PT_PHDR:         type_str = "PHDR"; break;
+            case PT_TLS:          type_str = "TLS"; break;
+            case PT_GNU_EH_FRAME: type_str = "GNU_EH_FRAME"; break;
+            case PT_GNU_STACK:    type_str = "GNU_STACK"; break;
+            case PT_GNU_RELRO:    type_str = "GNU_RELRO"; break;
+            case PT_GNU_PROPERTY: type_str = "GNU_PROPERTY"; break;
+            case PT_SUNWBSS:      type_str = "SUNWBSS"; break;
+            case PT_SUNWSTACK:    type_str = "SUNWSTACK"; break;
             default:
-              if (phdr[i].p_type >= PT_LOOS && phdr[i].p_type <= PT_HIOS)
-                  printf("OS-specific (0x%x)", phdr[i].p_type);
-              else if (phdr[i].p_type >= PT_LOPROC && phdr[i].p_type <= PT_HIPROC)
-                  printf("Processor-specific (0x%x)", phdr[i].p_type);
-              else
-                  printf("0x%x", phdr[i].p_type);
-              break;
+                                  if (phdr[i].p_type >= PT_LOOS && phdr[i].p_type <= PT_HIOS)
+                                      type_str = "OS-SPECIFIC";
+                                  else if (phdr[i].p_type >= PT_LOPROC && phdr[i].p_type <= PT_HIPROC)
+                                      type_str = "PROC-SPECIFIC";
+                                  else
+                                      type_str = "UNKNOWN";
+                                  break;
         }
 
-        printf("\n");        // Flags
-        printf(COLOR_GREEN "    Flags: " COLOR_RESET);
-        if (phdr[i].p_flags & PF_R) printf(COLOR_GREEN "R " COLOR_RESET);
-        if (phdr[i].p_flags & PF_W) printf(COLOR_RED "W " COLOR_RESET);
-        if (phdr[i].p_flags & PF_X) printf(COLOR_YELLOW "X " COLOR_RESET);
-        printf("\n");
+        char flags[4] = "";
+        if (phdr[i].p_flags & PF_R) strcat(flags, "R");
+        if (phdr[i].p_flags & PF_W) strcat(flags, "W");
+        if (phdr[i].p_flags & PF_X) strcat(flags, "X");
 
-        printf(COLOR_GREEN "    Offset: " COLOR_RESET "0x%lx\n", phdr[i].p_offset);
-        printf(COLOR_GREEN "    Virtual Address: " COLOR_RESET "0x%lx\n", phdr[i].p_vaddr);
-        printf(COLOR_GREEN "    Physical Address: " COLOR_RESET "0x%lx\n", phdr[i].p_paddr);
-        printf(COLOR_GREEN "    File Size: " COLOR_RESET "0x%lx\n", phdr[i].p_filesz);
-        printf(COLOR_GREEN "    Memory Size: " COLOR_RESET "0x%lx\n", phdr[i].p_memsz);
-        printf(COLOR_GREEN "    Alignment: " COLOR_RESET "0x%lx\n", phdr[i].p_align);
+        printf(COLOR_GREEN "%-3d %-15s %-8s 0x%08lx 0x%08lx 0x%08lx 0x%08lx 0x%08lx 0x%08lx\n" COLOR_RESET,
+                i, type_str, flags,
+                phdr[i].p_offset,
+                phdr[i].p_vaddr,
+                phdr[i].p_paddr,
+                phdr[i].p_filesz,
+                phdr[i].p_memsz,
+                phdr[i].p_align);
 
-        // Special: interpreter
         if (phdr[i].p_type == PT_INTERP) {
-            char *interp = (char*)(data + phdr[i].p_offset);
+            char *interp = (char*)(parser->source.mem.data + phdr[i].p_offset);
             printf(COLOR_YELLOW "    Interpreter: " COLOR_RESET "%s\n", interp);
         }
-        // Special: dynamic
         if (phdr[i].p_type == PT_DYNAMIC) {
             printf(COLOR_YELLOW "    Dynamically linked\n" COLOR_RESET);
         }
 
-        printf("\n");
+        if (phdr[i].p_filesz > 0) {
+            printf(COLOR_CYAN "    Segment [%d] %s raw bytes:\n" COLOR_RESET, i, type_str);
+
+            void *block = malloc(phdr[i].p_filesz);
+            bparser_read(parser, block, phdr[i].p_offset, phdr[i].p_filesz);
+
+            unsigned char *ptr = (unsigned char*)block;
+            for (size_t j = 0; j < phdr[i].p_filesz; j++) {
+                printf("%02x ", ptr[j]);
+                if ((j + 1) % BLOCK_LENGTH == 0) printf("\n");
+            }
+            printf("\n\n");
+
+            free(block);
+        }
     }
 }
 
-void dump_elf64_shdr(Elf64_Ehdr* elf , Elf64_Shdr* shdrs, void* data) {
-    Elf64_Shdr shstr = shdrs[elf->e_shstrndx];
-    const char* shstrtab = (const char*)(data + shstr.sh_offset);
+void dump_elf32_shdr(Elf32_Ehdr* elf , Elf32_Shdr* shdrs, bparser* parser) {
+    Elf32_Shdr shstr = shdrs[elf->e_shstrndx];
+    const char* shstrtab = (const char*)(parser->source.mem.data + shstr.sh_offset);
     printf(COLOR_BLUE "\n=== Section Headers ===\n" COLOR_RESET);
 
     printf(COLOR_YELLOW "=== Section Header Flags Legend ===\n" COLOR_RESET);
@@ -422,10 +291,10 @@ void dump_elf64_shdr(Elf64_Ehdr* elf , Elf64_Shdr* shdrs, void* data) {
     printf("| SYMTAB_SHNDX        | SHT_SYMTAB_SHNDX: Extended indices|\n");
     printf("+---------------------+-----------------------------------+\n\n");
 
-
-
-    printf(COLOR_GREEN "%-20s %-10s %-6s %-10s %-10s %-8s %-5s %-5s %-10s %-10s\n" COLOR_RESET,
-            "Name", "Type", "Flags", "Addr", "Offset", "Size", "Link", "Info", "Align", "EntSize");
+    printf(COLOR_GREEN 
+            "%-3s %-20s %-10s %-6s %-10s %-10s %-8s %-5s %-5s %-10s %-10s\n" 
+            COLOR_RESET,
+            "ID", "Name", "Type", "Flags", "Addr", "Offset", "Size", "Link", "Info", "Align", "EntSize");
 
     for (int i = 0; i < elf->e_shnum; i++) {
         const char* name = &shstrtab[shdrs[i].sh_name];
@@ -434,15 +303,16 @@ void dump_elf64_shdr(Elf64_Ehdr* elf , Elf64_Shdr* shdrs, void* data) {
         const char* type_str = sh_type_to_str(shdrs[i].sh_type);
 
         // Flags
-        char flags[4] = "";
-        if (shdrs[i].sh_flags & SHF_WRITE) strcat(flags, "W");
-        if (shdrs[i].sh_flags & SHF_ALLOC) strcat(flags, "A");
+        char flags[8] = "";
+        if (shdrs[i].sh_flags & SHF_WRITE)     strcat(flags, "W");
+        if (shdrs[i].sh_flags & SHF_ALLOC)     strcat(flags, "A");
         if (shdrs[i].sh_flags & SHF_EXECINSTR) strcat(flags, "X");
 
-        char* color = COLOR_RAND(i, COLOR_CYAN, COLOR_RESET);
-        printf("%s%-20s %-10s %-6s 0x%08lx 0x%08lx 0x%08lx %-5d %-5d 0x%08lx 0x%08lx\n" COLOR_RESET,
+        char* color = COLOR_CYAN;
+        printf("%s%-3d %-20s %-10s %-6s 0x%08lx 0x%08lx 0x%08lx %-5d %-5d 0x%08lx 0x%08lx\n" 
+                COLOR_RESET,
                 color,
-                name, type_str, flags,
+                i, name, type_str, flags,
                 shdrs[i].sh_addr,
                 shdrs[i].sh_offset,
                 shdrs[i].sh_size,
@@ -450,7 +320,238 @@ void dump_elf64_shdr(Elf64_Ehdr* elf , Elf64_Shdr* shdrs, void* data) {
                 shdrs[i].sh_info,
                 shdrs[i].sh_addralign,
                 shdrs[i].sh_entsize);
+
+        if (shdrs[i].sh_size > 0) {
+            void* block = malloc(shdrs[i].sh_size);
+            bparser_read(parser, block, shdrs[i].sh_offset, shdrs[i].sh_size);
+
+            printf(COLOR_YELLOW "Section [%d] %s bytes:\n" COLOR_RESET, i, name);
+            unsigned char* ptr = (unsigned char*)block;
+            for (size_t j = 0; j < shdrs[i].sh_size; j++) {
+                printf("%02x ", ptr[j]);
+                if ((j + 1) % BLOCK_LENGTH  == 0) printf("\n");
+            }
+            printf("\n\n");
+
+            free(block);
+        }
     }
+
+}
+
+
+
+
+
+
+// ELF 64 Bits
+void dump_elf64hdr(Elf64_Ehdr *elf)
+{
+    printf(COLOR_GREEN "Class: " COLOR_RESET "64-bit\n");
+    printf(COLOR_GREEN "Entry point: " COLOR_RESET "0x%lx\n", elf->e_entry);
+    printf(COLOR_GREEN "Program headers: " COLOR_RESET "%d (offset: 0x%lx)\n", elf->e_phnum, elf->e_phoff);
+    printf(COLOR_GREEN "Section headers: " COLOR_RESET "%d (offset: 0x%lx)\n", elf->e_shnum, elf->e_shoff);
+    printf(COLOR_GREEN "Section header string table index: " COLOR_RESET "%d\n", elf->e_shstrndx);
+    printf(COLOR_GREEN "File Type: " COLOR_RESET "%s (%d)\n",
+            elf_type_to_str(elf->e_type), elf->e_type);
+    printf(COLOR_GREEN "Machine: " COLOR_RESET "%s (%d)\n",
+            elf_machine_to_str(elf->e_machine), elf->e_machine);
+}
+
+void dump_elf64_phdr(Elf64_Ehdr *elf, Elf64_Phdr* phdr, bparser*parser)
+{
+    printf(COLOR_BLUE "\n=== Program Headers ===\n" COLOR_RESET);
+
+    printf(COLOR_YELLOW "=== Program Header Types Legend ===\n" COLOR_RESET);
+    printf("+------------+------------------------------------------+\n");
+    printf("| Type       | Meaning                                  |\n");
+    printf("+------------+------------------------------------------+\n");
+    printf("| NULL       | PT_NULL: Unused entry                    |\n");
+    printf("| LOAD       | PT_LOAD: Loadable segment                |\n");
+    printf("| DYNAMIC    | PT_DYNAMIC: Dynamic linking info         |\n");
+    printf("| INTERP     | PT_INTERP: Interpreter path              |\n");
+    printf("| NOTE       | PT_NOTE: Auxiliary information           |\n");
+    printf("| SHLIB      | PT_SHLIB: Reserved                       |\n");
+    printf("| PHDR       | PT_PHDR: Program header table itself     |\n");
+    printf("| TLS        | PT_TLS: Thread-Local Storage template    |\n");
+    printf("| GNU_STACK  | PT_GNU_STACK: Stack flags                |\n");
+    printf("| GNU_RELRO  | PT_GNU_RELRO: Read-only after relocation |\n");
+    printf("+------------+------------------------------------------+\n\n");
+
+    printf(COLOR_YELLOW "=== Program Header Flags Legend ===\n" COLOR_RESET);
+    printf("+-----+-----------------------------------+\n");
+    printf("| Flag| Meaning                           |\n");
+    printf("+-----+-----------------------------------+\n");
+    printf("| " COLOR_GREEN  " R " COLOR_RESET "  | PF_R: Readable                    |\n");
+    printf("| " COLOR_RED    " W " COLOR_RESET "  | PF_W: Writable                    |\n");
+    printf("| " COLOR_YELLOW " X " COLOR_RESET "  | PF_X: Executable                   |\n");
+    printf("+-----+-----------------------------------+\n\n");
+
+    printf(COLOR_GREEN 
+            "%-3s %-15s %-8s %-10s %-10s %-10s %-10s %-10s %-10s\n" 
+            COLOR_RESET,
+            "ID", "Type", "Flags", "Offset", "VirtAddr", "PhysAddr", "FileSz", "MemSz", "Align");
+
+    for (int i = 0; i < elf->e_phnum; i++) {
+        // --- Type ---
+        const char *type_str;
+        switch (phdr[i].p_type) {
+            case PT_NULL:         type_str = "NULL"; break;
+            case PT_LOAD:         type_str = "LOAD"; break;
+            case PT_DYNAMIC:      type_str = "DYNAMIC"; break;
+            case PT_INTERP:       type_str = "INTERP"; break;
+            case PT_NOTE:         type_str = "NOTE"; break;
+            case PT_SHLIB:        type_str = "SHLIB"; break;
+            case PT_PHDR:         type_str = "PHDR"; break;
+            case PT_TLS:          type_str = "TLS"; break;
+            case PT_GNU_EH_FRAME: type_str = "GNU_EH_FRAME"; break;
+            case PT_GNU_STACK:    type_str = "GNU_STACK"; break;
+            case PT_GNU_RELRO:    type_str = "GNU_RELRO"; break;
+            case PT_GNU_PROPERTY: type_str = "GNU_PROPERTY"; break;
+            case PT_SUNWBSS:      type_str = "SUNWBSS"; break;
+            case PT_SUNWSTACK:    type_str = "SUNWSTACK"; break;
+            default:
+                                  if (phdr[i].p_type >= PT_LOOS && phdr[i].p_type <= PT_HIOS)
+                                      type_str = "OS-SPECIFIC";
+                                  else if (phdr[i].p_type >= PT_LOPROC && phdr[i].p_type <= PT_HIPROC)
+                                      type_str = "PROC-SPECIFIC";
+                                  else
+                                      type_str = "UNKNOWN";
+                                  break;
+        }
+
+        char flags[4] = "";
+        if (phdr[i].p_flags & PF_R) strcat(flags, "R");
+        if (phdr[i].p_flags & PF_W) strcat(flags, "W");
+        if (phdr[i].p_flags & PF_X) strcat(flags, "X");
+
+        printf(COLOR_GREEN "%-3d %-15s %-8s 0x%08lx 0x%08lx 0x%08lx 0x%08lx 0x%08lx 0x%08lx\n" COLOR_RESET,
+                i, type_str, flags,
+                phdr[i].p_offset,
+                phdr[i].p_vaddr,
+                phdr[i].p_paddr,
+                phdr[i].p_filesz,
+                phdr[i].p_memsz,
+                phdr[i].p_align);
+
+        if (phdr[i].p_type == PT_INTERP) {
+            char *interp = (char*)(parser->source.mem.data + phdr[i].p_offset);
+            printf(COLOR_YELLOW "    Interpreter: " COLOR_RESET "%s\n", interp);
+        }
+        if (phdr[i].p_type == PT_DYNAMIC) {
+            printf(COLOR_YELLOW "    Dynamically linked\n" COLOR_RESET);
+        }
+
+        if (phdr[i].p_filesz > 0) {
+            printf(COLOR_CYAN "    Segment [%d] %s raw bytes:\n" COLOR_RESET, i, type_str);
+
+            void *block = malloc(phdr[i].p_filesz);
+            bparser_read(parser, block, phdr[i].p_offset, phdr[i].p_filesz);
+
+            unsigned char *ptr = (unsigned char*)block;
+            for (size_t j = 0; j < phdr[i].p_filesz; j++) {
+                printf("%02x ", ptr[j]);
+                if ((j + 1) % BLOCK_LENGTH == 0) printf("\n");
+            }
+            printf("\n\n");
+
+            free(block);
+        }
+    }
+}
+
+void dump_elf64_shdr(Elf64_Ehdr* elf , Elf64_Shdr* shdrs, bparser* parser) {
+    Elf64_Shdr shstr = shdrs[elf->e_shstrndx];
+    const char* shstrtab = (const char*)(parser->source.mem.data + shstr.sh_offset);
+    printf(COLOR_BLUE "\n=== Section Headers ===\n" COLOR_RESET);
+
+    printf(COLOR_YELLOW "=== Section Header Flags Legend ===\n" COLOR_RESET);
+    printf("+-----+-----------------------------------+\n");
+    printf("| Flag| Meaning                           |\n");
+    printf("+-----+-----------------------------------+\n");
+    printf("|  W  | SHF_WRITE: Writable               |\n");
+    printf("|  A  | SHF_ALLOC: Occupies memory        |\n");
+    printf("|  X  | SHF_EXECINSTR: Executable code    |\n");
+    printf("|  M  | SHF_MERGE: Might be merged        |\n");
+    printf("|  S  | SHF_STRINGS: Contains strings     |\n");
+    printf("|  I  | SHF_INFO_LINK: sh_info contains   |\n");
+    printf("|     | special meaning                   |\n");
+    printf("|  L  | SHF_LINK_ORDER: Link order        |\n");
+    printf("|  O  | SHF_OS_NONCONFORMING: OS specific |\n");
+    printf("|  G  | SHF_GROUP: Section group          |\n");
+    printf("|  T  | SHF_TLS: Thread-Local Storage     |\n");
+    printf("+-----+-----------------------------------+\n\n");
+
+
+    printf(COLOR_YELLOW "=== Section Header Types Legend ===\n" COLOR_RESET);
+    printf("+---------------------+-----------------------------------+\n");
+    printf("| Type                | Meaning                           |\n");
+    printf("+---------------------+-----------------------------------+\n");
+    printf("| NULL                | SHT_NULL: Unused section          |\n");
+    printf("| PROGBITS            | SHT_PROGBITS: Program-defined data|\n");
+    printf("| SYMTAB              | SHT_SYMTAB: Symbol table          |\n");
+    printf("| STRTAB              | SHT_STRTAB: String table          |\n");
+    printf("| RELA                | SHT_RELA: Relocation with addends |\n");
+    printf("| HASH                | SHT_HASH: Symbol hash table       |\n");
+    printf("| DYNAMIC             | SHT_DYNAMIC: Dynamic linking info |\n");
+    printf("| NOTE                | SHT_NOTE: Auxiliary information   |\n");
+    printf("| NOBITS              | SHT_NOBITS: Occupies no file space|\n");
+    printf("| REL                 | SHT_REL: Relocation without addends|\n");
+    printf("| SHLIB               | SHT_SHLIB: Reserved               |\n");
+    printf("| DYNSYM              | SHT_DYNSYM: Dynamic symbol table  |\n");
+    printf("| INIT_ARRAY          | SHT_INIT_ARRAY: Constructors array|\n");
+    printf("| FINI_ARRAY          | SHT_FINI_ARRAY: Destructors array |\n");
+    printf("| PREINIT_ARRAY       | SHT_PREINIT_ARRAY: Pre-initializers|\n");
+    printf("| GROUP               | SHT_GROUP: Section group          |\n");
+    printf("| SYMTAB_SHNDX        | SHT_SYMTAB_SHNDX: Extended indices|\n");
+    printf("+---------------------+-----------------------------------+\n\n");
+
+    printf(COLOR_GREEN 
+            "%-3s %-20s %-10s %-6s %-10s %-10s %-8s %-5s %-5s %-10s %-10s\n" 
+            COLOR_RESET,
+            "ID", "Name", "Type", "Flags", "Addr", "Offset", "Size", "Link", "Info", "Align", "EntSize");
+
+    for (int i = 0; i < elf->e_shnum; i++) {
+        const char* name = &shstrtab[shdrs[i].sh_name];
+
+        // Type
+        const char* type_str = sh_type_to_str(shdrs[i].sh_type);
+
+        // Flags
+        char flags[8] = "";
+        if (shdrs[i].sh_flags & SHF_WRITE)     strcat(flags, "W");
+        if (shdrs[i].sh_flags & SHF_ALLOC)     strcat(flags, "A");
+        if (shdrs[i].sh_flags & SHF_EXECINSTR) strcat(flags, "X");
+
+        char* color = COLOR_CYAN;
+        printf("%s%-3d %-20s %-10s %-6s 0x%08lx 0x%08lx 0x%08lx %-5d %-5d 0x%08lx 0x%08lx\n" 
+                COLOR_RESET,
+                color,
+                i, name, type_str, flags,
+                shdrs[i].sh_addr,
+                shdrs[i].sh_offset,
+                shdrs[i].sh_size,
+                shdrs[i].sh_link,
+                shdrs[i].sh_info,
+                shdrs[i].sh_addralign,
+                shdrs[i].sh_entsize);
+
+        if (shdrs[i].sh_size > 0) {
+            void* block = malloc(shdrs[i].sh_size);
+            bparser_read(parser, block, shdrs[i].sh_offset, shdrs[i].sh_size);
+
+            printf(COLOR_YELLOW "Section [%d] %s bytes:\n" COLOR_RESET, i, name);
+            unsigned char* ptr = (unsigned char*)block;
+            for (size_t j = 0; j < shdrs[i].sh_size; j++) {
+                printf("%02x ", ptr[j]);
+                if ((j + 1) % BLOCK_LENGTH  == 0) printf("\n");
+            }
+            printf("\n\n");
+
+            free(block);
+        }
+    }
+
 }
 
 
@@ -473,14 +574,21 @@ bool print_meta_data(bparser* parser, void* args) {
 
     if (bit_type == ELFCLASS32) {
         Elf32_Ehdr* elf = (Elf32_Ehdr*) data;
+        Elf32_Phdr* phdr = (Elf32_Phdr*) (data + elf->e_phoff);
+        Elf32_Shdr* shdrs = (Elf32_Shdr*)(data + elf->e_shoff);
         dump_elf32hdr(elf);
+        dump_elf32_shdr(elf, shdrs, parser);
+        dump_elf32_phdr(elf, phdr, parser);
+
+
+
     } else if (bit_type == ELFCLASS64) {
         Elf64_Ehdr* elf = (Elf64_Ehdr*) data;
         Elf64_Phdr* phdr = (Elf64_Phdr*) (data + elf->e_phoff);
         Elf64_Shdr* shdrs = (Elf64_Shdr*)(data + elf->e_shoff);
         dump_elf64hdr(elf);
-        dump_elf64_shdr(elf, shdrs, data);
-        dump_elf64_phdr(elf, phdr, data);
+        dump_elf64_shdr(elf, shdrs, parser);
+        dump_elf64_phdr(elf, phdr, parser);
 
     } else {
         printf(COLOR_RED "Unknown ELF class: %d\n" COLOR_RESET, bit_type);

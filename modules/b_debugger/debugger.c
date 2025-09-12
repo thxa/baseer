@@ -1,7 +1,7 @@
 #define _GNU_SOURCE
 #include <elf.h>
 #include <stdio.h>
-#include <udis86.h>
+#include "udis86.h"
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>

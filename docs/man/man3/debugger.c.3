@@ -15,9 +15,9 @@ modules/b_debugger/debugger.c \- Functions to handle debugging binary and comman
 .br
 \fR#include <stdlib\&.h>\fP
 .br
-\fR#include <stdbool\&.h>\fP
-.br
 \fR#include <unistd\&.h>\fP
+.br
+\fR#include <fcntl\&.h>\fP
 .br
 \fR#include <string\&.h>\fP
 .br
@@ -34,7 +34,7 @@ modules/b_debugger/debugger.c \- Functions to handle debugging binary and comman
 
 .in +1c
 .ti -1c
-.RI "void \fBparseCmd\fP (\fBcontext\fP *ctx)"
+.RI "void \fBparse_cmd\fP (\fBcontext\fP *ctx)"
 .br
 .ti -1c
 .RI "void \fBprint_helpCMD\fP ()"

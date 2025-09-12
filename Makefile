@@ -12,6 +12,7 @@ BX_BINHEAD      = modules/binhead/bx_binhead.c
 BPARSER         = modules/bparser/bparser.c
 BX_ELF          = modules/bx_elf/bx_elf.c
 B_ELF_METADATA  = modules/b_elf_metadata/b_elf_metadata.c
+BX_ELF_DISASM  = modules/bx_elf_disasm/bx_elf_disasm.c
 B_DEBUG         = modules/b_debugger/debugger.c
 BX_TAR          = modules/bx_tar/bx_tar.c
 BX_deElf        = modules/bx_deElf/bx_deElf.c
@@ -57,9 +58,10 @@ B_ELF_METADATA_SO = $(MODULEDIR)/b_elf_metadata.so
 B_DEBUG_SO      = $(MODULEDIR)/b_debugger.so
 BX_TAR_SO       = $(MODULEDIR)/bx_tar.so
 BX_deElf_SO     = $(MODULEDIR)/bx_deElf.so
+BX_ELF_DISASM_SO   = $(MODULEDIR)/bx_elf_disasm.so
 
 # Default target
-all: $(TARGET) $(BX_BINHEAD_SO) $(BPARSER_SO) $(BX_ELF_SO) $(B_ELF_METADATA_SO) $(B_DEBUG_SO) $(BX_TAR_SO) $(BX_deElf_SO)
+all: $(TARGET) $(BX_BINHEAD_SO) $(BPARSER_SO) $(BX_ELF_SO) $(B_ELF_METADATA_SO) $(B_DEBUG_SO) $(BX_TAR_SO) $(BX_deElf_SO) $(BX_ELF_DISASM_SO)
 
 # Ensure build directories exist
 $(BUILDDIR) $(MODULEDIR):
@@ -68,7 +70,7 @@ $(BUILDDIR) $(MODULEDIR):
 # Core executable
 $(TARGET): $(CORE) $(DEFAULT) $(BX_BINHEAD) $(BPARSER) $(BX_ELF) $(B_ELF_METADATA) $(B_DEBUG) $(BX_TAR) $(BX_deElf) baseer.h | $(BUILDDIR)
 
-	$(CC) $(CFLAGS) $(CORE) $(DEFAULT) $(BPARSER) $(BX_BINHEAD) $(BX_ELF) $(B_ELF_METADATA) $(B_DEBUG) $(BX_TAR) $(BX_deElf) $(UDIS86_SRC) -o $@
+	$(CC) $(CFLAGS) $(CORE) $(DEFAULT) $(BPARSER) $(BX_BINHEAD) $(BX_ELF) $(B_ELF_METADATA) $(B_DEBUG) $(BX_TAR) $(BX_deElf) $(BX_ELF_DISASM) $(UDIS86_SRC) -o $@
 	# $(CC) $(CORE) $(DEFAULT) $(BPARSER) $(BX_BINHEAD) $(BX_ELF) $(B_ELF_METADATA) $(B_DEBUG) $(BX_TAR) $(BX_deElf) -ludis86 -o $@
 
 # Shared libraries
@@ -88,6 +90,9 @@ $(B_ELF_METADATA_SO): $(B_ELF_METADATA) | $(MODULEDIR)
 $(B_DEBUG_SO): $(B_DEBUG) $(UDIS86_SRC) | $(MODULEDIR)
 	$(CC) $(CFLAGS) -shared $(B_DEBUG) $(UDIS86_SRC) -o $@
 
+$(BX_ELF_DISASM_SO): $(BX_ELF_DISASM) $(UDIS86_SRC) | $(MODULEDIR)
+	$(CC) $(CFLAGS) -shared $(BX_ELF_DISASM) $(UDIS86_SRC) -o $@
+
 # $(B_DEBUG_SO): $(B_DEBUG) | $(MODULEDIR)
 # 	$(CC) $(CFLAGS) -shared -ludis86 $< -o $@
 
@@ -96,8 +101,6 @@ $(BX_TAR_SO): $(BX_TAR) | $(MODULEDIR)
 
 $(BX_deElf_SO): $(BX_deElf) | $(MODULEDIR)
 	$(CC) $(CFLAGS) -shared $< -o $@
-
-
 
 
 # Install

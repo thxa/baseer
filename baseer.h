@@ -37,6 +37,20 @@
 
 #define BASEER_BASE_OFFSET(b, i, sf) (b) + ((i) * (sf))
 
+
+#define COLOR_RESET      "\033[0m"
+#define COLOR_GREEN      "\033[1;32m"
+#define COLOR_BLUE       "\033[1;34m"
+#define COLOR_YELLOW     "\033[1;33m"
+#define COLOR_RED        "\033[1;31m"
+#define COLOR_MAGENTA    "\033[35m"
+#define COLOR_CYAN       "\033[36m"
+#define COLOR_RAND(i, c1, c2) (i & 1)?c1:c2;
+#define BLOCK_LENGTH 40
+
+
+
+
 typedef struct baseer_target_t baseer_target_t;
 typedef bool (*baseer_callback_t)(baseer_target_t *, void *arg);
 

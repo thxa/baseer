@@ -22,6 +22,7 @@ enum {
     CMD_h,
     CMD_q,
     CMD_so,
+    CMD_vmmap,
     CMD_COUNT,
 };
 static char *cmds[CMD_COUNT] = {
@@ -33,6 +34,7 @@ static char *cmds[CMD_COUNT] = {
     "h",
     "q",
     "so",
+    "vmmap"
 };
 typedef struct{
     char *op;

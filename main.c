@@ -44,7 +44,7 @@ int main(int argc, char** args)
         print_banner();
         printf("Usage:\n");
         printf("  baseer <file> -m   ; for metadata of a file\n");
-        // printf("  baseer <file> -a   ; for disassemble of a file\n");
+        printf("  baseer <file> -a   ; for disassemble of a file\n");
         // printf("  baseer <file> -c   ; for decompiler of a file\n");
         printf("  baseer <file> -d   ; for debugger of a file\n");
         return 1;

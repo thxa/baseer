@@ -112,6 +112,8 @@ size_t&#160;</td><td class="memItemRight" valign="bottom"><b>inp_ctr</b></td></t
 uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>inp_sess</b> [64]</td></tr>
 <tr class="memitem:a34eda5ebd940219664220a394fdbb6a7" id="r_a34eda5ebd940219664220a394fdbb6a7"><td class="memItemLeft" align="right" valign="top"><a id="a34eda5ebd940219664220a394fdbb6a7" name="a34eda5ebd940219664220a394fdbb6a7"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>inp_end</b></td></tr>
+<tr class="memitem:aacc692d24ee010f83db8c9f17bf42055" id="r_aacc692d24ee010f83db8c9f17bf42055"><td class="memItemLeft" align="right" valign="top"><a id="aacc692d24ee010f83db8c9f17bf42055" name="aacc692d24ee010f83db8c9f17bf42055"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>inp_peek</b></td></tr>
 <tr class="memitem:a7daa10d7b6e82cbd5385c6e77ba20aa8" id="r_a7daa10d7b6e82cbd5385c6e77ba20aa8"><td class="memItemLeft" align="right" valign="top"><a id="a7daa10d7b6e82cbd5385c6e77ba20aa8" name="a7daa10d7b6e82cbd5385c6e77ba20aa8"></a>
 void(*&#160;</td><td class="memItemRight" valign="bottom"><b>translator</b> )(struct <a class="el" href="structud.html">ud</a> *)</td></tr>
 <tr class="memitem:a94a285f033e91a4a1a8f27895b69fc54" id="r_a94a285f033e91a4a1a8f27895b69fc54"><td class="memItemLeft" align="right" valign="top"><a id="a94a285f033e91a4a1a8f27895b69fc54" name="a94a285f033e91a4a1a8f27895b69fc54"></a>
@@ -136,10 +138,12 @@ uint64_t&#160;</td><td class="memItemRight" valign="bottom"><b>pc</b></td></tr>
 uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>vendor</b></td></tr>
 <tr class="memitem:aaed5ed6d8f27485e6afbae3e90c39d80" id="r_aaed5ed6d8f27485e6afbae3e90c39d80"><td class="memItemLeft" align="right" valign="top"><a id="aaed5ed6d8f27485e6afbae3e90c39d80" name="aaed5ed6d8f27485e6afbae3e90c39d80"></a>
 enum ud_mnemonic_code&#160;</td><td class="memItemRight" valign="bottom"><b>mnemonic</b></td></tr>
-<tr class="memitem:ad7eda94f413a6fd70d787fe4d5eb74f2" id="r_ad7eda94f413a6fd70d787fe4d5eb74f2"><td class="memItemLeft" align="right" valign="top"><a id="ad7eda94f413a6fd70d787fe4d5eb74f2" name="ad7eda94f413a6fd70d787fe4d5eb74f2"></a>
-struct <a class="el" href="structud__operand.html">ud_operand</a>&#160;</td><td class="memItemRight" valign="bottom"><b>operand</b> [3]</td></tr>
+<tr class="memitem:a51207c747aebdbc926d0133d3d9a950f" id="r_a51207c747aebdbc926d0133d3d9a950f"><td class="memItemLeft" align="right" valign="top"><a id="a51207c747aebdbc926d0133d3d9a950f" name="a51207c747aebdbc926d0133d3d9a950f"></a>
+struct <a class="el" href="structud__operand.html">ud_operand</a>&#160;</td><td class="memItemRight" valign="bottom"><b>operand</b> [4]</td></tr>
 <tr class="memitem:a16ca7e740e5bea94bb08b484ab47e159" id="r_a16ca7e740e5bea94bb08b484ab47e159"><td class="memItemLeft" align="right" valign="top"><a id="a16ca7e740e5bea94bb08b484ab47e159" name="a16ca7e740e5bea94bb08b484ab47e159"></a>
 uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>error</b></td></tr>
+<tr class="memitem:af8a33a207fae1c991abadf34aa896763" id="r_af8a33a207fae1c991abadf34aa896763"><td class="memItemLeft" align="right" valign="top"><a id="af8a33a207fae1c991abadf34aa896763" name="af8a33a207fae1c991abadf34aa896763"></a>
+uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>_rex</b></td></tr>
 <tr class="memitem:a3b241f73e1ba711d53da3a712cc53991" id="r_a3b241f73e1ba711d53da3a712cc53991"><td class="memItemLeft" align="right" valign="top"><a id="a3b241f73e1ba711d53da3a712cc53991" name="a3b241f73e1ba711d53da3a712cc53991"></a>
 uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>pfx_rex</b></td></tr>
 <tr class="memitem:a210f9d0a6fc22bfe7db90540c9d85894" id="r_a210f9d0a6fc22bfe7db90540c9d85894"><td class="memItemLeft" align="right" valign="top"><a id="a210f9d0a6fc22bfe7db90540c9d85894" name="a210f9d0a6fc22bfe7db90540c9d85894"></a>
@@ -170,6 +174,14 @@ uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>br_near</b></td></
 uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>have_modrm</b></td></tr>
 <tr class="memitem:a85b9b77aa7882aeaff38fefdc5759530" id="r_a85b9b77aa7882aeaff38fefdc5759530"><td class="memItemLeft" align="right" valign="top"><a id="a85b9b77aa7882aeaff38fefdc5759530" name="a85b9b77aa7882aeaff38fefdc5759530"></a>
 uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>modrm</b></td></tr>
+<tr class="memitem:adb7208a03051b08d6e10721b3aaa6dd1" id="r_adb7208a03051b08d6e10721b3aaa6dd1"><td class="memItemLeft" align="right" valign="top"><a id="adb7208a03051b08d6e10721b3aaa6dd1" name="adb7208a03051b08d6e10721b3aaa6dd1"></a>
+uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>modrm_offset</b></td></tr>
+<tr class="memitem:ac681f1e972458e3fdec77c440e8ef5dd" id="r_ac681f1e972458e3fdec77c440e8ef5dd"><td class="memItemLeft" align="right" valign="top"><a id="ac681f1e972458e3fdec77c440e8ef5dd" name="ac681f1e972458e3fdec77c440e8ef5dd"></a>
+uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>vex_op</b></td></tr>
+<tr class="memitem:abad05d803496c7fb6484fadac75faad1" id="r_abad05d803496c7fb6484fadac75faad1"><td class="memItemLeft" align="right" valign="top"><a id="abad05d803496c7fb6484fadac75faad1" name="abad05d803496c7fb6484fadac75faad1"></a>
+uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>vex_b1</b></td></tr>
+<tr class="memitem:a0b4ce63c176b5e0a951c902e7ac22ca0" id="r_a0b4ce63c176b5e0a951c902e7ac22ca0"><td class="memItemLeft" align="right" valign="top"><a id="a0b4ce63c176b5e0a951c902e7ac22ca0" name="a0b4ce63c176b5e0a951c902e7ac22ca0"></a>
+uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>vex_b2</b></td></tr>
 <tr class="memitem:ae720d732ef5c04b8321fc8620752bfa2" id="r_ae720d732ef5c04b8321fc8620752bfa2"><td class="memItemLeft" align="right" valign="top"><a id="ae720d732ef5c04b8321fc8620752bfa2" name="ae720d732ef5c04b8321fc8620752bfa2"></a>
 uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>primary_opcode</b></td></tr>
 <tr class="memitem:a5dfc80eee03681a224f7cc518dd445c6" id="r_a5dfc80eee03681a224f7cc518dd445c6"><td class="memItemLeft" align="right" valign="top"><a id="a5dfc80eee03681a224f7cc518dd445c6" name="a5dfc80eee03681a224f7cc518dd445c6"></a>
@@ -180,7 +192,7 @@ struct <a class="el" href="structud__itab__entry.html">ud_itab_entry</a> *&#160;
 struct <a class="el" href="structud__lookup__table__list__entry.html">ud_lookup_table_list_entry</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>le</b></td></tr>
 </table>
 <hr/>The documentation for this struct was generated from the following file:<ul>
-<li>libs/udis86-1.7.2/libudis86/<a class="el" href="types_8h_source.html">types.h</a></li>
+<li>libs/libudis86/<a class="el" href="types_8h_source.html">types.h</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->

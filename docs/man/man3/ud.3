@@ -37,6 +37,9 @@ ud
 .RI "int \fBinp_end\fP"
 .br
 .ti -1c
+.RI "int \fBinp_peek\fP"
+.br
+.ti -1c
 .RI "void(* \fBtranslator\fP )(struct \fBud\fP *)"
 .br
 .ti -1c
@@ -73,10 +76,13 @@ ud
 .RI "enum ud_mnemonic_code \fBmnemonic\fP"
 .br
 .ti -1c
-.RI "struct \fBud_operand\fP \fBoperand\fP [3]"
+.RI "struct \fBud_operand\fP \fBoperand\fP [4]"
 .br
 .ti -1c
 .RI "uint8_t \fBerror\fP"
+.br
+.ti -1c
+.RI "uint8_t \fB_rex\fP"
 .br
 .ti -1c
 .RI "uint8_t \fBpfx_rex\fP"
@@ -122,6 +128,18 @@ ud
 .br
 .ti -1c
 .RI "uint8_t \fBmodrm\fP"
+.br
+.ti -1c
+.RI "uint8_t \fBmodrm_offset\fP"
+.br
+.ti -1c
+.RI "uint8_t \fBvex_op\fP"
+.br
+.ti -1c
+.RI "uint8_t \fBvex_b1\fP"
+.br
+.ti -1c
+.RI "uint8_t \fBvex_b2\fP"
 .br
 .ti -1c
 .RI "uint8_t \fBprimary_opcode\fP"

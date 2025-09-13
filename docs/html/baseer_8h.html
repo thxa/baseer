@@ -124,6 +124,23 @@ Macros</h2></td></tr>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>BASEER_MAX_FILE_SIZE</b>&#160;&#160;&#160;1024 * 1024 * 4</td></tr>
 <tr class="memitem:adea3bb2f4f65095827fcd08f4736e1be" id="r_adea3bb2f4f65095827fcd08f4736e1be"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adea3bb2f4f65095827fcd08f4736e1be">RETURN_NULL_IF</a>(con)</td></tr>
 <tr class="memitem:ad8fa62f850908606457b5e6fc7666b41" id="r_ad8fa62f850908606457b5e6fc7666b41"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad8fa62f850908606457b5e6fc7666b41">BASEER_BASE_OFFSET</a>(b,  i,  sf)</td></tr>
+<tr class="memitem:a17f760256046df23dd0ab46602f04d02" id="r_a17f760256046df23dd0ab46602f04d02"><td class="memItemLeft" align="right" valign="top"><a id="a17f760256046df23dd0ab46602f04d02" name="a17f760256046df23dd0ab46602f04d02"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>COLOR_RESET</b>&#160;&#160;&#160;&quot;\033[0m&quot;</td></tr>
+<tr class="memitem:afc9149f5de51bd9ac4f5ebbfa153f018" id="r_afc9149f5de51bd9ac4f5ebbfa153f018"><td class="memItemLeft" align="right" valign="top"><a id="afc9149f5de51bd9ac4f5ebbfa153f018" name="afc9149f5de51bd9ac4f5ebbfa153f018"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>COLOR_GREEN</b>&#160;&#160;&#160;&quot;\033[1;32m&quot;</td></tr>
+<tr class="memitem:a23c70d699a5a775bc2e1ebeb8603f630" id="r_a23c70d699a5a775bc2e1ebeb8603f630"><td class="memItemLeft" align="right" valign="top"><a id="a23c70d699a5a775bc2e1ebeb8603f630" name="a23c70d699a5a775bc2e1ebeb8603f630"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>COLOR_BLUE</b>&#160;&#160;&#160;&quot;\033[1;34m&quot;</td></tr>
+<tr class="memitem:a4534b577b74a58b0f4b7be027af664e0" id="r_a4534b577b74a58b0f4b7be027af664e0"><td class="memItemLeft" align="right" valign="top"><a id="a4534b577b74a58b0f4b7be027af664e0" name="a4534b577b74a58b0f4b7be027af664e0"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>COLOR_YELLOW</b>&#160;&#160;&#160;&quot;\033[1;33m&quot;</td></tr>
+<tr class="memitem:ad86358bf19927183dd7b4ae215a29731" id="r_ad86358bf19927183dd7b4ae215a29731"><td class="memItemLeft" align="right" valign="top"><a id="ad86358bf19927183dd7b4ae215a29731" name="ad86358bf19927183dd7b4ae215a29731"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>COLOR_RED</b>&#160;&#160;&#160;&quot;\033[1;31m&quot;</td></tr>
+<tr class="memitem:a8deb0beccea721b35bdb1b4f7264fe75" id="r_a8deb0beccea721b35bdb1b4f7264fe75"><td class="memItemLeft" align="right" valign="top"><a id="a8deb0beccea721b35bdb1b4f7264fe75" name="a8deb0beccea721b35bdb1b4f7264fe75"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>COLOR_MAGENTA</b>&#160;&#160;&#160;&quot;\033[35m&quot;</td></tr>
+<tr class="memitem:a82573859711fce56f1aa0a76b18a9b18" id="r_a82573859711fce56f1aa0a76b18a9b18"><td class="memItemLeft" align="right" valign="top"><a id="a82573859711fce56f1aa0a76b18a9b18" name="a82573859711fce56f1aa0a76b18a9b18"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>COLOR_CYAN</b>&#160;&#160;&#160;&quot;\033[36m&quot;</td></tr>
+<tr class="memitem:ad3456ae778ae0e4e9ea04d924cf3e4c8" id="r_ad3456ae778ae0e4e9ea04d924cf3e4c8"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad3456ae778ae0e4e9ea04d924cf3e4c8">COLOR_RAND</a>(i,  c1,  c2)</td></tr>
+<tr class="memitem:a22a79078d4bc53268ab86f316856248f" id="r_a22a79078d4bc53268ab86f316856248f"><td class="memItemLeft" align="right" valign="top"><a id="a22a79078d4bc53268ab86f316856248f" name="a22a79078d4bc53268ab86f316856248f"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>BLOCK_LENGTH</b>&#160;&#160;&#160;40</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-typedef-members" class="groupheader"><a id="typedef-members" name="typedef-members"></a>
 Typedefs</h2></td></tr>
@@ -187,6 +204,33 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>baseer_execute</b> (<
 <b>Value:</b><div class="fragment"><div class="line">    TOSTRING(BASEER_VERSION_MAJOR) <span class="stringliteral">&quot;.&quot;</span> \</div>
 <div class="line">    TOSTRING(BASEER_VERSION_MINOR) <span class="stringliteral">&quot;.&quot;</span> \</div>
 <div class="line">    TOSTRING(BASEER_VERSION_MICRO)</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ad3456ae778ae0e4e9ea04d924cf3e4c8" name="ad3456ae778ae0e4e9ea04d924cf3e4c8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad3456ae778ae0e4e9ea04d924cf3e4c8">&#9670;&#160;</a></span>COLOR_RAND</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define COLOR_RAND</td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>i</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>c1</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>c2</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line">(i &amp; 1)?c1:c2;</div>
 </div><!-- fragment -->
 </div>
 </div>

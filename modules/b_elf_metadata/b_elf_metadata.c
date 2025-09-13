@@ -203,7 +203,8 @@ void dump_elf32hdr(Elf32_Ehdr* elf)
     printf(COLOR_GREEN "Section header string table index: " COLOR_RESET "%d\n", elf->e_shstrndx);
     printf(COLOR_GREEN "File Type: " COLOR_RESET "%s (%d)\n",
             elf_type_to_str(elf->e_type), elf->e_type);
-    printf(COLOR_GREEN "Machine: " COLOR_RESET "%d\n", elf->e_machine);
+    printf(COLOR_GREEN "Machine: " COLOR_RESET "%s (%d)\n",
+            elf_machine_to_str(elf->e_machine), elf->e_machine);
 }
 
 void dump_elf32_phdr(Elf32_Ehdr *elf, Elf32_Phdr* phdr, bparser*parser)
@@ -496,6 +497,8 @@ bool print_meta_data(bparser* parser, void* args) {
     } else {
         printf(COLOR_GREEN "Endianness: " COLOR_RESET "Unknown\n");
     }
+
+
 
     if (bit_type == ELFCLASS32) {
         Elf32_Ehdr* elf = (Elf32_Ehdr*) data;

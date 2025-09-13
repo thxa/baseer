@@ -76,20 +76,13 @@ void parse_cmd(context *ctx){
 							perror("SINGLESTEP");
 							break;
 						}
-						waitpid(ctx->pid, &stats, 0);
-						if (WIFSTOPPED(stats) && WSTOPSIG(stats) == SIGTRAP) {
-							dis_ctx(ctx);
-						} else if (WIFEXITED(stats) || (WIFSTOPPED(stats) && WSTOPSIG(stats) != SIGTRAP)  ) {
-							destroy_all(ctx);
-							exit(0);
-						}
 						flag = true;
-						ctx->do_wait = false;
+						ctx->do_wait = true;
 						break;
 
 					case CMD_so:
 						step_over(ctx);
-						ctx->do_wait = true;
+						ctx->do_wait = false;
 						flag = true;
 						break;
 					case CMD_C:
@@ -128,8 +121,6 @@ void parse_cmd(context *ctx){
 			printf("unkonw command\n");
 			print_helpCMD();
 		}
-		free(ctx->cmd.op);
-		ctx->cmd.op = 0;
 
 	}
 
@@ -188,6 +179,8 @@ void delBP(context *ctx, uint32_t id){
 }
 void step_over(context *ctx){
 	ud_t ud_obj;
+	uint64_t addr;
+	uint64_t orig;
 	uint8_t data[160];
 	for(int i = 0; i < 20; i++) {
 		long inst = ptrace(PTRACE_PEEKDATA, ctx->pid, (void*)(ctx->regs.rip + i*8), NULL);
@@ -200,10 +193,24 @@ void step_over(context *ctx){
 	ud_set_pc(&ud_obj, ctx->regs.rip);
 	ud_disassemble(&ud_obj);
 	if(ud_disassemble(&ud_obj)){
-		setBP(ctx,(uint64_t)ud_insn_off(&ud_obj));
+		addr = ud_insn_off(&ud_obj);
+		orig = ptrace(PTRACE_PEEKTEXT, ctx->pid, (void*)addr, NULL);
+		long trap = (orig & ~0xff) | 0xCC;
+		if (ptrace(PTRACE_POKETEXT, ctx->pid, (void*)addr, (void*)trap) == -1) {
+			perror("PTRACE_POKETEXT");
+			return ;
+		}
+
 	}
 	ptrace(PTRACE_CONT, ctx->pid, NULL, NULL);
-
+	waitpid(ctx->pid, 0, 0);
+	if (ptrace(PTRACE_POKETEXT, ctx->pid, (void*)addr, (void*)orig) == -1) {
+		perror("PTRACE_POKETEXT");
+		return ;
+	}
+	ctx->regs.rip = addr;
+	ptrace(PTRACE_SETREGS, ctx->pid, 0, &ctx->regs);
+	dis_ctx(ctx);
 }
 void setBP(context *ctx, uint64_t addr){
 	bp *bpoint = malloc(sizeof(bp));
@@ -228,14 +235,15 @@ void setBP(context *ctx, uint64_t addr){
 void handle_bpoint(context *ctx) {
 	ptrace(PTRACE_GETREGS, ctx->pid, 0, &ctx->regs);
 
+	if(strcmp(ctx->cmd.op,"si") == 0 ){
+		return;
+	}
 	bp *b = NULL;
 	b = findBP(ctx, ctx->regs.rip);
 	if (b == NULL) {
 		return;
 	}
-
 	ptrace(PTRACE_POKETEXT, ctx->pid, (void*)b->addr, (void*)b->orig);
-	
 
 	ctx->regs.rip = b->addr;
 	ptrace(PTRACE_SETREGS, ctx->pid, 0, &ctx->regs);
@@ -477,8 +485,12 @@ bool b_debugger(bparser *target, void *arg){
 					destroy_all(ctx);
 					exit(0);
 				}
+
 			}
-		
+			free(ctx->cmd.op);
+			ctx->cmd.op = 0;
+			ctx->cmd.addr = 0;
+			ctx->cmd.extra = 0;
 		}
 	}
 

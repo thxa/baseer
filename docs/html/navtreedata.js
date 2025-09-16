@@ -27,7 +27,12 @@ var NAVTREE =
   [ "Baseer", "index.html", [
     [ "Classes", "annotated.html", [
       [ "Class List", "annotated.html", "annotated_dup" ],
+<<<<<<< HEAD
       [ "Class Index", "classes.html", null ]
+=======
+      [ "Class Index", "classes.html", null ],
+      [ "Class Hierarchy", "hierarchy.html", "hierarchy" ]
+>>>>>>> 9c46ae5 (new changes)
     ] ],
     [ "Files", "files.html", [
       [ "File List", "files.html", "files_dup" ]

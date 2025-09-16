@@ -6,7 +6,7 @@ LDFLAGS = -ldl
 CFLAGS += -Ilibs/libudis86
 
 # Source Files
-CORE            = main.c baseer.c
+CORE            = main.c baseer.c utils/ui.c utils/flags.c
 DEFAULT         = modules/default/bx_default.c
 BX_BINHEAD      = modules/binhead/bx_binhead.c
 BPARSER         = modules/bparser/bparser.c
@@ -31,7 +31,7 @@ UDIS86_SRC = libs/libudis86/decode.c \
 
 
 UDIS86_HDR = libs/libudis86/decode.h \
-             libs/libudis86/itab.c \
+             libs/libudis86/itab.h \
              libs/libudis86/extern.h \
              libs/libudis86/syn.h \
              libs/libudis86/types.h \

@@ -1,6 +1,7 @@
 #ifndef BX_DECOMPILER_ELF
 #define BX_DECOMPILER_ELF
 #include "../bparser/bparser.h"
+#include <stdbool.h>
 #ifdef __cplusplus
 extern "C" {
 #endif

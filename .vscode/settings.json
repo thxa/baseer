@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "flags.h": "c",
+        "string.h": "c"
+    }
+}

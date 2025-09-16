@@ -33,6 +33,41 @@ Extensions add advanced capabilities:
 [docs](./docs/html)
 
 
+<<<<<<< HEAD
+## Libraries Used
+- **udis86**: Used for disassembling x86 and x64 architecture binaries.  
+  [GitHub Repository](https://github.com/vmt/udis86)
+
+
+
+## Install Baseer 
+
+### Installation on Arch Linux
+[Baseer on AUR](https://aur.archlinux.org/packages/baseer)
+
+You can install **Baseer** from the AUR using an AUR helper like `yay`:
+```bash
+yay -S baseer
+```
+> Make sure you have an AUR helper installed (e.g., `yay`, `paru`) before running the command.
+
+### Uninstallation
+To remove Baseer, use:
+```bash
+pacman -Rs baseer
+```
+
+### Install from Source
+To install **Baseer** from source:
+```bash
+make install
+```
+
+To uninstall:
+```bash
+make uninstall
+```
+=======
 
 ## Requirements
 - udis86
@@ -43,6 +78,7 @@ make install
 ```
 
 
+>>>>>>> 9c46ae5 (new changes)
 
 ## Usage
 

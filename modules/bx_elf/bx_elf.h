@@ -1,5 +1,5 @@
-#ifndef BX_ELF
-#define BX_ELF
+#ifndef BX_ELF_H
+#define BX_ELF_H
 #include "../bparser/bparser.h"
 #include "../../baseer.h"
 #include <elf.h>

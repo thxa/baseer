@@ -1,5 +1,20 @@
 var annotated_dup =
 [
+<<<<<<< HEAD
+=======
+    [ "oprgen", null, [
+      [ "UdTestGenerator", "classoprgen_1_1UdTestGenerator.html", null ]
+    ] ],
+    [ "ud_itab", null, [
+      [ "UdItabGenerator", "classud__itab_1_1UdItabGenerator.html", null ]
+    ] ],
+    [ "ud_opcode", null, [
+      [ "UdOpcodeTables", "classud__opcode_1_1UdOpcodeTables.html", "classud__opcode_1_1UdOpcodeTables" ]
+    ] ],
+    [ "ud_optable", null, [
+      [ "UdOptableXmlParser", "classud__optable_1_1UdOptableXmlParser.html", null ]
+    ] ],
+>>>>>>> 9c46ae5 (new changes)
     [ "baseer_target_t", "structbaseer__target__t.html", null ],
     [ "bmagic", "structbmagic.html", null ],
     [ "bp", "structbp.html", null ],

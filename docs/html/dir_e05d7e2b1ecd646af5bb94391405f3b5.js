@@ -8,7 +8,10 @@ var dir_e05d7e2b1ecd646af5bb94391405f3b5 =
     [ "bparser", "dir_87731e2ec3b1d3c5eb55d7bc2b3902f3.html", "dir_87731e2ec3b1d3c5eb55d7bc2b3902f3" ],
     [ "bx_deElf", "dir_78dd4a1422f2257432b94f03b1e77c36.html", "dir_78dd4a1422f2257432b94f03b1e77c36" ],
     [ "bx_elf", "dir_e9638e13cd84e8d8d55d1076e3a45a29.html", "dir_e9638e13cd84e8d8d55d1076e3a45a29" ],
+<<<<<<< HEAD
     [ "bx_elf_disasm", "dir_af182712f8c6a18bdadbe4eef22a220c.html", "dir_af182712f8c6a18bdadbe4eef22a220c" ],
+=======
+>>>>>>> 9c46ae5 (new changes)
     [ "bx_tar", "dir_71363cb6fe005a8ccd347ce0ffaf19dc.html", "dir_71363cb6fe005a8ccd347ce0ffaf19dc" ],
     [ "default", "dir_a60b33f10f99c7c63abd8d480e63fff5.html", "dir_a60b33f10f99c7c63abd8d480e63fff5" ]
 ];

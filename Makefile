@@ -6,13 +6,20 @@ LDFLAGS = -ldl
 CFLAGS += -Ilibs/libudis86
 
 # Source Files
+<<<<<<< HEAD
 CORE            = main.c baseer.c
+=======
+CORE            = main.c baseer.c utils/ui.c utils/flags.c
+>>>>>>> 9c46ae5 (new changes)
 DEFAULT         = modules/default/bx_default.c
 BX_BINHEAD      = modules/binhead/bx_binhead.c
 BPARSER         = modules/bparser/bparser.c
 BX_ELF          = modules/bx_elf/bx_elf.c
 B_ELF_METADATA  = modules/b_elf_metadata/b_elf_metadata.c
+<<<<<<< HEAD
 BX_ELF_DISASM  = modules/bx_elf_disasm/bx_elf_disasm.c
+=======
+>>>>>>> 9c46ae5 (new changes)
 B_DEBUG         = modules/b_debugger/debugger.c
 BX_TAR          = modules/bx_tar/bx_tar.c
 BX_deElf        = modules/bx_deElf/bx_deElf.c
@@ -31,7 +38,11 @@ UDIS86_SRC = libs/libudis86/decode.c \
 
 
 UDIS86_HDR = libs/libudis86/decode.h \
+<<<<<<< HEAD
              libs/libudis86/itab.c \
+=======
+             libs/libudis86/itab.h \
+>>>>>>> 9c46ae5 (new changes)
              libs/libudis86/extern.h \
              libs/libudis86/syn.h \
              libs/libudis86/types.h \
@@ -58,10 +69,16 @@ B_ELF_METADATA_SO = $(MODULEDIR)/b_elf_metadata.so
 B_DEBUG_SO      = $(MODULEDIR)/b_debugger.so
 BX_TAR_SO       = $(MODULEDIR)/bx_tar.so
 BX_deElf_SO     = $(MODULEDIR)/bx_deElf.so
+<<<<<<< HEAD
 BX_ELF_DISASM_SO   = $(MODULEDIR)/bx_elf_disasm.so
 
 # Default target
 all: $(TARGET) $(BX_BINHEAD_SO) $(BPARSER_SO) $(BX_ELF_SO) $(B_ELF_METADATA_SO) $(B_DEBUG_SO) $(BX_TAR_SO) $(BX_deElf_SO) $(BX_ELF_DISASM_SO)
+=======
+
+# Default target
+all: $(TARGET) $(BX_BINHEAD_SO) $(BPARSER_SO) $(BX_ELF_SO) $(B_ELF_METADATA_SO) $(B_DEBUG_SO) $(BX_TAR_SO) $(BX_deElf_SO)
+>>>>>>> 9c46ae5 (new changes)
 
 # Ensure build directories exist
 $(BUILDDIR) $(MODULEDIR):
@@ -70,7 +87,11 @@ $(BUILDDIR) $(MODULEDIR):
 # Core executable
 $(TARGET): $(CORE) $(DEFAULT) $(BX_BINHEAD) $(BPARSER) $(BX_ELF) $(B_ELF_METADATA) $(B_DEBUG) $(BX_TAR) $(BX_deElf) baseer.h | $(BUILDDIR)
 
+<<<<<<< HEAD
 	$(CC) $(CFLAGS) $(CORE) $(DEFAULT) $(BPARSER) $(BX_BINHEAD) $(BX_ELF) $(B_ELF_METADATA) $(B_DEBUG) $(BX_TAR) $(BX_deElf) $(BX_ELF_DISASM) $(UDIS86_SRC) -o $@
+=======
+	$(CC) $(CFLAGS) $(CORE) $(DEFAULT) $(BPARSER) $(BX_BINHEAD) $(BX_ELF) $(B_ELF_METADATA) $(B_DEBUG) $(BX_TAR) $(BX_deElf) $(UDIS86_SRC) -o $@
+>>>>>>> 9c46ae5 (new changes)
 	# $(CC) $(CORE) $(DEFAULT) $(BPARSER) $(BX_BINHEAD) $(BX_ELF) $(B_ELF_METADATA) $(B_DEBUG) $(BX_TAR) $(BX_deElf) -ludis86 -o $@
 
 # Shared libraries
@@ -90,9 +111,12 @@ $(B_ELF_METADATA_SO): $(B_ELF_METADATA) | $(MODULEDIR)
 $(B_DEBUG_SO): $(B_DEBUG) $(UDIS86_SRC) | $(MODULEDIR)
 	$(CC) $(CFLAGS) -shared $(B_DEBUG) $(UDIS86_SRC) -o $@
 
+<<<<<<< HEAD
 $(BX_ELF_DISASM_SO): $(BX_ELF_DISASM) $(UDIS86_SRC) | $(MODULEDIR)
 	$(CC) $(CFLAGS) -shared $(BX_ELF_DISASM) $(UDIS86_SRC) -o $@
 
+=======
+>>>>>>> 9c46ae5 (new changes)
 # $(B_DEBUG_SO): $(B_DEBUG) | $(MODULEDIR)
 # 	$(CC) $(CFLAGS) -shared -ludis86 $< -o $@
 
@@ -103,6 +127,11 @@ $(BX_deElf_SO): $(BX_deElf) | $(MODULEDIR)
 	$(CC) $(CFLAGS) -shared $< -o $@
 
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 9c46ae5 (new changes)
 # Install
 install: all
 	mkdir -p $(BINDIR) $(LIBDIR)

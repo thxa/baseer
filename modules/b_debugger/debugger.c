@@ -25,8 +25,13 @@ void parse_cmd(context *ctx){
 	char cmd[1024] = {0} ;
 	char *tokens[3];
 	unsigned int counter = 0;
+<<<<<<< HEAD
 	int stats = 0 ;
 	bool flag = false;
+=======
+	bool flag = false;
+	int status;
+>>>>>>> 9c46ae5 (new changes)
 	while (counter  == 0 ) {
 		printf("baseer> ");
 		read(0, cmd, 1020);
@@ -71,11 +76,15 @@ void parse_cmd(context *ctx){
 						ctx->do_wait = false;
 						break;
 					case CMD_si:
+<<<<<<< HEAD
 						restore_all_BP(ctx, 1);
+=======
+>>>>>>> 9c46ae5 (new changes)
 						if (ptrace(PTRACE_SINGLESTEP, ctx->pid, 0, 0) == -1) {
 							perror("SINGLESTEP");
 							break;
 						}
+<<<<<<< HEAD
 						flag = true;
 						ctx->do_wait = true;
 						break;
@@ -85,6 +94,10 @@ void parse_cmd(context *ctx){
 						ctx->do_wait = false;
 						flag = true;
 						break;
+=======
+						ctx->do_wait = true;
+						break;
+>>>>>>> 9c46ae5 (new changes)
 					case CMD_C:
 						restore_all_BP(ctx,0);
 
@@ -95,6 +108,7 @@ void parse_cmd(context *ctx){
 						flag = true;
 						ctx->do_wait = true;
 						break;
+<<<<<<< HEAD
 					case CMD_vmmap:
 						printf("%s\n",ctx->mmaps);
 						ctx->do_wait = false;
@@ -106,6 +120,11 @@ void parse_cmd(context *ctx){
 						flag = true;
 						ctx->do_wait = false;
 					        break;
+=======
+					case CMD_h:
+						print_helpCMD();
+						flag = true;
+>>>>>>> 9c46ae5 (new changes)
 					case CMD_q:
 						ptrace(PTRACE_CONT, ctx->pid, NULL, SIGKILL);
 						destroy_all(ctx);
@@ -121,12 +140,19 @@ void parse_cmd(context *ctx){
 			printf("unkonw command\n");
 			print_helpCMD();
 		}
+<<<<<<< HEAD
+=======
+		free(ctx->cmd.op);
+		ctx->cmd.op = 0;
+		return;
+>>>>>>> 9c46ae5 (new changes)
 
 	}
 
 
 }
 void print_helpCMD(){
+<<<<<<< HEAD
 	printf("bp     : set breakpoint {ex: bp 0x12354}\n");
 	printf("dp     : delete breakpoint {ex: dp breakpoint_id}\n");
 	printf("lp     : list all breakpoints {ex: lp}\n");
@@ -135,6 +161,14 @@ void print_helpCMD(){
 	printf("c      : continue execution {ex: c}\n");
 	printf("h      : display help commands {ex: h}\n");
 	printf("vmmap  : display maps memory {ex: vmmap}\n");
+=======
+	printf("bp : set breakpoint {ex: bp 0x12354}\n");
+	printf("dp : delete breakpoint {ex: dp breakpoint_id}\n");
+	printf("lp : list all breakpoints {ex: lp}\n");
+	printf("si : take one step execution {ex: si}\n");
+	printf("c  : continue execution {ex: c}\n");
+	printf("h  : display help commands {ex: h}\n");
+>>>>>>> 9c46ae5 (new changes)
 }
 bp* findBP(context *ctx, uint64_t rip) {
 	bp *p = ctx->list->first;
@@ -177,6 +211,7 @@ void delBP(context *ctx, uint32_t id){
 	printf("breakpoint with id: %d not found\n",id);
 	
 }
+<<<<<<< HEAD
 void step_over(context *ctx){
 	ud_t ud_obj;
 	uint64_t addr;
@@ -212,6 +247,8 @@ void step_over(context *ctx){
 	ptrace(PTRACE_SETREGS, ctx->pid, 0, &ctx->regs);
 	dis_ctx(ctx);
 }
+=======
+>>>>>>> 9c46ae5 (new changes)
 void setBP(context *ctx, uint64_t addr){
 	bp *bpoint = malloc(sizeof(bp));
 	bpoint->id = ++ctx->list->counter;
@@ -227,6 +264,10 @@ void setBP(context *ctx, uint64_t addr){
 		ctx->list->first = bpoint;
 		ctx->list->last = bpoint;
 	}else {
+<<<<<<< HEAD
+=======
+		// link to the last
+>>>>>>> 9c46ae5 (new changes)
 		ctx->list->last->next = bpoint;
 		ctx->list->last = bpoint;
 	}
@@ -235,6 +276,7 @@ void setBP(context *ctx, uint64_t addr){
 void handle_bpoint(context *ctx) {
 	ptrace(PTRACE_GETREGS, ctx->pid, 0, &ctx->regs);
 
+<<<<<<< HEAD
 	if(strcmp(ctx->cmd.op,"si") == 0 ){
 		return;
 	}
@@ -243,15 +285,36 @@ void handle_bpoint(context *ctx) {
 	if (b == NULL) {
 		return;
 	}
+=======
+	bp *b = findBP(ctx, ctx->regs.rip);
+	if (!b) {
+		return;
+	}
+
+>>>>>>> 9c46ae5 (new changes)
 	ptrace(PTRACE_POKETEXT, ctx->pid, (void*)b->addr, (void*)b->orig);
 
 	ctx->regs.rip = b->addr;
 	ptrace(PTRACE_SETREGS, ctx->pid, 0, &ctx->regs);
+<<<<<<< HEAD
+=======
+	dis_ctx(ctx);
+>>>>>>> 9c46ae5 (new changes)
 
 	if (ptrace(PTRACE_SINGLESTEP, ctx->pid, 0, 0) == -1) {
 		perror("SINGLESTEP");
 		return;
 	}
+<<<<<<< HEAD
+=======
+	waitpid(ctx->pid, 0, 0);
+
+	long trap = (b->orig & ~0xff) | 0xCC;
+	if(ptrace(PTRACE_POKETEXT, ctx->pid, (void*)b->addr, (void*)trap) == -1){
+		perror("PTRACE_POKETEXT");
+		return ;
+	}
+>>>>>>> 9c46ae5 (new changes)
 }
 
 void listBP(context *ctx){
@@ -275,10 +338,23 @@ void restore_all_BP(context *ctx,int opt){
 		bp *ptr = head;
 		while (ptr != NULL) {
 			if (opt == 1){
+<<<<<<< HEAD
 				ptrace(PTRACE_POKETEXT, ctx->pid, (void*)ptr->addr, (void*)ptr->orig);
 			}else if(opt == 0){
 				long trap = (ptr->orig & ~0xff) | 0xCC;
 				ptrace(PTRACE_POKETEXT, ctx->pid, (void*)ptr->addr, (void*)trap);
+=======
+				if (ptrace(PTRACE_POKETEXT, ctx->pid, (void*)ptr->addr, (void*)ptr->orig) == -1) {
+					perror("PTRACE_POKETEXT");
+					return ;
+				}
+			}else{
+				long trap = (ptr->orig & ~0xff) | 0xCC;
+				if (ptrace(PTRACE_POKETEXT, ctx->pid, (void*)ptr->addr, (void*)trap) == -1) {
+					perror("PTRACE_POKETEXT");
+					return ;
+				}
+>>>>>>> 9c46ae5 (new changes)
 			}
 			ptr = ptr->next;
 		}
@@ -288,6 +364,7 @@ void dis_ctx(context *ctx){
 
 	ud_t ud_obj;
 	uint8_t data[160];
+<<<<<<< HEAD
 	printf("------------- regs ----------------\n");
 	if(ctx->arch == 64){
 		printf("\tRAX => 0x%llx\n", ctx->regs.rax);
@@ -327,6 +404,28 @@ void dis_ctx(context *ctx){
 		printf("\tEBP => 0x%llx\n", ctx->regs.rbp);
 		printf("\tEIP => 0x%llx\n", ctx->regs.rip);
 	}
+=======
+	restore_all_BP(ctx,1);
+	ptrace(PTRACE_GETREGS, ctx->pid, NULL, &ctx->regs);
+	printf("------------- regs ----------------\n");
+	printf("\tRAX => 0x%llx\n", ctx->regs.rax);
+	printf("\tRDX => 0x%llx\n", ctx->regs.rdx);
+	printf("\tRCX => 0x%llx\n", ctx->regs.rcx);
+	printf("\tRBX => 0x%llx\n", ctx->regs.rbx);
+	printf("\tRDI => 0x%llx\n", ctx->regs.rdi);
+	printf("\tRSI => 0x%llx\n", ctx->regs.rsi);
+	printf("\tR8  => 0x%llx\n", ctx->regs.r8);
+	printf("\tR9  => 0x%llx\n", ctx->regs.r9);
+	printf("\tR10 => 0x%llx\n", ctx->regs.r10);
+	printf("\tR11 => 0x%llx\n", ctx->regs.r11);
+	printf("\tR12 => 0x%llx\n", ctx->regs.r12);
+	printf("\tR13 => 0x%llx\n", ctx->regs.r13);
+	printf("\tR14 => 0x%llx\n", ctx->regs.r14);
+	printf("\tR15 => 0x%llx\n", ctx->regs.r15);
+	printf("\tRSP => 0x%llx\n", ctx->regs.rsp);
+	printf("\tRBP => 0x%llx\n", ctx->regs.rbp);
+	printf("\tRIP => 0x%llx\n", ctx->regs.rip);
+>>>>>>> 9c46ae5 (new changes)
 
 	printf("------------- disass ----------------\n");
 	for(int i = 0; i < 20; i++) {
@@ -335,6 +434,7 @@ void dis_ctx(context *ctx){
 	}
 	ud_init(&ud_obj);
 	ud_set_input_buffer(&ud_obj, data, sizeof(data));
+<<<<<<< HEAD
 	ud_set_mode(&ud_obj, ctx->arch);
 	ud_set_syntax(&ud_obj, UD_SYN_INTEL);
 	ud_set_pc(&ud_obj, ctx->regs.rip);
@@ -345,11 +445,20 @@ void dis_ctx(context *ctx){
 			printf("\t0x%llx: %s\n",(uint64_t)ud_insn_off(&ud_obj),ud_insn_asm(&ud_obj));
 		}
 		if(ud_insn_mnemonic(&ud_obj)  == UD_Iret || ud_insn_off(&ud_obj) >= (ctx->regs.rip + 0x20))
+=======
+	ud_set_mode(&ud_obj, 64); // x86_64 mode
+	ud_set_syntax(&ud_obj, UD_SYN_INTEL);
+	ud_set_pc(&ud_obj, ctx->regs.rip);
+	while(ud_disassemble(&ud_obj)){
+		printf("\t0x%llx: %s\n",(unsigned long long)ud_insn_off(&ud_obj),ud_insn_asm(&ud_obj));
+		if(ud_insn_mnemonic(&ud_obj)  == UD_Iret )
+>>>>>>> 9c46ae5 (new changes)
 			break;
 	}
 
 	printf("------------- stack ----------------\n");
 	for(int i = 0; i < 10; i++) {
+<<<<<<< HEAD
 		if(ctx->arch == 64){
 			long v = ptrace(PTRACE_PEEKDATA, ctx->pid, (void*)(ctx->regs.rsp + i*8), NULL);
 			printf("\t0x%llx => 0x%lx\n", (ctx->regs.rsp + i *8), v);
@@ -366,10 +475,23 @@ void init_values(bparser *target, context *ctx){
 	char mmaps[512]= {0};
 	char line[512]= {0};
 	ctx->do_wait = false;
+=======
+		long v = ptrace(PTRACE_PEEKDATA, ctx->pid, (void*)(ctx->regs.rsp + i*8), NULL);
+		printf("\t0x%llx => 0x%lx\n", (ctx->regs.rsp + i *8), v);
+	}
+
+}
+void init_values(bparser *target, context *ctx){
+bp_list *list = malloc(sizeof(bp_list));
+	char mmaps[512]= {0};
+	char line[512]= {0};
+	uint64_t start = 0;
+>>>>>>> 9c46ae5 (new changes)
 	memset(list, 0, sizeof(bp_list));
 	list->counter = 0;
 	ctx->list = list;
 	Elf64_Ehdr *ehdr = (Elf64_Ehdr*)target->source.mem.data;
+<<<<<<< HEAD
 	sprintf(mmaps, "/proc/%d/maps", ctx->pid);
 	FILE *file = fopen(mmaps,"r");
 	size_t size = 0;
@@ -385,6 +507,17 @@ void init_values(bparser *target, context *ctx){
 	}else{
 		ctx->arch = 64;
 	}
+=======
+	if(ehdr->e_type == ET_EXEC){
+		ctx->entry = ehdr->e_entry;
+	}else {
+		sprintf(mmaps, "/proc/%d/maps", ctx->pid);
+		FILE *file = fopen(mmaps,"r");
+		fgets(line,sizeof(line),file);
+		sscanf(line, "%lx", &start);
+		ctx->entry = start + ehdr->e_entry;
+	}	
+>>>>>>> 9c46ae5 (new changes)
 }
 void destroy_bp(bp *bpoint){
 	bp *ptr = bpoint;
@@ -437,13 +570,18 @@ bool b_debugger(bparser *target, void *arg){
 		if (fexecve(fd, argv, envp) == -1) {
 			perror("fexecve failed");
 			close(fd);
+<<<<<<< HEAD
 			exit(1);
+=======
+			exit(EXIT_FAILURE); // child should exit
+>>>>>>> 9c46ae5 (new changes)
 		}
 	}else {
 		waitpid(pid, &stats, 0);
 
 		ctx->pid = pid;
 		init_values(target, ctx);
+<<<<<<< HEAD
 		uint64_t entry= 0;
 		if(ctx->arch == 32){
 			 entry = ctx->entry & 0xffffffff;
@@ -453,6 +591,12 @@ bool b_debugger(bparser *target, void *arg){
 		}
 
 		unsigned long orig = ptrace(PTRACE_PEEKTEXT, ctx->pid, (void*)entry, NULL);
+=======
+		uint64_t entry = ctx->entry;
+
+		// setBreakPoint at entry point
+		uint64_t orig = ptrace(PTRACE_PEEKTEXT, ctx->pid, (void*)entry, NULL);
+>>>>>>> 9c46ae5 (new changes)
 		long trap = (orig & ~0xff) | 0xCC;
 		if (ptrace(PTRACE_POKETEXT, ctx->pid, (void*)entry, (void*)trap) == -1) {
 			perror("PTRACE_POKETEXT");
@@ -465,6 +609,10 @@ bool b_debugger(bparser *target, void *arg){
 			if(ptrace(PTRACE_GETREGS, ctx->pid, NULL, &ctx->regs) == -1){
 				printf("failed to read regs\n");
 			}
+<<<<<<< HEAD
+=======
+			// restore the orignal instruction
+>>>>>>> 9c46ae5 (new changes)
 			if(ptrace(PTRACE_POKETEXT, ctx->pid, (void*)entry, (void*)orig)== -1){
 				printf("failed to restore entry point\n");
 			}
@@ -472,13 +620,19 @@ bool b_debugger(bparser *target, void *arg){
 			ptrace(PTRACE_SETREGS, ctx->pid, NULL, &ctx->regs);
 		}
 
+<<<<<<< HEAD
 		dis_ctx(ctx);
 		while (1) {
+=======
+		while (1) {
+			dis_ctx(ctx);
+>>>>>>> 9c46ae5 (new changes)
 			parse_cmd(ctx);
 			if(ctx->do_wait){
 				waitpid(ctx->pid, &stats, 0);
 				if (WIFSTOPPED(stats) && WSTOPSIG(stats) == SIGTRAP) {
 					handle_bpoint(ctx);
+<<<<<<< HEAD
 					restore_all_BP(ctx,1);
 					dis_ctx(ctx);
 				} else if (WIFEXITED(stats) || (WIFSTOPPED(stats) && WSTOPSIG(stats) != SIGTRAP)  ) {
@@ -491,6 +645,15 @@ bool b_debugger(bparser *target, void *arg){
 			ctx->cmd.op = 0;
 			ctx->cmd.addr = 0;
 			ctx->cmd.extra = 0;
+=======
+				} else if (WIFEXITED(stats) || (WIFSTOPPED(stats) && WSTOPSIG(stats) != SIGTRAP)  ) {
+					printf(">>> Child exited %d\n",stats);
+					destroy_all(ctx);
+					exit(0);
+				}
+			}
+		
+>>>>>>> 9c46ae5 (new changes)
 		}
 	}
 

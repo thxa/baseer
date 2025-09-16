@@ -8,8 +8,13 @@
  */
 
 
+<<<<<<< HEAD
 #ifndef BX_DEFAULT_H
 #define BX_DEFAULT_H
+=======
+#ifndef BX_BINHEAD_H
+#define BX_BINHEAD_H
+>>>>>>> 9c46ae5 (new changes)
 #include <stdbool.h>
 // #include <elf.h>
 #include "../../baseer.h"

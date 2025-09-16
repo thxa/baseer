@@ -44,11 +44,6 @@ bool bx_binhead(baseer_target_t *target, void *arg)
     if (target == NULL || target->block == NULL)
         return false;
 
-<<<<<<< HEAD
-    void *block = target ->block;
-    bparser* bp= bparser_load(BPARSER_MEM, block);
-    bp ->source.mem.size = target ->size;
-=======
     bparser* bp= NULL;
     
     if (target->size > 0) {
@@ -60,7 +55,6 @@ bool bx_binhead(baseer_target_t *target, void *arg)
         if(!bp) return false;
     }
     
->>>>>>> 9c46ae5 (new changes)
 
     bmagic magics[] = {
         {"ELF", ELF_MAGIC, reverse_bytes(ELF_MAGIC), bx_elf, 0},

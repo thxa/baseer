@@ -1,67 +1,3 @@
-<<<<<<< HEAD
-
-#include "baseer.h"
-// #include "modules/default/bx_default.h"
-#include "modules/binhead/bx_binhead.h"
-
-static void print_banner(void) {
-    printf(
-"=====================---------====================\n"
-"================--:::..........:::-===============\n"
-"=============-::....................::-===========\n"
-"===========::........::------::........::-========\n"
-"=========:.....:...:-==========-:...::....:-======\n"
-"=======:....:--...-===--------===-...--:....:-====\n"
-"=====:...:-===:..:==------------==:...===-:...:-==\n"
-"===-....:=====:..-==------------==-...=====:....:=\n"
-"====-:...:-===:..:==------------==:..:===-:....-==\n"
-"======:....:-=-...-===--------===-...-=-:....:====\n"
-"========:.....::...:-==========-:...:::....:======\n"
-"==========-:.........::------::.........:-========\n"
-"============--:........................:==========\n"
-"================-:::............::--:....:-=======\n"
-"======================-------=========-:...:-=====\n"
-"========================================-:...:-===\n"
-"==========================================-:...:==\n"
-"============================================-:-===\n"
-"==================================================\n"
-"==================================--==============\n"
-"======:::======::-======:::==--:......:-=======::-\n"
-"======..:=====-:.-======...-:..:--==--..:=====-..-\n"
-"======..:=====-:.:======....:-========:..=====-..-\n"
-"======..:-----:..:------...-----------:..-----:..-\n"
-"=====-.........::..............................:-=\n"
-"=====:..-=========================================\n"
-"=---:..:====-:-=-:-==========================-::==\n"
-"-...::-=====-:-=-:-===========================::==\n"
-"==================================================\n"
-    );
-    printf("Baseer version: %s\n\n", BASEER_VERSION);
-}
-
-int main(int argc, char** args)
-{
-    if (argc != 3) {
-        print_banner();
-        printf("Usage:\n");
-        printf("  baseer <file> -m   ; for metadata of a file\n");
-        printf("  baseer <file> -a   ; for disassemble of a file\n");
-        // printf("  baseer <file> -c   ; for decompiler of a file\n");
-        printf("  baseer <file> -d   ; for debugger of a file\n");
-        return 1;
-    }
-
-    inputs input = {&argc, args};
-    baseer_target_t *target = baseer_open(args[1]);
-
-    if (target == NULL)
-        return 1;
-
-    if (!baseer_execute(target, bx_binhead, &input))
-        printf("Execution error\n");
-
-    baseer_close(target);
-=======
 #include "baseer.h"
 // #include "modules/default/bx_default.h"
 #include "modules/binhead/bx_binhead.h"
@@ -78,6 +14,8 @@ int main(int argc, char** args)
  * @param args Array of argument strings
  * @return 0 on success, 1 on error
  */
+
+
 
 int main(int argc, char** args)
 {
@@ -108,8 +46,8 @@ int main(int argc, char** args)
 
     if ((need_memory && !mem_target)) {
         fprintf(stderr, "[!] Failed to open file in required mode(s)\n");
-        if(mem_target) baseer_close(mem_target);
-        if(stream_target) baseer_close(stream_target);
+        if(mem_target) baseer_close(mem_target, MEMORY);
+        if(stream_target) baseer_close(stream_target, STREAM);
         return 1;
     }
 
@@ -134,10 +72,9 @@ int main(int argc, char** args)
     }
     
     // Clean up
-    if(mem_target) baseer_close(mem_target);
-    if(stream_target) baseer_close(stream_target);
+    if(mem_target) baseer_close(mem_target, MEMORY);
+    if(stream_target) baseer_close(stream_target, STREAM);
 
->>>>>>> 9c46ae5 (new changes)
     return 0;
 }
 

@@ -10,13 +10,9 @@ bool bx_elf(bparser* parser, void *arg)
     if(strcmp("-m", args[2]) == 0) {
         bparser_apply(parser, print_meta_data, arg);
         // print_meta_data(parser);
-<<<<<<< HEAD
     } else if (strcmp("-a", args[2]) == 0) {
         bparser_apply(parser, print_elf_disasm, arg);
     } else if(strcmp("-d", args[2]) == 0) {
-=======
-    } else if (strcmp("-d", args[2]) == 0) {
->>>>>>> 9c46ae5 (new changes)
         bparser_apply(parser, b_debugger, arg);
     } else if (strcmp("-c", args[2]) == 0) {
         bparser_apply(parser, decompile_elf, arg);

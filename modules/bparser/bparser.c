@@ -1,19 +1,3 @@
-<<<<<<< HEAD
-#include "bparser.h"
-
-bparser* bparser_load(bparser_type type, void *data) {
-    bparser *p = malloc(sizeof(bparser));
-    if (!p) return NULL;
-
-    p->type = type;
-
-    if (type == BPARSER_FILE) {
-        p->source.fp = (FILE*)data;
-    } else if (type == BPARSER_MEM) {
-
-        p->source.mem.size = 0;
-        p->source.mem.data = data;
-=======
 /**
  * @file bparser.c
  * @brief Binary parser implementation
@@ -36,17 +20,11 @@ bparser* bparser_load(bparser_type type, void *data) {
     } else if (type == BPARSER_MEM) {
         p->source.mem.data = data;
         p->source.mem.size = 0;
->>>>>>> 9c46ae5 (new changes)
     }
 
     return p;
 }
 
-<<<<<<< HEAD
-size_t bparser_read(bparser* parser, void* buf, unsigned int pos, size_t size) {
-    if (!parser || !buf) return 0;
-    if (parser->type == BPARSER_FILE) {
-=======
 /* ========================= Read Data ========================= */
 size_t bparser_read(bparser* parser, void* buf, unsigned int pos, size_t size) {
     if (!parser || !buf) return 0;
@@ -54,7 +32,6 @@ size_t bparser_read(bparser* parser, void* buf, unsigned int pos, size_t size) {
     if (parser->type == BPARSER_FILE) {
         if(!parser->source.fp) return 0;
         if(fseek(parser->source.fp, pos, SEEK_SET) != 0) return 0;
->>>>>>> 9c46ae5 (new changes)
         return fread(buf, 1, size, parser->source.fp);
     } else if (parser->type == BPARSER_MEM) {
         unsigned int chunck_size=0;
@@ -66,26 +43,17 @@ size_t bparser_read(bparser* parser, void* buf, unsigned int pos, size_t size) {
 
         if(size >= parser->source.mem.size) {
             chunck_size = parser->source.mem.size-1;
-<<<<<<< HEAD
-        } else {
-            chunck_size = size;
-        }
-=======
         }else {
             chunck_size = size;
         }
 
->>>>>>> 9c46ae5 (new changes)
         memcpy(buf, (unsigned char*)parser->source.mem.data+pos, chunck_size);
         return size;
     }
     return 0;
 }
 
-<<<<<<< HEAD
-=======
 /* ========================= Apply Callback ========================= */
->>>>>>> 9c46ae5 (new changes)
 bool bparser_apply(bparser* parser, bparser_callback_t callback, void* arg) {
     if(parser == NULL || callback == NULL) {
         return 0;

@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-#ifndef BPARSER_H
-#define BPARSER_H 
-#include<stdio.h>
-=======
 /**
  * @file bparser.h
  * @brief Binary parser abstraction supporting memory and streaming files.
@@ -14,40 +9,29 @@
 #ifndef BPARSER_H
 #define BPARSER_H 
 #include <stdio.h>
->>>>>>> 9c46ae5 (new changes)
 #include <stdlib.h>
 #include <string.h>
 #include "../../baseer.h"
 
-<<<<<<< HEAD
-
-=======
 /**
  * @brief Parser type: memory or streaming
  */
->>>>>>> 9c46ae5 (new changes)
 typedef enum {
     BPARSER_FILE,
     BPARSER_MEM
 } bparser_type;
 
-<<<<<<< HEAD
-=======
 /**
  * @brief Memory source for the parser
  */
->>>>>>> 9c46ae5 (new changes)
 typedef struct {
     const void *data;
     size_t size;
 } bparser_mem_t;
 
-<<<<<<< HEAD
-=======
 /**
  * @brief Parser object
  */
->>>>>>> 9c46ae5 (new changes)
 typedef struct {
     union {
         FILE *fp;
@@ -57,13 +41,6 @@ typedef struct {
     bparser_type type;
 } bparser;
 
-<<<<<<< HEAD
-
-typedef bool (*bparser_callback_t)(bparser* parser, void* arg);
-
-bparser* bparser_load(bparser_type type, void *data);
-size_t bparser_read(bparser* parser, void* buf, unsigned int pos, size_t size);
-=======
 /**
  * @brief Callback for bparser tools
  * 
@@ -101,7 +78,6 @@ size_t bparser_read(bparser* parser, void* buf, unsigned int pos, size_t size);
  * @param arg Additional argument
  * @return true on success, false on failure
  */
->>>>>>> 9c46ae5 (new changes)
 bool bparser_apply(bparser* parser, bparser_callback_t callback, void* arg);
 
 #endif

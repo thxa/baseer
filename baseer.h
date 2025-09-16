@@ -1,13 +1,9 @@
 /**
  * @file baseer.h
-<<<<<<< HEAD
- * @brief Core function
-=======
  * @brief Core file handling and execution API for Baseer.
  *
  * Provides memory and streaming file access, as well as execution
  * of analysis tools using a unified callback interface.
->>>>>>> 9c46ae5 (new changes)
  */
 
 /* Baseer 0.1.0a */
@@ -35,11 +31,7 @@
     TOSTRING(BASEER_VERSION_MINOR) "." \
     TOSTRING(BASEER_VERSION_MICRO)
 
-<<<<<<< HEAD
-#define BASEER_MAX_FILE_SIZE 1024 * 1024 * 4
-=======
 #define BASEER_MAX_FILE_SIZE 1024 * 1024 * 4 /**< Max file size for memory mode */
->>>>>>> 9c46ae5 (new changes)
 #define RETURN_NULL_IF(con) \
     if ((con))              \
     {                       \
@@ -48,8 +40,6 @@
 
 #define BASEER_BASE_OFFSET(b, i, sf) (b) + ((i) * (sf))
 
-
-<<<<<<< HEAD
 #define COLOR_RESET      "\033[0m"
 #define COLOR_GREEN      "\033[1;32m"
 #define COLOR_BLUE       "\033[1;34m"
@@ -61,32 +51,19 @@
 #define BLOCK_LENGTH 40
 
 
-
-
-typedef struct baseer_target_t baseer_target_t;
-typedef bool (*baseer_callback_t)(baseer_target_t *, void *arg);
-
-=======
 /**
  * @brief Struct representing command-line inputs
  */
->>>>>>> 9c46ae5 (new changes)
 typedef struct {
     int* argc;
     char**args;
 } inputs;
 
-<<<<<<< HEAD
-struct baseer_target_t
-{
-    unsigned int size;
-    void *block;
-};
+typedef enum {
+    STREAM,
+    MEMORY
+} file_mode;
 
-baseer_target_t *baseer_open(char *file_path);
-void baseer_close(baseer_target_t *target);
-void baseer_print(baseer_target_t *target);
-=======
 /**
  * @brief Struct representing a file target in memory or streaming mode.
  */
@@ -125,7 +102,7 @@ baseer_target_t *baseer_open_file(char *file_path);
  * 
  * @param target Pointer to the file target
  */
-void baseer_close(baseer_target_t *target);
+void baseer_close(baseer_target_t *target, int mode);
 
 /**
  * @brief Print a hex dump of the file target
@@ -142,7 +119,6 @@ void baseer_print(baseer_target_t *target);
  * @param arg Additional argument
  * @return true on success, false on failure
  */
->>>>>>> 9c46ae5 (new changes)
 bool baseer_execute(baseer_target_t *target, baseer_callback_t callback, void *arg);
 
 #endif

@@ -1,32 +1,15 @@
 /**
  * @file baseer.c
-<<<<<<< HEAD
- * @brief Core 
- */
-=======
  * @brief Core file operations for Baseer.
  * 
  * Supports memory and streaming modes, execution of analysis tools,
  */
 
 
->>>>>>> 9c46ae5 (new changes)
 /* Baseer 0.1.0a */
 
 #include "baseer.h"
 
-<<<<<<< HEAD
-baseer_target_t *baseer_open(char *file_path)
-{
-    baseer_target_t *target = NULL;
-
-    struct stat info;
-    unsigned int read;
-    FILE *handler = NULL;
-
-    RETURN_NULL_IF(file_path == NULL)
-
-=======
 
 /* =================== Memory Mode =================== */
 baseer_target_t *baseer_open_memory(char *file_path)
@@ -38,7 +21,6 @@ baseer_target_t *baseer_open_memory(char *file_path)
 
     RETURN_NULL_IF(file_path == NULL)
     struct stat info;
->>>>>>> 9c46ae5 (new changes)
 
     RETURN_NULL_IF(stat(file_path, &info) != 0)
     RETURN_NULL_IF((info.st_size == 0) || (info.st_size > BASEER_MAX_FILE_SIZE))
@@ -62,11 +44,6 @@ baseer_target_t *baseer_open_memory(char *file_path)
         return NULL;
     }
 
-<<<<<<< HEAD
-    read = fread(target->block,
-                 target->size, 1, handler);
-    // TODO: read condition
-=======
     read = fread(target->block, 1, target->size, handler);
     // TODO: read condition ->
     if (read != target->size)
@@ -77,24 +54,10 @@ baseer_target_t *baseer_open_memory(char *file_path)
         return NULL;
     }
     
->>>>>>> 9c46ae5 (new changes)
     fclose(handler);
     return target;
 }
 
-<<<<<<< HEAD
-void baseer_close(baseer_target_t *target)
-{
-    if (target)
-    {
-        target->size = 0;
-        if (target->block)
-            free(target->block);
-        free(target);
-    }
-}
-
-=======
 
 /* =================== Streaming Mode =================== */
 baseer_target_t *baseer_open_file(char *file_path)
@@ -115,18 +78,20 @@ baseer_target_t *baseer_open_file(char *file_path)
 }
 
 /* =================== Closeing =================== */
-void baseer_close(baseer_target_t *target)
+void baseer_close(baseer_target_t *target, int mode)
 {
     if(!target) return;
-    target->size = 0;
-    if(target->block) {
-        // If block is a FILE pointer, close it; otherwise, free the memory
-        FILE *handler = (FILE*)target->block;
-        if(handler) {
-            fclose(handler);
-            handler = NULL;
-        }else {
+
+    if(mode == MEMORY) {
+        target->size = 0;
+        if(target->block) {
             free(target->block);
+            target->block = NULL;
+        }
+    }else if(mode == STREAM){
+        target->size = 0;
+        if(target->block) {
+            fclose((FILE*)target->block);
             target->block = NULL;
         }
     }
@@ -134,7 +99,6 @@ void baseer_close(baseer_target_t *target)
 }
 
 /* =================== Printing =================== */
->>>>>>> 9c46ae5 (new changes)
 void baseer_print(baseer_target_t *target)
 {
     if (target == NULL)
@@ -150,17 +114,10 @@ void baseer_print(baseer_target_t *target)
     printf("\n\n");
 }
 
-<<<<<<< HEAD
-bool baseer_execute(baseer_target_t *target, baseer_callback_t callback, void *arg)
-{
-    if (target == NULL || callback == NULL)
-        return false;
-=======
 /* =================== Executing =================== */
 bool baseer_execute(baseer_target_t *target, baseer_callback_t callback, void *arg)
 {
     if (target == NULL || callback == NULL) return false;
->>>>>>> 9c46ae5 (new changes)
 
     // TODO: check for failure
     if(!callback(target, arg)) {

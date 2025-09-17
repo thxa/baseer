@@ -59,6 +59,7 @@ void parse_cmd(context *ctx){
 	if(!flag){
 		printf("unkonw command\n");
 		print_helpCMD();
+		ctx->do_wait = false;
 	}
 
 }
@@ -397,6 +398,7 @@ void init_values(bparser *target, context *ctx){
 	}	
 	if(ehdr->e_ident[EI_CLASS] == ELFCLASS32){
 		ctx->arch = 32;
+		ctx->entry = ctx->entry & 0xffffffff;
 	}else{
 		Elf64_Shdr *shdr = target->source.mem.data + ehdr->e_shoff;
 		if(ehdr->e_shnum != 0){
@@ -411,7 +413,7 @@ void init_values(bparser *target, context *ctx){
 						if(ELF64_ST_TYPE(syms[j].st_info) == STT_FUNC && syms[j].st_shndx != SHN_UNDEF){
 							char *name = strtab + syms[j].st_name;
 							if(*name){
-								printf("function name: %s addr: 0x%llx\n",name,syms[j].st_value);
+								//printf("function name: %s addr: 0x%llx\n",name,syms[j].st_value);
 							}
 						}
 					}
@@ -439,6 +441,8 @@ void destroy_all(context *ctx){
 }
 bool b_debugger(bparser *target, void *arg){
 	setbuf(stdout, NULL);
+	int argc = *((inputs*)arg) -> argc;
+	char** args = ((inputs*)arg) -> args;
 	context *ctx  = malloc(sizeof(context));
 	memset(ctx, 0, sizeof(ctx));
 	int stats = 0;
@@ -447,31 +451,15 @@ bool b_debugger(bparser *target, void *arg){
 		printf("faild to fork");
 		return false;
 	}else if (pid == 0) {
-		int fd = memfd_create("in_memory_elf", MFD_CLOEXEC);
-		if (fd == -1) {
-			perror("memfd_create failed");
-			return -1;
-		}
-
-		ssize_t written = write(fd, target->source.mem.data,  target->source.mem.size);
-		if (written == -1 || (size_t)written != target->source.mem.size) {
-			perror("write failed");
-			close(fd);
-			return -1;
-		}
+		char *argv[] = {args[1], NULL};
+		char *envp[] = {NULL};
 
 		if (ptrace(PTRACE_TRACEME, 0, NULL, NULL) == -1) {
 			perror("PTRACE_TRACEME failed");
-			close(fd);
 			return -1;
 		}
-
-		char *argv[] = {"in_memory_elf", NULL};
-		char *envp[] = {NULL};
-
-		if (fexecve(fd, argv, envp) == -1) {
-			perror("fexecve failed");
-			close(fd);
+		if (execve(args[1], argv, envp) == -1) {
+			perror("execve failed");
 			exit(1);
 		}
 	}else {
@@ -479,17 +467,10 @@ bool b_debugger(bparser *target, void *arg){
 
 		ctx->pid = pid;
 		init_values(target, ctx);
-		uint64_t entry= 0;
-		if(ctx->arch == 32){
-			 entry = ctx->entry & 0xffffffff;
-		}else {
-			entry = ctx->entry ;
-		
-		}
 
-		unsigned long orig = ptrace(PTRACE_PEEKTEXT, ctx->pid, (void*)entry, NULL);
+		unsigned long orig = ptrace(PTRACE_PEEKTEXT, ctx->pid, (void*)ctx->entry, NULL);
 		long trap = (orig & ~0xff) | 0xCC;
-		if (ptrace(PTRACE_POKETEXT, ctx->pid, (void*)entry, (void*)trap) == -1) {
+		if (ptrace(PTRACE_POKETEXT, ctx->pid, (void*)ctx->entry, (void*)trap) == -1) {
 			perror("PTRACE_POKETEXT");
 			return false;
 		}
@@ -500,10 +481,10 @@ bool b_debugger(bparser *target, void *arg){
 			if(ptrace(PTRACE_GETREGS, ctx->pid, NULL, &ctx->regs) == -1){
 				printf("failed to read regs\n");
 			}
-			if(ptrace(PTRACE_POKETEXT, ctx->pid, (void*)entry, (void*)orig)== -1){
+			if(ptrace(PTRACE_POKETEXT, ctx->pid, (void*)ctx->entry, (void*)orig)== -1){
 				printf("failed to restore entry point\n");
 			}
-			ctx->regs.rip = entry;
+			ctx->regs.rip = ctx->entry;
 			ptrace(PTRACE_SETREGS, ctx->pid, NULL, &ctx->regs);
 		}
 

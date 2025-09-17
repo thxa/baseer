@@ -11,6 +11,7 @@ typedef struct bp bp;
 typedef struct sym_list sym_list;
 typedef struct context context;
 typedef struct func_list func_list;
+typedef struct e_FLAGS e_FLAGS;
 typedef bool (*func_callback_t)(context *ctx,void *args);
 typedef struct{
     char *op;
@@ -51,6 +52,10 @@ struct func_list{
     func_callback_t func;
 };
 
+struct e_FLAGS{
+    char *FLAG_NAME;
+    int offset;
+};
 void destroy_bp(bp *bpoint);
 void destroy_all(context *ctx);
 void print_helpCMD();
@@ -62,7 +67,6 @@ bool setBP(context *ctx, void *args);
 bool delBP(context *ctx, void *args);
 bool step_over(context *ctx,void *args);
 bool listBP(context *ctx, void *args);
-bp* findBP(context *ctx, uint64_t rip);
 void restore_all_BP(context *ctx,int opt);
 bool handle_action(context *ctx,void *);
 void parse_cmd(context *ctx);
@@ -76,5 +80,15 @@ static func_list cmds[] = {
     {"q",handle_action},
     {"si",handle_action},
     {"vmmap",handle_action},
+    {"i",handle_action},
+};
+static e_FLAGS flags[] = {
+    {"CF",0},
+    {"PF",2},
+    {"AF",4},
+    {"ZF",6},
+    {"SF",7},
+    {"DF",10},
+    {"OF",11},
 };
 #endif

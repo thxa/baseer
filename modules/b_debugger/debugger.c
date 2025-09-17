@@ -48,7 +48,8 @@ void parse_cmd(context *ctx){
 		args = NULL;
 	}
 	ctx->cmd.op = strdup(op); 
-	for (int i = 0; i< sizeof(cmds)/sizeof(func_list); i++) {
+	uint32_t len = sizeof(cmds)/sizeof(func_list); 
+	for (int i = 0; i< len ; i++) {
 		if(strcmp(ctx->cmd.op,cmds[i].cmd) == 0){
 			flag = cmds[i].func(ctx,(void*)args);
 			break;
@@ -73,10 +74,9 @@ bool handle_action(context *ctx,void *args){
 	if(strcmp(ctx->cmd.op,"q") == 0){
 		ptrace(PTRACE_CONT, ctx->pid, NULL, SIGKILL);
 		destroy_all(ctx);
-		return true;
+		exit(0);
 	}else if (strcmp(ctx->cmd.op,"h") == 0) {
 		print_helpCMD();
-		ctx->do_wait = false;
 		return true;
 	}else if (strcmp(ctx->cmd.op,"vmmap") == 0) {
 		printf("%s\n",ctx->mmaps);
@@ -97,6 +97,14 @@ bool handle_action(context *ctx,void *args){
 		}
 		ctx->do_wait = true;
 		return true;
+	}else if (strcmp(ctx->cmd.op,"i") == 0) {
+		sym_list *sym = ctx->sym;
+		while (sym != NULL) {
+			printf("function %s 0x%llx\n",sym->name,sym->addr);
+			sym = sym->next;
+		}
+		ctx->do_wait = false;
+		return true;
 	}
 
 }
@@ -106,26 +114,15 @@ bool handle_action(context *ctx,void *args){
  *
  */
 void print_helpCMD(){
-	printf("bp     : set breakpoint {ex: bp 0x12354}\n");
-	printf("dp     : delete breakpoint {ex: dp breakpoint_id}\n");
-	printf("lp     : list all breakpoints {ex: lp}\n");
-	printf("si     : take one step execution (step into) {ex: si}\n");
-	printf("so     : take one step execution (step over){ex: so}\n");
-	printf("c      : continue execution {ex: c}\n");
-	printf("h      : display help commands {ex: h}\n");
-	printf("vmmap  : display maps memory {ex: vmmap}\n");
-}
-/**
- * @brief find a breakpoint that program hits. 
- *
- */
-bp* findBP(context *ctx, uint64_t rip) {
-	bp *p = ctx->list->first;
-	while (p != NULL) {
-		if (p->addr == rip - 1) return p;
-		p = p->next;
-	}
-	return NULL;
+	printf("bp    : set breakpoint {ex: bp 0x12354}\n");
+	printf("dp    : delete breakpoint {ex: dp breakpoint_id}\n");
+	printf("lp    : list all breakpoints {ex: lp}\n");
+	printf("si    : take one step execution (step into) {ex: si}\n");
+	printf("so    : take one step execution (step over){ex: so}\n");
+	printf("c     : continue execution {ex: c}\n");
+	printf("h     : display help commands {ex: h}\n");
+	printf("vmmap : display maps memory {ex: vmmap}\n");
+	printf("i     : display function info {ex: i}\n");
 }
 /**
  * @brief delete a breakpoint. 
@@ -254,7 +251,14 @@ bool setBP(context *ctx, void* args){
 void handle_bpoint(context *ctx) {
 	ptrace(PTRACE_GETREGS, ctx->pid, 0, &ctx->regs);
 	bp *b = NULL;
-	b = findBP(ctx, ctx->regs.rip);
+	bp *p = ctx->list->first;
+	while (p != NULL) {
+		if (p->addr == ctx->regs.rip - 1){ 
+			b = p;
+			break;
+		}
+		p = p->next;
+	}
 	if (b == NULL || strcmp(ctx->cmd.op,"si") == 0) {
 		return;
 	}
@@ -344,7 +348,17 @@ void dis_ctx(context *ctx){
 		printf(COLOR_CYAN "\tEBP  " COLOR_RESET "=> " COLOR_RESET "0x%llx\n", ctx->regs.rbp);
 		printf(COLOR_CYAN "\tEIP  " COLOR_RESET "=> " COLOR_RESET "0x%llx\n", ctx->regs.rip);
 	}
-
+	int len =sizeof(flags)/sizeof(e_FLAGS) ;
+	printf("FLAGS: ");
+	for (int i = 0 ; i<len ; i++) {
+		int is_set = (ctx->regs.eflags >> flags[i].offset) & 1;
+		if(is_set){
+			printf(COLOR_GREEN  "%s " COLOR_RESET, flags[i].FLAG_NAME);
+		}else {
+			printf(COLOR_RED    "%s " COLOR_RESET, flags[i].FLAG_NAME);
+		}
+	}
+	printf("\n");
 	printf(COLOR_YELLOW "------------- disass ----------------\n" COLOR_RESET);
 	for(int i = 0; i < 20; i++) {
 		long inst = ptrace(PTRACE_PEEKDATA, ctx->pid, (void*)(ctx->regs.rip + i*8), NULL);
@@ -382,6 +396,7 @@ void init_values(bparser *target, context *ctx){
 	bp_list *list = malloc(sizeof(bp_list));
 	char mmaps[512]= {0};
 	ctx->do_wait = false;
+	ctx->sym = NULL;
 	memset(list, 0, sizeof(bp_list));
 	list->counter = 0;
 	ctx->list = list;
@@ -399,7 +414,49 @@ void init_values(bparser *target, context *ctx){
 	if(ehdr->e_ident[EI_CLASS] == ELFCLASS32){
 		ctx->arch = 32;
 		ctx->entry = ctx->entry & 0xffffffff;
+		Elf32_Ehdr *ehdr = (Elf32_Ehdr*)target->source.mem.data;
+		Elf32_Shdr *shdr = target->source.mem.data + ehdr->e_shoff;
+
+		if (ehdr->e_shnum != 0) {
+			char *shstrtab = (char*)target->source.mem.data + shdr[ehdr->e_shstrndx].sh_offset;
+
+			for (int i = 0; i < ehdr->e_shnum; i++) {
+				if (shdr[i].sh_type == SHT_SYMTAB) {
+					Elf32_Sym *syms = target->source.mem.data + shdr[i].sh_offset;
+					Elf32_Shdr *strtab_hdr = &shdr[shdr[i].sh_link];
+					char *strtab = (char*)target->source.mem.data + strtab_hdr->sh_offset;
+
+					int num = shdr[i].sh_size / shdr[i].sh_entsize;
+					for (int j = 0; j < num; j++) {
+						if (ELF32_ST_TYPE(syms[j].st_info) == STT_FUNC &&
+							syms[j].st_shndx != SHN_UNDEF) {
+
+							char *name = strtab + syms[j].st_name;
+							if (*name) {
+								sym_list *sym = malloc(sizeof(sym_list));
+								printf("test\n");
+
+								sym->name = strdup(name);
+								sym->addr = ctx->base + syms[j].st_value;
+								sym->next = NULL;
+
+								if (ctx->sym == NULL) {
+									ctx->sym = sym;
+								} else {
+									sym_list *last = ctx->sym;
+									while (last->next != NULL) {
+										last = last->next;
+									}
+									last->next = sym;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 	}else{
+		ctx->arch = 64;
 		Elf64_Shdr *shdr = target->source.mem.data + ehdr->e_shoff;
 		if(ehdr->e_shnum != 0){
 			char *shstrtab = target->source.mem.data + shdr[ehdr->e_shstrndx].sh_offset;
@@ -413,14 +470,25 @@ void init_values(bparser *target, context *ctx){
 						if(ELF64_ST_TYPE(syms[j].st_info) == STT_FUNC && syms[j].st_shndx != SHN_UNDEF){
 							char *name = strtab + syms[j].st_name;
 							if(*name){
-								//printf("function name: %s addr: 0x%llx\n",name,syms[j].st_value);
+								sym_list *sym = malloc(sizeof(sym_list));
+								sym->name = strdup(name);
+								sym->addr = (ctx->base + syms[j].st_value);
+								sym->next = NULL;
+								if(ctx->sym == NULL){
+									ctx->sym = sym;
+								}else {
+									sym_list *last = ctx->sym;
+									while ( last->next != NULL) {
+										last = last->next;
+									}
+									last->next = sym;
+								}
 							}
 						}
 					}
 				}
 			}
 		}
-		ctx->arch = 64;
 	}
 }
 void destroy_bp(bp *bpoint){

@@ -434,7 +434,6 @@ void init_values(bparser *target, context *ctx){
 							char *name = strtab + syms[j].st_name;
 							if (*name) {
 								sym_list *sym = malloc(sizeof(sym_list));
-								printf("test\n");
 
 								sym->name = strdup(name);
 								sym->addr = ctx->base + syms[j].st_value;
@@ -520,13 +519,12 @@ bool b_debugger(bparser *target, void *arg){
 		return false;
 	}else if (pid == 0) {
 		char *argv[] = {args[1], NULL};
-		char *envp[] = {NULL};
 
 		if (ptrace(PTRACE_TRACEME, 0, NULL, NULL) == -1) {
 			perror("PTRACE_TRACEME failed");
 			return -1;
 		}
-		if (execve(args[1], argv, envp) == -1) {
+		if (execve(args[1], argv, NULL) == -1) {
 			perror("execve failed");
 			exit(1);
 		}

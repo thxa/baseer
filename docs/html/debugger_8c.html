@@ -96,11 +96,8 @@ $(function(){initNavTree('debugger_8c.html','',''); });
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &lt;elf.h&gt;</code><br />
 <code>#include &lt;stdio.h&gt;</code><br />
-<<<<<<< HEAD
+<code>#include &lt;ctype.h&gt;</code><br />
 <code>#include &quot;udis86.h&quot;</code><br />
-=======
-<code>#include &lt;udis86.h&gt;</code><br />
->>>>>>> 9c46ae5 (new changes)
 <code>#include &lt;stdlib.h&gt;</code><br />
 <code>#include &lt;unistd.h&gt;</code><br />
 <code>#include &lt;fcntl.h&gt;</code><br />
@@ -112,25 +109,29 @@ $(function(){initNavTree('debugger_8c.html','',''); });
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a44cadf6b6d2996703095c55c79d96195" id="r_a44cadf6b6d2996703095c55c79d96195"><td class="memItemLeft" align="right" valign="top"><a id="a44cadf6b6d2996703095c55c79d96195" name="a44cadf6b6d2996703095c55c79d96195"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>parse_cmd</b> (<a class="el" href="structcontext.html">context</a> *ctx)</td></tr>
+<tr class="memitem:a44cadf6b6d2996703095c55c79d96195" id="r_a44cadf6b6d2996703095c55c79d96195"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a44cadf6b6d2996703095c55c79d96195">parse_cmd</a> (<a class="el" href="structcontext.html">context</a> *ctx)</td></tr>
+<tr class="memdesc:a44cadf6b6d2996703095c55c79d96195"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function to handle user commands.  <br /></td></tr>
+<tr class="memitem:a0cf63db5ac47b62a00e91d611a0fd07e" id="r_a0cf63db5ac47b62a00e91d611a0fd07e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0cf63db5ac47b62a00e91d611a0fd07e">handle_action</a> (<a class="el" href="structcontext.html">context</a> *ctx, void *args)</td></tr>
+<tr class="memdesc:a0cf63db5ac47b62a00e91d611a0fd07e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function to handle command that don't need a function .  <br /></td></tr>
 <tr class="memitem:a54938d2b6415efb1e55083cb4333614c" id="r_a54938d2b6415efb1e55083cb4333614c"><td class="memItemLeft" align="right" valign="top"><a id="a54938d2b6415efb1e55083cb4333614c" name="a54938d2b6415efb1e55083cb4333614c"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>print_helpCMD</b> ()</td></tr>
+<tr class="memdesc:a54938d2b6415efb1e55083cb4333614c"><td class="mdescLeft">&#160;</td><td class="mdescRight">print the help commands . <br /></td></tr>
 <tr class="memitem:aa373d503c01b9fcae5d45f970fabf8b6" id="r_aa373d503c01b9fcae5d45f970fabf8b6"><td class="memItemLeft" align="right" valign="top"><a id="aa373d503c01b9fcae5d45f970fabf8b6" name="aa373d503c01b9fcae5d45f970fabf8b6"></a>
 <a class="el" href="structbp.html">bp</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>findBP</b> (<a class="el" href="structcontext.html">context</a> *ctx, uint64_t rip)</td></tr>
-<tr class="memitem:a388c3cf6911670bd00066aca3ad0f899" id="r_a388c3cf6911670bd00066aca3ad0f899"><td class="memItemLeft" align="right" valign="top"><a id="a388c3cf6911670bd00066aca3ad0f899" name="a388c3cf6911670bd00066aca3ad0f899"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>delBP</b> (<a class="el" href="structcontext.html">context</a> *ctx, uint32_t id)</td></tr>
-<<<<<<< HEAD
-<tr class="memitem:aa3e7b9dee3cc6d8887de4f4794046176" id="r_aa3e7b9dee3cc6d8887de4f4794046176"><td class="memItemLeft" align="right" valign="top"><a id="aa3e7b9dee3cc6d8887de4f4794046176" name="aa3e7b9dee3cc6d8887de4f4794046176"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>step_over</b> (<a class="el" href="structcontext.html">context</a> *ctx)</td></tr>
-=======
->>>>>>> 9c46ae5 (new changes)
-<tr class="memitem:abc8c7f6b41b81522c6bc905be2023990" id="r_abc8c7f6b41b81522c6bc905be2023990"><td class="memItemLeft" align="right" valign="top"><a id="abc8c7f6b41b81522c6bc905be2023990" name="abc8c7f6b41b81522c6bc905be2023990"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>setBP</b> (<a class="el" href="structcontext.html">context</a> *ctx, uint64_t addr)</td></tr>
+<tr class="memdesc:aa373d503c01b9fcae5d45f970fabf8b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">find a breakpoint that program hits. <br /></td></tr>
+<tr class="memitem:aa368ce0ff990876c9ea6611125d01cd5" id="r_aa368ce0ff990876c9ea6611125d01cd5"><td class="memItemLeft" align="right" valign="top"><a id="aa368ce0ff990876c9ea6611125d01cd5" name="aa368ce0ff990876c9ea6611125d01cd5"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>delBP</b> (<a class="el" href="structcontext.html">context</a> *ctx, void *args)</td></tr>
+<tr class="memdesc:aa368ce0ff990876c9ea6611125d01cd5"><td class="mdescLeft">&#160;</td><td class="mdescRight">delete a breakpoint. <br /></td></tr>
+<tr class="memitem:a0343f9c7a1e9135576e29c48c083683e" id="r_a0343f9c7a1e9135576e29c48c083683e"><td class="memItemLeft" align="right" valign="top"><a id="a0343f9c7a1e9135576e29c48c083683e" name="a0343f9c7a1e9135576e29c48c083683e"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>step_over</b> (<a class="el" href="structcontext.html">context</a> *ctx, void *args)</td></tr>
+<tr class="memdesc:a0343f9c7a1e9135576e29c48c083683e"><td class="mdescLeft">&#160;</td><td class="mdescRight">function that do step over a function call. <br /></td></tr>
+<tr class="memitem:a46c28deefe27e450fe35881d5319bf93" id="r_a46c28deefe27e450fe35881d5319bf93"><td class="memItemLeft" align="right" valign="top"><a id="a46c28deefe27e450fe35881d5319bf93" name="a46c28deefe27e450fe35881d5319bf93"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>setBP</b> (<a class="el" href="structcontext.html">context</a> *ctx, void *args)</td></tr>
+<tr class="memdesc:a46c28deefe27e450fe35881d5319bf93"><td class="mdescLeft">&#160;</td><td class="mdescRight">set a breakpoint. <br /></td></tr>
 <tr class="memitem:ac2fdceaf5836ab15d9512b534fa155fb" id="r_ac2fdceaf5836ab15d9512b534fa155fb"><td class="memItemLeft" align="right" valign="top"><a id="ac2fdceaf5836ab15d9512b534fa155fb" name="ac2fdceaf5836ab15d9512b534fa155fb"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>handle_bpoint</b> (<a class="el" href="structcontext.html">context</a> *ctx)</td></tr>
-<tr class="memitem:a843c086948b6247dafbcc4372c49f711" id="r_a843c086948b6247dafbcc4372c49f711"><td class="memItemLeft" align="right" valign="top"><a id="a843c086948b6247dafbcc4372c49f711" name="a843c086948b6247dafbcc4372c49f711"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>listBP</b> (<a class="el" href="structcontext.html">context</a> *ctx)</td></tr>
+<tr class="memitem:a04f49fd9e411d994dbc2c637c4b1e040" id="r_a04f49fd9e411d994dbc2c637c4b1e040"><td class="memItemLeft" align="right" valign="top"><a id="a04f49fd9e411d994dbc2c637c4b1e040" name="a04f49fd9e411d994dbc2c637c4b1e040"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>listBP</b> (<a class="el" href="structcontext.html">context</a> *ctx, void *args)</td></tr>
 <tr class="memitem:a69638fb4119958d602a84508c7305746" id="r_a69638fb4119958d602a84508c7305746"><td class="memItemLeft" align="right" valign="top"><a id="a69638fb4119958d602a84508c7305746" name="a69638fb4119958d602a84508c7305746"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>restore_all_BP</b> (<a class="el" href="structcontext.html">context</a> *ctx, int opt)</td></tr>
 <tr class="memitem:ab98a3865f9bc4aab5e9144e5d603b041" id="r_ab98a3865f9bc4aab5e9144e5d603b041"><td class="memItemLeft" align="right" valign="top"><a id="ab98a3865f9bc4aab5e9144e5d603b041" name="ab98a3865f9bc4aab5e9144e5d603b041"></a>
@@ -146,7 +147,62 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>b_debugger</b> (<a cl
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Functions to handle debugging binary and command logic. </p>
-</div></div><!-- contents -->
+</div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="a0cf63db5ac47b62a00e91d611a0fd07e" name="a0cf63db5ac47b62a00e91d611a0fd07e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0cf63db5ac47b62a00e91d611a0fd07e">&#9670;&#160;</a></span>handle_action()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool handle_action </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcontext.html">context</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *</td>          <td class="paramname"><span class="paramname"><em>args</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Function to handle command that don't need a function . </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ctx</td><td>is the cpu status </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a44cadf6b6d2996703095c55c79d96195" name="a44cadf6b6d2996703095c55c79d96195"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a44cadf6b6d2996703095c55c79d96195">&#9670;&#160;</a></span>parse_cmd()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void parse_cmd </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcontext.html">context</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Function to handle user commands. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ctx</td><td>is the cpu status </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+</div><!-- contents -->
 </div><!-- doc-content -->
 <div id="page-nav" class="page-nav-panel">
 <div id="page-nav-resize-handle"></div>

@@ -1,0 +1,213 @@
+.TH "modules/bx_elf_disasm/bx_elf_disasm.c" 3 "Version 0.1.0" "Baseer" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+modules/bx_elf_disasm/bx_elf_disasm.c \- Functions for disassembling ELF files and printing metadata\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fR#include 'bx_elf_disasm\&.h'\fP
+.br
+
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "bool \fBis_metadata_section\fP (const char *name)"
+.br
+.ti -1c
+.RI "void \fBdump_disasm_elf32_phdr\fP (Elf32_Ehdr *elf, Elf32_Phdr *phdr, \fBbparser\fP *parser)"
+.br
+.RI "Disassembles and prints the program headers of a 32-bit ELF file\&. "
+.ti -1c
+.RI "void \fBdump_disasm_elf64_phdr\fP (Elf64_Ehdr *elf, Elf64_Phdr *phdr, \fBbparser\fP *parser)"
+.br
+.RI "Disassembles and prints the program headers of a 64-bit ELF file\&. "
+.ti -1c
+.RI "void \fBdump_disasm_elf32_shdr\fP (Elf32_Ehdr *elf, Elf32_Shdr *shdrs, \fBbparser\fP *parser)"
+.br
+.RI "Disassemble and print the ELF32 section headers\&. "
+.ti -1c
+.RI "void \fBdump_disasm_elf64_shdr\fP (Elf64_Ehdr *elf, Elf64_Shdr *shdrs, \fBbparser\fP *parser)"
+.br
+.RI "Disassemble and print the ELF64 section headers\&. "
+.ti -1c
+.RI "bool \fBprint_elf_disasm\fP (\fBbparser\fP *parser, void *args)"
+.br
+.RI "Print ELF file disassembly and metadata\&. "
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "const char * \fBmetadata_sections\fP []"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Functions for disassembling ELF files and printing metadata\&. 
+
+
+.SH "Function Documentation"
+.PP 
+.SS "void dump_disasm_elf32_phdr (Elf32_Ehdr * elf, Elf32_Phdr * phdr, \fBbparser\fP * parser)"
+
+.PP
+Disassembles and prints the program headers of a 32-bit ELF file\&. This function iterates through all program headers in a 32-bit ELF file, prints their metadata (type, flags, addresses, sizes), and optionally disassembles the binary contents of loadable segments using udis86\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIelf\fP Pointer to the ELF header structure (Elf32_Ehdr)\&. 
+.br
+\fIphdr\fP Pointer to the first program header (array of Elf32_Phdr)\&. 
+.br
+\fIparser\fP Pointer to the Baseer parser object used for reading file contents\&.
+.RE
+.PP
+.IP "\(bu" 2
+Prints program header table with columns: ID, Type, Flags, Offset, VirtAddr, PhysAddr, FileSz, MemSz, Align\&.
+.IP "\(bu" 2
+Highlights special segments:
+.IP "  \(bu" 4
+PT_INTERP: prints interpreter path\&.
+.IP "  \(bu" 4
+PT_DYNAMIC: marks the file as dynamically linked\&.
+.PP
+
+.IP "\(bu" 2
+If a program header contains data (\fRp_filesz > 0\fP), its content is read and disassembled instruction by instruction until either the end of the segment or a \fRret\fP instruction is encountered\&.
+.PP
+
+.PP
+\fBNote\fP
+.RS 4
+Only supports EM_386 and EM_X86_64 architectures at the moment\&. 
+.RE
+.PP
+\fBWarning\fP
+.RS 4
+Stops disassembly early when encountering \fRret\fP (\fRUD_Iret\fP)\&. 
+.RE
+.PP
+
+.SS "void dump_disasm_elf32_shdr (Elf32_Ehdr * elf, Elf32_Shdr * shdrs, \fBbparser\fP * parser)"
+
+.PP
+Disassemble and print the ELF32 section headers\&. Iterates over all section headers in a 32-bit ELF file\&. Prints metadata (name, type, flags, address, size, etc\&.) and disassembles machine code sections using udis86\&. Metadata sections (e\&.g\&., \&.rela\&.dyn, \&.interp) are identified and not disassembled\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIelf\fP Pointer to the ELF32 header\&. 
+.br
+\fIshdrs\fP Pointer to the array of ELF32 section headers\&. 
+.br
+\fIparser\fP Pointer to a bparser structure for reading binary data\&. 
+.RE
+.PP
+
+.SS "void dump_disasm_elf64_phdr (Elf64_Ehdr * elf, Elf64_Phdr * phdr, \fBbparser\fP * parser)"
+
+.PP
+Disassembles and prints the program headers of a 64-bit ELF file\&. This function iterates through all program headers in a 64-bit ELF file, prints their metadata (type, flags, addresses, sizes), and optionally disassembles the binary contents of loadable segments using udis86\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIelf\fP Pointer to the ELF header structure (Elf64_Ehdr)\&. 
+.br
+\fIphdr\fP Pointer to the first program header (array of Elf64_Phdr)\&. 
+.br
+\fIparser\fP Pointer to the Baseer parser object used for reading file contents\&.
+.RE
+.PP
+.IP "\(bu" 2
+Prints program header table with columns: ID, Type, Flags, Offset, VirtAddr, PhysAddr, FileSz, MemSz, Align\&.
+.IP "\(bu" 2
+Highlights special segments:
+.IP "  \(bu" 4
+PT_INTERP: prints interpreter path\&.
+.IP "  \(bu" 4
+PT_DYNAMIC: marks the file as dynamically linked\&.
+.PP
+
+.IP "\(bu" 2
+If a program header contains data (\fRp_filesz > 0\fP), its content is read and disassembled instruction by instruction until either the end of the segment or a \fRret\fP instruction is encountered\&.
+.PP
+
+.PP
+\fBNote\fP
+.RS 4
+Only supports EM_386 and EM_X86_64 architectures at the moment\&. 
+.RE
+.PP
+\fBWarning\fP
+.RS 4
+Stops disassembly early when encountering \fRret\fP (\fRUD_Iret\fP)\&. 
+.RE
+.PP
+
+.SS "void dump_disasm_elf64_shdr (Elf64_Ehdr * elf, Elf64_Shdr * shdrs, \fBbparser\fP * parser)"
+
+.PP
+Disassemble and print the ELF64 section headers\&. Iterates over all section headers in a 64-bit ELF file\&. Prints metadata (name, type, flags, address, size, etc\&.) and disassembles machine code sections using udis86\&. Metadata sections (e\&.g\&., \&.rela\&.dyn, \&.interp) are identified and not disassembled\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIelf\fP Pointer to the ELF64 header\&. 
+.br
+\fIshdrs\fP Pointer to the array of ELF64 section headers\&. 
+.br
+\fIparser\fP Pointer to a bparser structure for reading binary data\&. 
+.RE
+.PP
+
+.SS "bool print_elf_disasm (\fBbparser\fP * parser, void * args)"
+
+.PP
+Print ELF file disassembly and metadata\&. This function analyzes an ELF file in memory using a bparser and prints key information including endianness, class (32-bit or 64-bit), entry point, section headers, program headers, file type, and machine type\&. It calls the appropriate ELF32 or ELF64 section and program header disassembly functions\&. Only x86 (32-bit) and x86_64 (64-bit) architectures are supported\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIparser\fP Pointer to a bparser structure containing the ELF file in memory\&. 
+.br
+\fIargs\fP Optional arguments (currently unused)\&.
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+true if the ELF file was successfully analyzed and disassembled; false if the ELF class or machine type is unsupported or unknown\&. 
+.RE
+.PP
+
+.SH "Variable Documentation"
+.PP 
+.SS "const char* metadata_sections[]"
+\fBInitial value:\fP
+.nf
+= {
+    "\&.rela\&.dyn",
+    "\&.rela\&.plt",
+    "\&.dynsym",
+    "\&.dynstr",
+    "\&.eh_frame",
+    "\&.eh_frame_hdr",
+    "\&.note\&.gnu\&.property",
+    "\&.note\&.gnu\&.build\-id",
+    "\&.comment",
+    "\&.gnu\&.version",
+    "\&.interp",
+    "\&.gnu\&.hash",
+    "\&.gnu\&.version_r",
+    NULL
+}
+.PP
+.fi
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Baseer from the source code\&.

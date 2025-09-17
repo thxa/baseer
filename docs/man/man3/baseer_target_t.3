@@ -2,10 +2,13 @@
 .ad l
 .nh
 .SH NAME
-baseer_target_t
+baseer_target_t \- Struct representing a file target in memory or streaming mode\&.  
+
 .SH SYNOPSIS
 .br
 .PP
+.PP
+\fR#include <baseer\&.h>\fP
 .SS "Public Attributes"
 
 .in +1c
@@ -16,6 +19,15 @@ baseer_target_t
 .RI "void * \fBblock\fP"
 .br
 .in -1c
+.SH "Detailed Description"
+.PP 
+Struct representing a file target in memory or streaming mode\&. 
+.SH "Member Data Documentation"
+.PP 
+.SS "void* baseer_target_t::block"
+Memory block or FILE* cast 
+.SS "unsigned int baseer_target_t::size"
+File size in bytes 
 
 .SH "Author"
 .PP 

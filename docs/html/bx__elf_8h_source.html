@@ -91,29 +91,24 @@ $(function(){initNavTree('bx__elf_8h_source.html','',''); });
   <div class="headertitle"><div class="title">bx_elf.h</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#ifndef BX_ELF</span></div>
-<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#define BX_ELF</span></div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &quot;../bparser/bparser.h&quot;</span></div>
+<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#ifndef BX_ELF_H</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#define BX_ELF_H</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &quot;<a class="code" href="bparser_8h.html">../bparser/bparser.h</a>&quot;</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &quot;<a class="code" href="baseer_8h.html">../../baseer.h</a>&quot;</span></div>
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &lt;elf.h&gt;</span></div>
 <div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &lt;string.h&gt;</span></div>
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &quot;../b_debugger/debugger.h&quot;</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &quot;../b_elf_metadata/b_elf_metadata.h&quot;</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &quot;<a class="code" href="b__elf__metadata_8h.html">../b_elf_metadata/b_elf_metadata.h</a>&quot;</span></div>
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &quot;../bx_deElf/bx_deElf.h&quot;</span></div>
-<<<<<<< HEAD
 <div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &quot;../bx_elf_disasm/bx_elf_disasm.h&quot;</span></div>
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
 <div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="keywordtype">bool</span> bx_elf(<a class="code hl_struct" href="structbparser.html">bparser</a>* parser, <span class="keywordtype">void</span> *arg);</div>
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#endif </span></div>
-=======
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span> </div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="keywordtype">bool</span> bx_elf(<a class="code hl_struct" href="structbparser.html">bparser</a>* parser, <span class="keywordtype">void</span> *arg);</div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#endif </span></div>
->>>>>>> 9c46ae5 (new changes)
-<div class="ttc" id="abaseer_8h_html"><div class="ttname"><a href="baseer_8h.html">baseer.h</a></div><div class="ttdoc">Core function.</div></div>
-<div class="ttc" id="astructbparser_html"><div class="ttname"><a href="structbparser.html">bparser</a></div><div class="ttdef"><b>Definition</b> bparser.h:19</div></div>
+<div class="ttc" id="ab__elf__metadata_8h_html"><div class="ttname"><a href="b__elf__metadata_8h.html">b_elf_metadata.h</a></div><div class="ttdoc">ELF metadata extraction and printing interface for Baseer.</div></div>
+<div class="ttc" id="abaseer_8h_html"><div class="ttname"><a href="baseer_8h.html">baseer.h</a></div><div class="ttdoc">Core file handling and execution API for Baseer.</div></div>
+<div class="ttc" id="abparser_8h_html"><div class="ttname"><a href="bparser_8h.html">bparser.h</a></div><div class="ttdoc">Binary parser abstraction supporting memory and streaming files.</div></div>
+<div class="ttc" id="astructbparser_html"><div class="ttname"><a href="structbparser.html">bparser</a></div><div class="ttdoc">Parser object.</div><div class="ttdef"><b>Definition</b> bparser.h:35</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->

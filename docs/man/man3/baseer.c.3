@@ -2,7 +2,7 @@
 .ad l
 .nh
 .SH NAME
-baseer.c \- Core\&.  
+baseer.c \- Core file operations for Baseer\&.  
 
 .SH SYNOPSIS
 .br
@@ -14,22 +14,106 @@ baseer.c \- Core\&.
 
 .in +1c
 .ti -1c
-.RI "\fBbaseer_target_t\fP * \fBbaseer_open\fP (char *file_path)"
+.RI "\fBbaseer_target_t\fP * \fBbaseer_open_memory\fP (char *file_path)"
 .br
+.RI "Open a file fully loaded into memory\&. "
 .ti -1c
-.RI "void \fBbaseer_close\fP (\fBbaseer_target_t\fP *target)"
+.RI "\fBbaseer_target_t\fP * \fBbaseer_open_file\fP (char *file_path)"
 .br
+.RI "Open a file in streaming mode (FILE*) without full memory load\&. "
+.ti -1c
+.RI "void \fBbaseer_close\fP (\fBbaseer_target_t\fP *target, int mode)"
+.br
+.RI "Close a file target and free associated resources\&. "
 .ti -1c
 .RI "void \fBbaseer_print\fP (\fBbaseer_target_t\fP *target)"
 .br
+.RI "Print a hex dump of the file target\&. "
 .ti -1c
-.RI "bool \fBbaseer_execute\fP (\fBbaseer_target_t\fP *target, baseer_callback_t callback, void *arg)"
+.RI "bool \fBbaseer_execute\fP (\fBbaseer_target_t\fP *target, \fBbaseer_callback_t\fP callback, void *arg)"
 .br
+.RI "Execute a callback on a file target\&. "
 .in -1c
 .SH "Detailed Description"
 .PP 
-Core\&. 
+Core file operations for Baseer\&. 
 
+Supports memory and streaming modes, execution of analysis tools, 
+.SH "Function Documentation"
+.PP 
+.SS "void baseer_close (\fBbaseer_target_t\fP * target, int mode)"
+
+.PP
+Close a file target and free associated resources\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fItarget\fP Pointer to the file target 
+.RE
+.PP
+
+.SS "bool baseer_execute (\fBbaseer_target_t\fP * target, \fBbaseer_callback_t\fP callback, void * arg)"
+
+.PP
+Execute a callback on a file target\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fItarget\fP Pointer to the file target 
+.br
+\fIcallback\fP Callback function 
+.br
+\fIarg\fP Additional argument 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+true on success, false on failure 
+.RE
+.PP
+
+.SS "\fBbaseer_target_t\fP * baseer_open_file (char * file_path)"
+
+.PP
+Open a file in streaming mode (FILE*) without full memory load\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIfile_path\fP Path to the file 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+Pointer to \fBbaseer_target_t\fP on success, NULL on failure 
+.RE
+.PP
+
+.SS "\fBbaseer_target_t\fP * baseer_open_memory (char * file_path)"
+
+.PP
+Open a file fully loaded into memory\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIfile_path\fP Path to the file 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+Pointer to \fBbaseer_target_t\fP on success, NULL on failure 
+.RE
+.PP
+
+.SS "void baseer_print (\fBbaseer_target_t\fP * target)"
+
+.PP
+Print a hex dump of the file target\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fItarget\fP Pointer to the file target 
+.RE
+.PP
 
 .SH "Author"
 .PP 

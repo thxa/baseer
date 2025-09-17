@@ -1,0 +1,102 @@
+.TH "modules/b_elf_metadata/b_elf_metadata.h" 3 "Version 0.1.0" "Baseer" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+modules/b_elf_metadata/b_elf_metadata.h \- ELF metadata extraction and printing interface for Baseer\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fR#include '\&.\&./bparser/bparser\&.h'\fP
+.br
+\fR#include '\&.\&./\&.\&./baseer\&.h'\fP
+.br
+\fR#include <elf\&.h>\fP
+.br
+\fR#include <string\&.h>\fP
+.br
+\fR#include '\&.\&./bx_elf_utils/bx_elf_utils\&.h'\fP
+.br
+
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "bool \fBprint_meta_data\fP (\fBbparser\fP *parser, void *args)"
+.br
+.RI "Print high-level metadata of an ELF file and dispatch detailed dump functions\&. "
+.in -1c
+.SH "Detailed Description"
+.PP 
+ELF metadata extraction and printing interface for Baseer\&. 
+
+This module provides functions to parse and print metadata from ELF files, including ELF headers, program headers, and section headers\&. It is used within the Baseer binary analysis framework to display detailed ELF information in a structured and colored format\&.
+
+.PP
+The main entry point is \fR\fBprint_meta_data()\fP\fP, which determines the ELF class (32-bit or 64-bit), detects endianness, and invokes the appropriate dump functions for headers and sections\&.
+
+.PP
+\fBNote\fP
+.RS 4
+This module depends on \fRbx_elf_utils\fP for header dumping utilities\&. 
+
+.PP
+Supports both 32bit and 64bit binaries\&.
+.RE
+.PP
+\fBSee also\fP
+.RS 4
+\fBbx_elf_utils\&.h\fP 
+
+.PP
+\fBbparser\&.h\fP 
+.RE
+.PP
+
+.SH "Function Documentation"
+.PP 
+.SS "bool print_meta_data (\fBbparser\fP * parser, void * args)"
+
+.PP
+Print high-level metadata of an ELF file and dispatch detailed dump functions\&. This function reads the ELF identification bytes from the parser source memory to determine:
+.IP "\(bu" 2
+Endianness (Little Endian, Big Endian, or Unknown)
+.IP "\(bu" 2
+ELF class (32-bit or 64-bit)
+.PP
+
+.PP
+Based on the ELF class, it parses the ELF header, program headers, and section headers, then calls the corresponding dump functions:
+.IP "\(bu" 2
+For 32-bit ELF: \fBdump_elf32hdr()\fP, \fBdump_elf32_shdr()\fP, \fBdump_elf32_phdr()\fP
+.IP "\(bu" 2
+For 64-bit ELF: \fBdump_elf64hdr()\fP, \fBdump_elf64_shdr()\fP, \fBdump_elf64_phdr()\fP
+.PP
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIparser\fP Pointer to a \fBbparser\fP structure containing the ELF file in memory\&. 
+.br
+\fIargs\fP Optional arguments (currently unused)\&.
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+true if the ELF class was recognized and processed (32-bit or 64-bit), false otherwise (invalid or unknown ELF class)\&.
+.RE
+.PP
+\fBNote\fP
+.RS 4
+Output is color formatted and written to standard output\&. 
+.RE
+.PP
+\fBSee also\fP
+.RS 4
+\fBdump_elf32hdr()\fP, \fBdump_elf32_shdr()\fP, \fBdump_elf32_phdr()\fP, \fBdump_elf64hdr()\fP, \fBdump_elf64_shdr()\fP, \fBdump_elf64_phdr()\fP 
+.RE
+.PP
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Baseer from the source code\&.

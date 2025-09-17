@@ -1,0 +1,98 @@
+.TH "modules/bparser/bparser.c" 3 "Version 0.1.0" "Baseer" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+modules/bparser/bparser.c \- Binary parser implementation\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fR#include 'bparser\&.h'\fP
+.br
+
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBbparser\fP * \fBbparser_load\fP (\fBbparser_type\fP type, void *data)"
+.br
+.RI "Load a parser object\&. "
+.ti -1c
+.RI "size_t \fBbparser_read\fP (\fBbparser\fP *parser, void *buf, unsigned int pos, size_t size)"
+.br
+.RI "Read bytes from parser\&. "
+.ti -1c
+.RI "bool \fBbparser_apply\fP (\fBbparser\fP *parser, \fBbparser_callback_t\fP callback, void *arg)"
+.br
+.RI "Execute a callback on the parser\&. "
+.in -1c
+.SH "Detailed Description"
+.PP 
+Binary parser implementation\&. 
+
+Supports reading from memory or streaming files, and executing callbacks\&. 
+.SH "Function Documentation"
+.PP 
+.SS "bool bparser_apply (\fBbparser\fP * parser, \fBbparser_callback_t\fP callback, void * arg)"
+
+.PP
+Execute a callback on the parser\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIparser\fP Pointer to parser 
+.br
+\fIcallback\fP Callback function 
+.br
+\fIarg\fP Additional argument 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+true on success, false on failure 
+.RE
+.PP
+
+.SS "\fBbparser\fP * bparser_load (\fBbparser_type\fP type, void * data)"
+
+.PP
+Load a parser object\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fItype\fP Parser type: BPARSER_MEM or BPARSER_FILE 
+.br
+\fIdata\fP Memory block or FILE* pointer 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+Pointer to bparser on success, NULL on failure 
+.RE
+.PP
+
+.SS "size_t bparser_read (\fBbparser\fP * parser, void * buf, unsigned int pos, size_t size)"
+
+.PP
+Read bytes from parser\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIparser\fP Pointer to parser object 
+.br
+\fIbuf\fP Output buffer 
+.br
+\fIpos\fP Offset in memory or file 
+.br
+\fIsize\fP Number of bytes to read 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+Number of bytes successfully read 
+.RE
+.PP
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Baseer from the source code\&.

@@ -11,11 +11,9 @@ modules/b_debugger/debugger.c \- Functions to handle debugging binary and comman
 .br
 \fR#include <stdio\&.h>\fP
 .br
-<<<<<<< HEAD
+\fR#include <ctype\&.h>\fP
+.br
 \fR#include 'udis86\&.h'\fP
-=======
-\fR#include <udis86\&.h>\fP
->>>>>>> 9c46ae5 (new changes)
 .br
 \fR#include <stdlib\&.h>\fP
 .br
@@ -40,29 +38,36 @@ modules/b_debugger/debugger.c \- Functions to handle debugging binary and comman
 .ti -1c
 .RI "void \fBparse_cmd\fP (\fBcontext\fP *ctx)"
 .br
+.RI "Function to handle user commands\&. "
+.ti -1c
+.RI "bool \fBhandle_action\fP (\fBcontext\fP *ctx, void *args)"
+.br
+.RI "Function to handle command that don't need a function \&. "
 .ti -1c
 .RI "void \fBprint_helpCMD\fP ()"
 .br
+.RI "print the help commands \&. "
 .ti -1c
 .RI "\fBbp\fP * \fBfindBP\fP (\fBcontext\fP *ctx, uint64_t rip)"
 .br
+.RI "find a breakpoint that program hits\&. "
 .ti -1c
-.RI "void \fBdelBP\fP (\fBcontext\fP *ctx, uint32_t id)"
+.RI "bool \fBdelBP\fP (\fBcontext\fP *ctx, void *args)"
 .br
+.RI "delete a breakpoint\&. "
 .ti -1c
-<<<<<<< HEAD
-.RI "void \fBstep_over\fP (\fBcontext\fP *ctx)"
+.RI "bool \fBstep_over\fP (\fBcontext\fP *ctx, void *args)"
 .br
+.RI "function that do step over a function call\&. "
 .ti -1c
-=======
->>>>>>> 9c46ae5 (new changes)
-.RI "void \fBsetBP\fP (\fBcontext\fP *ctx, uint64_t addr)"
+.RI "bool \fBsetBP\fP (\fBcontext\fP *ctx, void *args)"
 .br
+.RI "set a breakpoint\&. "
 .ti -1c
 .RI "void \fBhandle_bpoint\fP (\fBcontext\fP *ctx)"
 .br
 .ti -1c
-.RI "void \fBlistBP\fP (\fBcontext\fP *ctx)"
+.RI "bool \fBlistBP\fP (\fBcontext\fP *ctx, void *args)"
 .br
 .ti -1c
 .RI "void \fBrestore_all_BP\fP (\fBcontext\fP *ctx, int opt)"
@@ -87,6 +92,30 @@ modules/b_debugger/debugger.c \- Functions to handle debugging binary and comman
 .PP 
 Functions to handle debugging binary and command logic\&. 
 
+
+.SH "Function Documentation"
+.PP 
+.SS "bool handle_action (\fBcontext\fP * ctx, void * args)"
+
+.PP
+Function to handle command that don't need a function \&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIctx\fP is the cpu status 
+.RE
+.PP
+
+.SS "void parse_cmd (\fBcontext\fP * ctx)"
+
+.PP
+Function to handle user commands\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIctx\fP is the cpu status 
+.RE
+.PP
 
 .SH "Author"
 .PP 

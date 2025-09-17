@@ -92,7 +92,7 @@ $(function(){initNavTree('baseer_8h.html','',''); });
 </div><!--header-->
 <div class="contents">
 
-<p>Core function.  
+<p>Core file handling and execution API for Baseer.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &lt;stdio.h&gt;</code><br />
 <code>#include &lt;stdlib.h&gt;</code><br />
@@ -107,7 +107,9 @@ $(function(){initNavTree('baseer_8h.html','',''); });
 <tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:inputs" id="r_inputs"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structinputs.html">inputs</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Struct representing command-line inputs.  <a href="structinputs.html#details">More...</a><br /></td></tr>
 <tr class="memitem:baseer_5Ftarget_5Ft" id="r_baseer_5Ftarget_5Ft"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structbaseer__target__t.html">baseer_target_t</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Struct representing a file target in memory or streaming mode.  <a href="structbaseer__target__t.html#details">More...</a><br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-define-members" class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
@@ -120,11 +122,9 @@ Macros</h2></td></tr>
 <tr class="memitem:a6df1d22fb5f09eccc23b9f399670cfd7" id="r_a6df1d22fb5f09eccc23b9f399670cfd7"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6df1d22fb5f09eccc23b9f399670cfd7">STRINGIFY</a>(x)</td></tr>
 <tr class="memitem:a9063e80f8777300c93afde6e6f4c9cea" id="r_a9063e80f8777300c93afde6e6f4c9cea"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9063e80f8777300c93afde6e6f4c9cea">TOSTRING</a>(x)</td></tr>
 <tr class="memitem:aa69821511ee6d0207ca409db244ccb38" id="r_aa69821511ee6d0207ca409db244ccb38"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa69821511ee6d0207ca409db244ccb38">BASEER_VERSION</a></td></tr>
-<tr class="memitem:af4b41731c799aea6025edfd36ffbce8d" id="r_af4b41731c799aea6025edfd36ffbce8d"><td class="memItemLeft" align="right" valign="top"><a id="af4b41731c799aea6025edfd36ffbce8d" name="af4b41731c799aea6025edfd36ffbce8d"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>BASEER_MAX_FILE_SIZE</b>&#160;&#160;&#160;1024 * 1024 * 4</td></tr>
+<tr class="memitem:af4b41731c799aea6025edfd36ffbce8d" id="r_af4b41731c799aea6025edfd36ffbce8d"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af4b41731c799aea6025edfd36ffbce8d">BASEER_MAX_FILE_SIZE</a>&#160;&#160;&#160;1024 * 1024 * 4</td></tr>
 <tr class="memitem:adea3bb2f4f65095827fcd08f4736e1be" id="r_adea3bb2f4f65095827fcd08f4736e1be"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adea3bb2f4f65095827fcd08f4736e1be">RETURN_NULL_IF</a>(con)</td></tr>
 <tr class="memitem:ad8fa62f850908606457b5e6fc7666b41" id="r_ad8fa62f850908606457b5e6fc7666b41"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad8fa62f850908606457b5e6fc7666b41">BASEER_BASE_OFFSET</a>(b,  i,  sf)</td></tr>
-<<<<<<< HEAD
 <tr class="memitem:a17f760256046df23dd0ab46602f04d02" id="r_a17f760256046df23dd0ab46602f04d02"><td class="memItemLeft" align="right" valign="top"><a id="a17f760256046df23dd0ab46602f04d02" name="a17f760256046df23dd0ab46602f04d02"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>COLOR_RESET</b>&#160;&#160;&#160;&quot;\033[0m&quot;</td></tr>
 <tr class="memitem:afc9149f5de51bd9ac4f5ebbfa153f018" id="r_afc9149f5de51bd9ac4f5ebbfa153f018"><td class="memItemLeft" align="right" valign="top"><a id="afc9149f5de51bd9ac4f5ebbfa153f018" name="afc9149f5de51bd9ac4f5ebbfa153f018"></a>
@@ -142,29 +142,37 @@ Macros</h2></td></tr>
 <tr class="memitem:ad3456ae778ae0e4e9ea04d924cf3e4c8" id="r_ad3456ae778ae0e4e9ea04d924cf3e4c8"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad3456ae778ae0e4e9ea04d924cf3e4c8">COLOR_RAND</a>(i,  c1,  c2)</td></tr>
 <tr class="memitem:a22a79078d4bc53268ab86f316856248f" id="r_a22a79078d4bc53268ab86f316856248f"><td class="memItemLeft" align="right" valign="top"><a id="a22a79078d4bc53268ab86f316856248f" name="a22a79078d4bc53268ab86f316856248f"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>BLOCK_LENGTH</b>&#160;&#160;&#160;40</td></tr>
-=======
->>>>>>> 9c46ae5 (new changes)
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-typedef-members" class="groupheader"><a id="typedef-members" name="typedef-members"></a>
 Typedefs</h2></td></tr>
 <tr class="memitem:af06fab8270684c79b21df5f35f7b6ed0" id="r_af06fab8270684c79b21df5f35f7b6ed0"><td class="memItemLeft" align="right" valign="top"><a id="af06fab8270684c79b21df5f35f7b6ed0" name="af06fab8270684c79b21df5f35f7b6ed0"></a>
 typedef struct baseer_target_t&#160;</td><td class="memItemRight" valign="bottom"><b>baseer_target_t</b></td></tr>
-<tr class="memitem:a026a9e012e9e6b67149c1b8dd7ef6438" id="r_a026a9e012e9e6b67149c1b8dd7ef6438"><td class="memItemLeft" align="right" valign="top"><a id="a026a9e012e9e6b67149c1b8dd7ef6438" name="a026a9e012e9e6b67149c1b8dd7ef6438"></a>
-typedef bool(*&#160;</td><td class="memItemRight" valign="bottom"><b>baseer_callback_t</b>) (<a class="el" href="structbaseer__target__t.html">baseer_target_t</a> *, void *arg)</td></tr>
+<tr class="memdesc:af06fab8270684c79b21df5f35f7b6ed0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Struct representing a file target in memory or streaming mode. <br /></td></tr>
+<tr class="memitem:a026a9e012e9e6b67149c1b8dd7ef6438" id="r_a026a9e012e9e6b67149c1b8dd7ef6438"><td class="memItemLeft" align="right" valign="top">typedef bool(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a026a9e012e9e6b67149c1b8dd7ef6438">baseer_callback_t</a>) (<a class="el" href="structbaseer__target__t.html">baseer_target_t</a> *, void *arg)</td></tr>
+<tr class="memdesc:a026a9e012e9e6b67149c1b8dd7ef6438"><td class="mdescLeft">&#160;</td><td class="mdescRight">Callback function type for file analysis.  <br /></td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-enum-members" class="groupheader"><a id="enum-members" name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:a588666511dde277029c4c5afc30782a6" id="r_a588666511dde277029c4c5afc30782a6"><td class="memItemLeft" align="right" valign="top"><a id="a588666511dde277029c4c5afc30782a6" name="a588666511dde277029c4c5afc30782a6"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><b>file_mode</b> { <b>STREAM</b>
+, <b>MEMORY</b>
+ }</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ad1d0a9b2a8cedbb4e044d5f91f8fbada" id="r_ad1d0a9b2a8cedbb4e044d5f91f8fbada"><td class="memItemLeft" align="right" valign="top"><a id="ad1d0a9b2a8cedbb4e044d5f91f8fbada" name="ad1d0a9b2a8cedbb4e044d5f91f8fbada"></a>
-<a class="el" href="structbaseer__target__t.html">baseer_target_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>baseer_open</b> (char *file_path)</td></tr>
-<tr class="memitem:a6c7d20aa4157fb69030fc25171cdc916" id="r_a6c7d20aa4157fb69030fc25171cdc916"><td class="memItemLeft" align="right" valign="top"><a id="a6c7d20aa4157fb69030fc25171cdc916" name="a6c7d20aa4157fb69030fc25171cdc916"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>baseer_close</b> (<a class="el" href="structbaseer__target__t.html">baseer_target_t</a> *target)</td></tr>
-<tr class="memitem:ab32e495d6af677e7772ccc0d19ad8d5d" id="r_ab32e495d6af677e7772ccc0d19ad8d5d"><td class="memItemLeft" align="right" valign="top"><a id="ab32e495d6af677e7772ccc0d19ad8d5d" name="ab32e495d6af677e7772ccc0d19ad8d5d"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>baseer_print</b> (<a class="el" href="structbaseer__target__t.html">baseer_target_t</a> *target)</td></tr>
-<tr class="memitem:a5df3250b6207c6c70e9e743556d1b5a8" id="r_a5df3250b6207c6c70e9e743556d1b5a8"><td class="memItemLeft" align="right" valign="top"><a id="a5df3250b6207c6c70e9e743556d1b5a8" name="a5df3250b6207c6c70e9e743556d1b5a8"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>baseer_execute</b> (<a class="el" href="structbaseer__target__t.html">baseer_target_t</a> *target, baseer_callback_t callback, void *arg)</td></tr>
+<tr class="memitem:a44d67d593f18c21c6f81bec443a1522c" id="r_a44d67d593f18c21c6f81bec443a1522c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structbaseer__target__t.html">baseer_target_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a44d67d593f18c21c6f81bec443a1522c">baseer_open_memory</a> (char *file_path)</td></tr>
+<tr class="memdesc:a44d67d593f18c21c6f81bec443a1522c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Open a file fully loaded into memory.  <br /></td></tr>
+<tr class="memitem:a239229cb1937549ec6dd31fe189e33aa" id="r_a239229cb1937549ec6dd31fe189e33aa"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structbaseer__target__t.html">baseer_target_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a239229cb1937549ec6dd31fe189e33aa">baseer_open_file</a> (char *file_path)</td></tr>
+<tr class="memdesc:a239229cb1937549ec6dd31fe189e33aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Open a file in streaming mode (FILE*) without full memory load.  <br /></td></tr>
+<tr class="memitem:a4f7d25d89526392b9d90bb5b0bc5f4d4" id="r_a4f7d25d89526392b9d90bb5b0bc5f4d4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4f7d25d89526392b9d90bb5b0bc5f4d4">baseer_close</a> (<a class="el" href="structbaseer__target__t.html">baseer_target_t</a> *target, int mode)</td></tr>
+<tr class="memdesc:a4f7d25d89526392b9d90bb5b0bc5f4d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Close a file target and free associated resources.  <br /></td></tr>
+<tr class="memitem:ab32e495d6af677e7772ccc0d19ad8d5d" id="r_ab32e495d6af677e7772ccc0d19ad8d5d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab32e495d6af677e7772ccc0d19ad8d5d">baseer_print</a> (<a class="el" href="structbaseer__target__t.html">baseer_target_t</a> *target)</td></tr>
+<tr class="memdesc:ab32e495d6af677e7772ccc0d19ad8d5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Print a hex dump of the file target.  <br /></td></tr>
+<tr class="memitem:a5df3250b6207c6c70e9e743556d1b5a8" id="r_a5df3250b6207c6c70e9e743556d1b5a8"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5df3250b6207c6c70e9e743556d1b5a8">baseer_execute</a> (<a class="el" href="structbaseer__target__t.html">baseer_target_t</a> *target, <a class="el" href="#a026a9e012e9e6b67149c1b8dd7ef6438">baseer_callback_t</a> callback, void *arg)</td></tr>
+<tr class="memdesc:a5df3250b6207c6c70e9e743556d1b5a8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Execute a callback on a file target.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Core function. </p>
+<div class="textblock"><p>Core file handling and execution API for Baseer. </p>
+<p>Provides memory and streaming file access, as well as execution of analysis tools using a unified callback interface. </p>
 </div><a name="doc-define-members" id="doc-define-members"></a><h2 id="header-doc-define-members" class="groupheader">Macro Definition Documentation</h2>
 <a id="ad8fa62f850908606457b5e6fc7666b41" name="ad8fa62f850908606457b5e6fc7666b41"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad8fa62f850908606457b5e6fc7666b41">&#9670;&#160;</a></span>BASEER_BASE_OFFSET</h2>
@@ -193,6 +201,21 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>baseer_execute</b> (<
 </div><!-- fragment -->
 </div>
 </div>
+<a id="af4b41731c799aea6025edfd36ffbce8d" name="af4b41731c799aea6025edfd36ffbce8d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af4b41731c799aea6025edfd36ffbce8d">&#9670;&#160;</a></span>BASEER_MAX_FILE_SIZE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define BASEER_MAX_FILE_SIZE&#160;&#160;&#160;1024 * 1024 * 4</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Max file size for memory mode </p>
+
+</div>
+</div>
 <a id="aa69821511ee6d0207ca409db244ccb38" name="aa69821511ee6d0207ca409db244ccb38"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa69821511ee6d0207ca409db244ccb38">&#9670;&#160;</a></span>BASEER_VERSION</h2>
 
@@ -210,7 +233,6 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>baseer_execute</b> (<
 </div><!-- fragment -->
 </div>
 </div>
-<<<<<<< HEAD
 <a id="ad3456ae778ae0e4e9ea04d924cf3e4c8" name="ad3456ae778ae0e4e9ea04d924cf3e4c8"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad3456ae778ae0e4e9ea04d924cf3e4c8">&#9670;&#160;</a></span>COLOR_RAND</h2>
 
@@ -238,8 +260,6 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>baseer_execute</b> (<
 </div><!-- fragment -->
 </div>
 </div>
-=======
->>>>>>> 9c46ae5 (new changes)
 <a id="adea3bb2f4f65095827fcd08f4736e1be" name="adea3bb2f4f65095827fcd08f4736e1be"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#adea3bb2f4f65095827fcd08f4736e1be">&#9670;&#160;</a></span>RETURN_NULL_IF</h2>
 
@@ -295,6 +315,175 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>baseer_execute</b> (<
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line">STRINGIFY(x)</div>
 </div><!-- fragment -->
+</div>
+</div>
+<a name="doc-typedef-members" id="doc-typedef-members"></a><h2 id="header-doc-typedef-members" class="groupheader">Typedef Documentation</h2>
+<a id="a026a9e012e9e6b67149c1b8dd7ef6438" name="a026a9e012e9e6b67149c1b8dd7ef6438"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a026a9e012e9e6b67149c1b8dd7ef6438">&#9670;&#160;</a></span>baseer_callback_t</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef bool(* baseer_callback_t) (<a class="el" href="structbaseer__target__t.html">baseer_target_t</a> *, void *arg)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Callback function type for file analysis. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">target</td><td>Pointer to the file target </td></tr>
+    <tr><td class="paramname">arg</td><td>Additional user argument </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>true on success, false on failure </dd></dl>
+
+</div>
+</div>
+<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="a4f7d25d89526392b9d90bb5b0bc5f4d4" name="a4f7d25d89526392b9d90bb5b0bc5f4d4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4f7d25d89526392b9d90bb5b0bc5f4d4">&#9670;&#160;</a></span>baseer_close()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void baseer_close </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structbaseer__target__t.html">baseer_target_t</a> *</td>          <td class="paramname"><span class="paramname"><em>target</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>mode</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Close a file target and free associated resources. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">target</td><td>Pointer to the file target </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a5df3250b6207c6c70e9e743556d1b5a8" name="a5df3250b6207c6c70e9e743556d1b5a8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5df3250b6207c6c70e9e743556d1b5a8">&#9670;&#160;</a></span>baseer_execute()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool baseer_execute </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structbaseer__target__t.html">baseer_target_t</a> *</td>          <td class="paramname"><span class="paramname"><em>target</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="#a026a9e012e9e6b67149c1b8dd7ef6438">baseer_callback_t</a></td>          <td class="paramname"><span class="paramname"><em>callback</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *</td>          <td class="paramname"><span class="paramname"><em>arg</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Execute a callback on a file target. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">target</td><td>Pointer to the file target </td></tr>
+    <tr><td class="paramname">callback</td><td>Callback function </td></tr>
+    <tr><td class="paramname">arg</td><td>Additional argument </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>true on success, false on failure </dd></dl>
+
+</div>
+</div>
+<a id="a239229cb1937549ec6dd31fe189e33aa" name="a239229cb1937549ec6dd31fe189e33aa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a239229cb1937549ec6dd31fe189e33aa">&#9670;&#160;</a></span>baseer_open_file()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structbaseer__target__t.html">baseer_target_t</a> * baseer_open_file </td>
+          <td>(</td>
+          <td class="paramtype">char *</td>          <td class="paramname"><span class="paramname"><em>file_path</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Open a file in streaming mode (FILE*) without full memory load. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">file_path</td><td>Path to the file </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to <a class="el" href="structbaseer__target__t.html" title="Struct representing a file target in memory or streaming mode.">baseer_target_t</a> on success, NULL on failure </dd></dl>
+
+</div>
+</div>
+<a id="a44d67d593f18c21c6f81bec443a1522c" name="a44d67d593f18c21c6f81bec443a1522c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a44d67d593f18c21c6f81bec443a1522c">&#9670;&#160;</a></span>baseer_open_memory()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structbaseer__target__t.html">baseer_target_t</a> * baseer_open_memory </td>
+          <td>(</td>
+          <td class="paramtype">char *</td>          <td class="paramname"><span class="paramname"><em>file_path</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Open a file fully loaded into memory. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">file_path</td><td>Path to the file </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to <a class="el" href="structbaseer__target__t.html" title="Struct representing a file target in memory or streaming mode.">baseer_target_t</a> on success, NULL on failure </dd></dl>
+
+</div>
+</div>
+<a id="ab32e495d6af677e7772ccc0d19ad8d5d" name="ab32e495d6af677e7772ccc0d19ad8d5d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab32e495d6af677e7772ccc0d19ad8d5d">&#9670;&#160;</a></span>baseer_print()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void baseer_print </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structbaseer__target__t.html">baseer_target_t</a> *</td>          <td class="paramname"><span class="paramname"><em>target</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Print a hex dump of the file target. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">target</td><td>Pointer to the file target </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 </div><!-- contents -->

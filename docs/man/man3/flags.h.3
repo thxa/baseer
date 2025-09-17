@@ -1,0 +1,68 @@
+.TH "utils/flags.h" 3 "Version 0.1.0" "Baseer" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+utils/flags.h \- Flag utility functions to determine execution mode\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fR#include <stdbool\&.h>\fP
+.br
+
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "bool \fBis_memory_mode\fP (const char *mode)"
+.br
+.RI "Checks if a command-line flag requires memory mode\&. "
+.ti -1c
+.RI "bool \fBis_stream_mode\fP (const char *mode)"
+.br
+.RI "Checks if a command-line flag requires streaming mode\&. "
+.in -1c
+.SH "Detailed Description"
+.PP 
+Flag utility functions to determine execution mode\&. 
+
+
+.SH "Function Documentation"
+.PP 
+.SS "bool is_memory_mode (const char * mode)"
+
+.PP
+Checks if a command-line flag requires memory mode\&. Memory mode is used for tools that require the whole file in memory\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fImode\fP Command-line flag string 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+true if memory mode is required, false otherwise
+.RE
+.PP
+Checks if a command-line flag requires memory mode\&. 
+.SS "bool is_stream_mode (const char * mode)"
+
+.PP
+Checks if a command-line flag requires streaming mode\&. Streaming mode is used for tools that read the file sequentially\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fImode\fP Command-line flag string 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+true if streaming mode is required, false otherwise
+.RE
+.PP
+Checks if a command-line flag requires streaming mode\&. 
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Baseer from the source code\&.

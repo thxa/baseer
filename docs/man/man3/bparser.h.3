@@ -1,0 +1,152 @@
+.TH "modules/bparser/bparser.h" 3 "Version 0.1.0" "Baseer" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+modules/bparser/bparser.h \- Binary parser abstraction supporting memory and streaming files\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fR#include <stdio\&.h>\fP
+.br
+\fR#include <stdlib\&.h>\fP
+.br
+\fR#include <string\&.h>\fP
+.br
+\fR#include '\&.\&./\&.\&./baseer\&.h'\fP
+.br
+
+.SS "Classes"
+
+.in +1c
+.ti -1c
+.RI "struct \fBbparser_mem_t\fP"
+.br
+.RI "Memory source for the parser\&. "
+.ti -1c
+.RI "struct \fBbparser\fP"
+.br
+.RI "Parser object\&. "
+.in -1c
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "typedef bool(* \fBbparser_callback_t\fP) (\fBbparser\fP *parser, void *arg)"
+.br
+.RI "Callback for bparser tools\&. "
+.in -1c
+.SS "Enumerations"
+
+.in +1c
+.ti -1c
+.RI "enum \fBbparser_type\fP { \fBBPARSER_FILE\fP, \fBBPARSER_MEM\fP }"
+.br
+.RI "Parser type: memory or streaming\&. "
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBbparser\fP * \fBbparser_load\fP (\fBbparser_type\fP type, void *data)"
+.br
+.RI "Load a parser object\&. "
+.ti -1c
+.RI "size_t \fBbparser_read\fP (\fBbparser\fP *parser, void *buf, unsigned int pos, size_t size)"
+.br
+.RI "Read bytes from parser\&. "
+.ti -1c
+.RI "bool \fBbparser_apply\fP (\fBbparser\fP *parser, \fBbparser_callback_t\fP callback, void *arg)"
+.br
+.RI "Execute a callback on the parser\&. "
+.in -1c
+.SH "Detailed Description"
+.PP 
+Binary parser abstraction supporting memory and streaming files\&. 
+
+Provides a unified interface to read from memory blocks or FILE* streams and execute callbacks on the parsed content\&. 
+.SH "Typedef Documentation"
+.PP 
+.SS "typedef bool(* bparser_callback_t) (\fBbparser\fP *parser, void *arg)"
+
+.PP
+Callback for bparser tools\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIparser\fP Pointer to parser object 
+.br
+\fIarg\fP Additional argument (e\&.g\&., inputs) 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+true on success, false on failure 
+.RE
+.PP
+
+.SH "Function Documentation"
+.PP 
+.SS "bool bparser_apply (\fBbparser\fP * parser, \fBbparser_callback_t\fP callback, void * arg)"
+
+.PP
+Execute a callback on the parser\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIparser\fP Pointer to parser 
+.br
+\fIcallback\fP Callback function 
+.br
+\fIarg\fP Additional argument 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+true on success, false on failure 
+.RE
+.PP
+
+.SS "\fBbparser\fP * bparser_load (\fBbparser_type\fP type, void * data)"
+
+.PP
+Load a parser object\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fItype\fP Parser type: BPARSER_MEM or BPARSER_FILE 
+.br
+\fIdata\fP Memory block or FILE* pointer 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+Pointer to bparser on success, NULL on failure 
+.RE
+.PP
+
+.SS "size_t bparser_read (\fBbparser\fP * parser, void * buf, unsigned int pos, size_t size)"
+
+.PP
+Read bytes from parser\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIparser\fP Pointer to parser object 
+.br
+\fIbuf\fP Output buffer 
+.br
+\fIpos\fP Offset in memory or file 
+.br
+\fIsize\fP Number of bytes to read 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+Number of bytes successfully read 
+.RE
+.PP
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Baseer from the source code\&.

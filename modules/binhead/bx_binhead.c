@@ -45,15 +45,17 @@ bool bx_binhead(baseer_target_t *target, void *arg)
         return false;
 
     bparser* bp= NULL;
-    
-    if (target->size > 0) {
-        bp = bparser_load(BPARSER_MEM, target->block);
-        if(!bp) return false;
-    } else
-    {
-        bp = bparser_load(BPARSER_FILE, target->block);
-        if(!bp) return false;
-    }
+    printf("%d\n", target->size);
+    bp = bparser_load(target);
+    // if (target->size > 0) {
+
+    //     bp = bparser_load(BPARSER_MEM, target->block);
+    //     if(!bp) return false;
+    // } else
+    // {
+    //     bp = bparser_load(BPARSER_FILE, target->block);
+    //     if(!bp) return false;
+    // }
     
 
     bmagic magics[] = {
@@ -77,7 +79,7 @@ bool bx_binhead(baseer_target_t *target, void *arg)
         unsigned char* p = (unsigned char*)pattern;
         unsigned char* mgn = (unsigned char*)&magics[i].number;
         unsigned char* mgn_r = (unsigned char*)&magics[i].rnumber;
-
+        printf("%ld\n", n);
         flag_1 = 1, flag_2 = 1;
         for(int j=0; j< n; j++) {
             flag_1 &= (*mgn == *p);

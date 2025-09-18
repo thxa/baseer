@@ -145,7 +145,7 @@ void dump_elf32_phdr(Elf32_Ehdr *elf, Elf32_Phdr* phdr, bparser*parser)
                 phdr[i].p_align);
 
         if (phdr[i].p_type == PT_INTERP) {
-            char *interp = (char*)(parser->source.mem.data + phdr[i].p_offset);
+            char *interp = (char*)(parser->block + phdr[i].p_offset);
             printf(COLOR_YELLOW "    Interpreter: " COLOR_RESET "%s\n", interp);
         }
         if (phdr[i].p_type == PT_DYNAMIC) {
@@ -228,7 +228,7 @@ void dump_elf64_phdr(Elf64_Ehdr *elf, Elf64_Phdr* phdr, bparser*parser)
                 phdr[i].p_align);
 
         if (phdr[i].p_type == PT_INTERP) {
-            char *interp = (char*)(parser->source.mem.data + phdr[i].p_offset);
+            char *interp = (char*)(parser->block + phdr[i].p_offset);
             printf(COLOR_YELLOW "    Interpreter: " COLOR_RESET "%s\n", interp);
         }
         if (phdr[i].p_type == PT_DYNAMIC) {
@@ -287,7 +287,7 @@ void dump_elf64_phdr(Elf64_Ehdr *elf, Elf64_Phdr* phdr, bparser*parser)
  */
 void dump_elf32_shdr(Elf32_Ehdr* elf , Elf32_Shdr* shdrs, bparser* parser) {
     Elf32_Shdr shstr = shdrs[elf->e_shstrndx];
-    const char* shstrtab = (const char*)(parser->source.mem.data + shstr.sh_offset);
+    const char* shstrtab = (const char*)(parser->block + shstr.sh_offset);
     printf(COLOR_BLUE "\n=== Section Headers ===\n" COLOR_RESET);
     print_section_header_legend();
 
@@ -371,7 +371,7 @@ void dump_elf32_shdr(Elf32_Ehdr* elf , Elf32_Shdr* shdrs, bparser* parser) {
  */
 void dump_elf64_shdr(Elf64_Ehdr* elf , Elf64_Shdr* shdrs, bparser* parser) {
     Elf64_Shdr shstr = shdrs[elf->e_shstrndx];
-    const char* shstrtab = (const char*)(parser->source.mem.data + shstr.sh_offset);
+    const char* shstrtab = (const char*)(parser->block + shstr.sh_offset);
     printf(COLOR_BLUE "\n=== Section Headers ===\n" COLOR_RESET);
     print_section_header_legend();
     for (int i = 0; i < elf->e_shnum; i++) {
@@ -448,7 +448,7 @@ void dump_elf64_shdr(Elf64_Ehdr* elf , Elf64_Shdr* shdrs, bparser* parser) {
  *      dump_elf64hdr(), dump_elf64_shdr(), dump_elf64_phdr()
  */
 bool print_meta_data(bparser* parser, void* args) {
-    unsigned char *data = (unsigned char*) parser->source.mem.data;
+    unsigned char *data = (unsigned char*) parser->block;
     char bit_type = data[EI_CLASS];
     char endian   = data[EI_DATA];
 

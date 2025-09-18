@@ -400,7 +400,7 @@ void init_values(bparser *target, context *ctx){
 	memset(list, 0, sizeof(bp_list));
 	list->counter = 0;
 	ctx->list = list;
-	Elf64_Ehdr *ehdr = (Elf64_Ehdr*)target->source.mem.data;
+	Elf64_Ehdr *ehdr = (Elf64_Ehdr*)target->block;
 	sprintf(mmaps, "/proc/%d/maps", ctx->pid);
 	FILE *file = fopen(mmaps,"r");
 	size_t size = 0;
@@ -414,17 +414,17 @@ void init_values(bparser *target, context *ctx){
 	if(ehdr->e_ident[EI_CLASS] == ELFCLASS32){
 		ctx->arch = 32;
 		ctx->entry = ctx->entry & 0xffffffff;
-		Elf32_Ehdr *ehdr = (Elf32_Ehdr*)target->source.mem.data;
-		Elf32_Shdr *shdr = target->source.mem.data + ehdr->e_shoff;
+		Elf32_Ehdr *ehdr = (Elf32_Ehdr*)target->block;
+		Elf32_Shdr *shdr = target->block + ehdr->e_shoff;
 
 		if (ehdr->e_shnum != 0) {
-			char *shstrtab = (char*)target->source.mem.data + shdr[ehdr->e_shstrndx].sh_offset;
+			char *shstrtab = (char*)target->block + shdr[ehdr->e_shstrndx].sh_offset;
 
 			for (int i = 0; i < ehdr->e_shnum; i++) {
 				if (shdr[i].sh_type == SHT_SYMTAB) {
-					Elf32_Sym *syms = target->source.mem.data + shdr[i].sh_offset;
+					Elf32_Sym *syms = target->block + shdr[i].sh_offset;
 					Elf32_Shdr *strtab_hdr = &shdr[shdr[i].sh_link];
-					char *strtab = (char*)target->source.mem.data + strtab_hdr->sh_offset;
+					char *strtab = (char*)target->block + strtab_hdr->sh_offset;
 
 					int num = shdr[i].sh_size / shdr[i].sh_entsize;
 					for (int j = 0; j < num; j++) {
@@ -456,14 +456,14 @@ void init_values(bparser *target, context *ctx){
 		}
 	}else{
 		ctx->arch = 64;
-		Elf64_Shdr *shdr = target->source.mem.data + ehdr->e_shoff;
+		Elf64_Shdr *shdr = target->block + ehdr->e_shoff;
 		if(ehdr->e_shnum != 0){
-			char *shstrtab = target->source.mem.data + shdr[ehdr->e_shstrndx].sh_offset;
+			char *shstrtab = target->block + shdr[ehdr->e_shstrndx].sh_offset;
 			for (int i = 0; i< ehdr->e_shnum; i++) {
 				if(shdr[i].sh_type == SHT_SYMTAB){
-					Elf64_Sym *syms = target->source.mem.data + shdr[i].sh_offset;
+					Elf64_Sym *syms = target->block + shdr[i].sh_offset;
 					Elf64_Shdr *strtab_hdr = &shdr[shdr[i].sh_link];
-					char *strtab = (char*)target->source.mem.data + strtab_hdr->sh_offset;
+					char *strtab = (char*)target->block + strtab_hdr->sh_offset;
 					int num = shdr[i].sh_size / shdr[i].sh_entsize;
 					for (int j = 0; j< num; j++) {
 						if(ELF64_ST_TYPE(syms[j].st_info) == STT_FUNC && syms[j].st_shndx != SHN_UNDEF){

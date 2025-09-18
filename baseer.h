@@ -68,6 +68,7 @@ typedef enum {
  * @brief Struct representing a file target in memory or streaming mode.
  */
 typedef struct baseer_target_t {
+    FILE* fp;
     unsigned int size; /**< File size in bytes */
     void *block;       /**< Memory block or FILE* cast */
 } baseer_target_t;
@@ -87,7 +88,8 @@ typedef bool (*baseer_callback_t)(baseer_target_t *, void *arg);
  * @param file_path Path to the file
  * @return Pointer to baseer_target_t on success, NULL on failure
  */
-baseer_target_t *baseer_open_memory(char *file_path);
+// baseer_target_t *baseer_open_memory(char *file_path);
+baseer_target_t *baseer_open(char *file_path);
 
 /**
  * @brief Open a file in streaming mode (FILE*) without full memory load
@@ -95,7 +97,7 @@ baseer_target_t *baseer_open_memory(char *file_path);
  * @param file_path Path to the file
  * @return Pointer to baseer_target_t on success, NULL on failure
  */
-baseer_target_t *baseer_open_file(char *file_path);
+// baseer_target_t *baseer_open_file(char *file_path);
 
 /**
  * @brief Close a file target and free associated resources

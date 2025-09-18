@@ -54,7 +54,7 @@ bool bx_tar(bparser* parser, void *arg)
 
     if(strcmp("-m", args[2]) == 0) {
         unsigned int pos = 0;
-        while (pos < parser->source.mem.size) {
+        while (pos < parser->size) {
             void* block = malloc(sizeof(posix_header));
             size_t n = bparser_read(parser, block, pos, sizeof(posix_header));
             if(n == 0) break;

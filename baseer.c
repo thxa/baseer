@@ -11,8 +11,8 @@
 #include "baseer.h"
 
 
-/* =================== Memory Mode =================== */
-baseer_target_t *baseer_open_memory(char *file_path)
+/* =================== Baseer open =================== */
+baseer_target_t *baseer_open(char *file_path)
 {
     baseer_target_t *target = NULL;
 
@@ -35,6 +35,7 @@ baseer_target_t *baseer_open_memory(char *file_path)
         return NULL;
     }
 
+    target->fp = handler;
     target->size = info.st_size;
     target->block = malloc(target->size);
     if (target->block == NULL)
@@ -53,48 +54,48 @@ baseer_target_t *baseer_open_memory(char *file_path)
         fclose(handler);
         return NULL;
     }
-    
-    fclose(handler);
     return target;
 }
 
 
 /* =================== Streaming Mode =================== */
-baseer_target_t *baseer_open_file(char *file_path)
-{
-    RETURN_NULL_IF(file_path == NULL)
-    baseer_target_t *target = NULL;
-    FILE *handler = NULL;
-    handler = fopen(file_path, "rb");
-    RETURN_NULL_IF(handler == NULL)
-    target = (baseer_target_t *)malloc(sizeof(baseer_target_t));
-    if (target == NULL){
-        fclose(handler);
-        return NULL;
-    }
-    target->size = 0;          // Size unkown or not needed in streaming mode
-    target->block = handler;   // Store the FILE pointer in block
-    return target;
-}
+// baseer_target_t *baseer_open_file(char *file_path)
+// {
+//     RETURN_NULL_IF(file_path == NULL)
+//     baseer_target_t *target = NULL;
+//     FILE *handler = NULL;
+//     handler = fopen(file_path, "rb");
+//     RETURN_NULL_IF(handler == NULL)
+//     target = (baseer_target_t *)malloc(sizeof(baseer_target_t));
+//     if (target == NULL){
+//         fclose(handler);
+//         return NULL;
+//     }
+//     target->size = 0;          // Size unkown or not needed in streaming mode
+//     target->block = handler;   // Store the FILE pointer in block
+//     return target;
+// }
 
 /* =================== Closeing =================== */
 void baseer_close(baseer_target_t *target, int mode)
 {
     if(!target) return;
 
-    if(mode == MEMORY) {
+    // if(mode == MEMORY) {
+        fclose(target->fp);
         target->size = 0;
         if(target->block) {
             free(target->block);
             target->block = NULL;
         }
-    }else if(mode == STREAM){
-        target->size = 0;
-        if(target->block) {
-            fclose((FILE*)target->block);
-            target->block = NULL;
-        }
-    }
+
+    // }else if(mode == STREAM){
+        // target->size = 0;
+        // if(target->block) {
+            // fclose((FILE*)target->block);
+            // target->block = NULL;
+        // }
+    // }
     free(target);
 }
 

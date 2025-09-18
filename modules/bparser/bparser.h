@@ -16,29 +16,32 @@
 /**
  * @brief Parser type: memory or streaming
  */
-typedef enum {
-    BPARSER_FILE,
-    BPARSER_MEM
-} bparser_type;
+// typedef enum {
+//     BPARSER_FILE,
+//     BPARSER_MEM
+// } bparser_type;
 
 /**
  * @brief Memory source for the parser
  */
-typedef struct {
-    const void *data;
-    size_t size;
-} bparser_mem_t;
+// typedef struct {
+//     const void *data;
+//     size_t size;
+// } bparser_mem_t;
 
 /**
  * @brief Parser object
  */
 typedef struct {
-    union {
+    // union {
         FILE *fp;
+        const void *block;
+        size_t size;
         // void *mem;
-        bparser_mem_t mem;
-    } source;
-    bparser_type type;
+        // bparser_mem_t mem;
+    // } source;
+
+    // bparser_type type;
 } bparser;
 
 /**
@@ -57,7 +60,7 @@ typedef bool (*bparser_callback_t)(bparser* parser, void* arg);
  * @param data Memory block or FILE* pointer
  * @return Pointer to bparser on success, NULL on failure
  */
-bparser* bparser_load(bparser_type type, void *data);
+bparser* bparser_load(baseer_target_t *data);
 
 /**
  * @brief Read bytes from parser

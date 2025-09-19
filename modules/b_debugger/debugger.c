@@ -447,8 +447,6 @@ void init_values(bparser *target, context *ctx){
 		Elf32_Shdr *shdr = target->block + ehdr->e_shoff;
 
 		if (ehdr->e_shnum != 0) {
-			char *shstrtab = (char*)target->block + shdr[ehdr->e_shstrndx].sh_offset;
-
 			for (int i = 0; i < ehdr->e_shnum; i++) {
 				if (shdr[i].sh_type == SHT_SYMTAB) {
 					Elf32_Sym *syms = target->block + shdr[i].sh_offset;
@@ -487,7 +485,6 @@ void init_values(bparser *target, context *ctx){
 		ctx->arch = 64;
 		Elf64_Shdr *shdr = target->block + ehdr->e_shoff;
 		if(ehdr->e_shnum != 0){
-			char *shstrtab = target->block + shdr[ehdr->e_shstrndx].sh_offset;
 			for (int i = 0; i< ehdr->e_shnum; i++) {
 				if(shdr[i].sh_type == SHT_SYMTAB){
 					Elf64_Sym *syms = target->block + shdr[i].sh_offset;

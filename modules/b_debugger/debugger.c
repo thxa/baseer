@@ -30,7 +30,7 @@ void parse_cmd(context *ctx){
 		return;
 	char cmd[1024] = {0} ;
 	bool flag = false;
-	printf("baseer> ");
+	printf("baseer-dbg> ");
 	read(0, cmd, 1020);
 	cmd[strcspn(cmd, "\n")] = 0;
 	char *op ;
@@ -188,7 +188,6 @@ bool step_over(context *ctx,void *args){
 	ud_init(&ud_obj);
 	ud_set_input_buffer(&ud_obj, data, sizeof(data));
 	ud_set_mode(&ud_obj, ctx->arch);
-	ud_set_syntax(&ud_obj, UD_SYN_INTEL);
 	ud_set_pc(&ud_obj, ctx->regs.rip);
 	ud_disassemble(&ud_obj);
 	if(ud_disassemble(&ud_obj)){
@@ -212,6 +211,21 @@ bool step_over(context *ctx,void *args){
 	dis_ctx(ctx);
 	return true;
 }
+
+
+uint64_t find_sym(context *ctx,char *name){
+	sym_list *sym = ctx->sym;
+	while (sym != NULL) {
+		if (strcmp(sym->name,name) == 0 ){ 
+			return sym->addr;
+			break;
+		}
+		sym = sym->next;
+	}
+	return 0;
+}
+
+
 /**
  * @brief set a breakpoint. 
  *
@@ -222,10 +236,19 @@ bool setBP(context *ctx, void* args){
 
 	while(isspace((unsigned char)*arg)) arg++;
 	char *token = strtok(arg, " ");
-	uint64_t addr = strtol(token,NULL,16);
-	if(addr == 0){
-		printf("wrong address\n");
+	if(token == NULL){
 		return false;
+	}
+	uint64_t addr ;
+	bool is_str = isalpha(token[0]);
+	if(is_str){
+		addr = find_sym(ctx, token);
+		if(addr == 0){
+			printf("undind symbol %s \n",token);
+			return true;
+		}
+	}else {
+		addr = strtol(token,NULL,16);
 	}
 	bp *bpoint = malloc(sizeof(bp));
 	bpoint->id = ++ctx->list->counter;
@@ -234,7 +257,9 @@ bool setBP(context *ctx, void* args){
 	bpoint->orig = ptrace(PTRACE_PEEKTEXT, ctx->pid, (void*)addr, NULL);
 	long trap = (bpoint->orig & ~0xff) | 0xCC;
 	if (ptrace(PTRACE_POKETEXT, ctx->pid, (void*)addr, (void*)trap) == -1) {
-		perror("PTRACE_POKETEXT");
+		printf("wrong address\n");
+		free(bpoint);
+		ctx->list->counter--;
 		return true;
 	}
 	if (ctx->list->first == NULL){
@@ -392,6 +417,9 @@ void dis_ctx(context *ctx){
 
 }
 
+
+
+
 void init_values(bparser *target, context *ctx){
 	bp_list *list = malloc(sizeof(bp_list));
 	char mmaps[512]= {0};
@@ -405,10 +433,11 @@ void init_values(bparser *target, context *ctx){
 	FILE *file = fopen(mmaps,"r");
 	size_t size = 0;
 	ssize_t b_read = getdelim(&ctx->mmaps,&size,'\0' , file);
+	sscanf(ctx->mmaps, "%lx", &ctx->base);
 	if(ehdr->e_type == ET_EXEC){
 		ctx->entry = ehdr->e_entry;
+		ctx->base |= 1 ;
 	}else {
-		sscanf(ctx->mmaps, "%lx", &ctx->base);
 		ctx->entry = ctx->base + ehdr->e_entry;
 	}	
 	if(ehdr->e_ident[EI_CLASS] == ELFCLASS32){
@@ -436,7 +465,7 @@ void init_values(bparser *target, context *ctx){
 								sym_list *sym = malloc(sizeof(sym_list));
 
 								sym->name = strdup(name);
-								sym->addr = ctx->base + syms[j].st_value;
+								sym->addr = (ctx->base & 1) ? syms[j].st_value : ctx->base + syms[j].st_value;
 								sym->next = NULL;
 
 								if (ctx->sym == NULL) {
@@ -471,7 +500,7 @@ void init_values(bparser *target, context *ctx){
 							if(*name){
 								sym_list *sym = malloc(sizeof(sym_list));
 								sym->name = strdup(name);
-								sym->addr = (ctx->base + syms[j].st_value);
+								sym->addr = (ctx->base & 1) ? syms[j].st_value : ctx->base + syms[j].st_value;
 								sym->next = NULL;
 								if(ctx->sym == NULL){
 									ctx->sym = sym;
@@ -518,15 +547,28 @@ bool b_debugger(bparser *target, void *arg){
 		printf("faild to fork");
 		return false;
 	}else if (pid == 0) {
-		char *argv[] = {args[1], NULL};
+		int fd = memfd_create(args[1], MFD_CLOEXEC);
+		if (fd == -1) {
+			perror("memfd_create failed");
+			return -1;
+		}
 
+		ssize_t written = write(fd, target->block,  target->size);
+		if (written == -1 || (size_t)written != target->size) {
+			perror("write failed");
+			close(fd);
+			return -1;
+		}
 		if (ptrace(PTRACE_TRACEME, 0, NULL, NULL) == -1) {
 			perror("PTRACE_TRACEME failed");
 			return -1;
 		}
-		if (execve(args[1], argv, NULL) == -1) {
-			perror("execve failed");
-			exit(1);
+		char *argv[] = {args[1], NULL};
+		char *envp[] = {NULL};
+
+		if (fexecve(fd, argv, envp) == -1) {
+			perror("fexecve failed");
+			close(fd);
 		}
 	}else {
 		waitpid(pid, &stats, 0);

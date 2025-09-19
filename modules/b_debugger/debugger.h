@@ -36,6 +36,7 @@ struct bp{
 };
 struct context{
     char *mmaps;
+    // base will have one bit for PIE status
     uint64_t base;
     unsigned long entry;
     struct user_regs_struct regs;

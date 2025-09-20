@@ -62,53 +62,53 @@ bool bx_tar(bparser* parser, void *arg)
             if (header -> name[0] == '\0') break;
             int file_size = oct2int(header->size);
             printf("=== TAR Header Info ===\n");
-            printf("[  0] name      : %s\n", header->name);
-            printf("[100] mode      : %s\n", header->mode);
-            printf("[108] uid       : %s\n", header->uid);
-            printf("[116] gid       : %s\n", header->gid);
-            printf("[124] size      : %s\n", header->size);
-            printf("[124] size      : %d\n", file_size);
-            printf("[136] mtime     : %s\n", header->mtime);
-            printf("[148] chksum    : %s\n", header->chksum);
-            printf("[156] typeflag  : %c\n", header->typeflag);
-            printf("[157] linkname  : %s\n", header->linkname);
-            printf("[257] magic     : %s\n", header->magic);
-            printf("[263] version   : %s\n", header->version);
-            printf("[265] uname     : %s\n", header->uname);
-            printf("[297] gname     : %s\n", header->gname);
-            printf("[329] devmajor  : %s\n", header->devmajor);
-            printf("[337] devminor  : %s\n", header->devminor);
-            printf("[345] prefix    : %s\n", header->prefix);
-            printf("========================\n\n");
+            printf(COLOR_GREEN "[  0] name      :%s %s\n", COLOR_RESET, header->name);
+            printf(COLOR_GREEN "[100] mode      :%s %s\n", COLOR_RESET, header->mode);
+            printf(COLOR_GREEN "[108] uid       :%s %s\n", COLOR_RESET, header->uid);
+            printf(COLOR_GREEN "[116] gid       :%s %s\n", COLOR_RESET, header->gid);
+            printf(COLOR_GREEN "[124] size      :%s %s\n", COLOR_RESET, header->size);
+            printf(COLOR_GREEN "[124] size      :%s %d\n", COLOR_RESET, file_size);
+            printf(COLOR_GREEN "[136] mtime     :%s %s\n", COLOR_RESET, header->mtime);
+            printf(COLOR_GREEN "[148] chksum    :%s %s\n", COLOR_RESET, header->chksum);
+            printf(COLOR_GREEN "[156] typeflag  :%s %c\n", COLOR_RESET, header->typeflag);
+            printf(COLOR_GREEN "[157] linkname  :%s %s\n", COLOR_RESET, header->linkname);
+            printf(COLOR_GREEN "[257] magic     :%s %s\n", COLOR_RESET, header->magic);
+            printf(COLOR_GREEN "[263] version   :%s %s\n", COLOR_RESET, header->version);
+            printf(COLOR_GREEN "[265] uname     :%s %s\n", COLOR_RESET, header->uname);
+            printf(COLOR_GREEN "[297] gname     :%s %s\n", COLOR_RESET, header->gname);
+            printf(COLOR_GREEN "[329] devmajor  :%s %s\n", COLOR_RESET, header->devmajor);
+            printf(COLOR_GREEN "[337] devminor  :%s %s\n", COLOR_RESET, header->devminor);
+            printf(COLOR_GREEN "[345] prefix    :%s %s\n", COLOR_RESET, header->prefix);
+            printf(COLOR_BLUE "========================\n\n" COLOR_RESET);
 
 
             if(header ->typeflag == REGTYPE || header->typeflag == AREGTYPE) {
-                printf("This is Reg File\n");
+                printf(COLOR_YELLOW "This is Reg File\n" COLOR_RESET);
             }
             else if(header ->typeflag == LNKTYPE) {
-                printf("This is LINK File\n");
+                printf(COLOR_YELLOW "This is LINK File\n" COLOR_RESET);
             }
             else if(header ->typeflag == SYMTYPE ) {
-                printf("This is reserved File\n");
+                printf(COLOR_YELLOW "This is reserved File\n" COLOR_RESET);
             }
             else if(header ->typeflag == CHRTYPE) {
-                printf("This is character special File\n");
+                printf(COLOR_YELLOW "This is character special File\n" COLOR_RESET);
             }
             else if(header ->typeflag == BLKTYPE) {
-                printf("This is block special File\n");
+                printf(COLOR_YELLOW "This is block special File\n" COLOR_RESET);
             }
             else if(header ->typeflag == DIRTYPE) {
-                printf("This is directory\n");
+                printf(COLOR_YELLOW "This is directory\n" COLOR_RESET);
                 // mkdir(header->name, oct2int(header->mode));
                 pos+=BLOCK_SIZE;
                 free(block);
                 continue;
             }
             else if(header ->typeflag == FIFOTYPE) {
-                printf("This is FIFO File\n");
+                printf(COLOR_YELLOW "This is FIFO File\n" COLOR_RESET);
             }
             else if(header ->typeflag == CONTTYPE) {
-                printf("This is reserved File\n");
+                printf(COLOR_YELLOW "This is reserved File\n" COLOR_RESET);
             }
 
             unsigned int data_blocks = (file_size + BLOCK_SIZE - 1) / BLOCK_SIZE;

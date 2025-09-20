@@ -45,7 +45,7 @@ bool bx_binhead(baseer_target_t *target, void *arg)
         return false;
 
     bparser* bp= NULL;
-    printf("%d\n", target->size);
+    // printf("%d\n", target->size);
     bp = bparser_load(target);
     // if (target->size > 0) {
 
@@ -60,11 +60,11 @@ bool bx_binhead(baseer_target_t *target, void *arg)
 
     bmagic magics[] = {
         {"ELF", ELF_MAGIC, reverse_bytes(ELF_MAGIC), bx_elf, 0},
-        {"PDF", PDF_MAGIC, reverse_bytes(PDF_MAGIC), NULL, 0},
-        {"PNG", PNG_MAGIC, reverse_bytes(PNG_MAGIC), NULL, 0},
-        {"ZIP", ZIP_MAGIC, reverse_bytes(ZIP_MAGIC), NULL, 0},
-        {"Mach-o", MACHO_MAGIC, reverse_bytes(MACHO_MAGIC), NULL, 0},
-        {"TAR", TAR_MAGIC, reverse_bytes(TAR_MAGIC), bx_tar, 257}
+        {"TAR", TAR_MAGIC, reverse_bytes(TAR_MAGIC), bx_tar, 257},
+        // {"PDF", PDF_MAGIC, reverse_bytes(PDF_MAGIC), NULL, 0},
+        // {"PNG", PNG_MAGIC, reverse_bytes(PNG_MAGIC), NULL, 0},
+        // {"ZIP", ZIP_MAGIC, reverse_bytes(ZIP_MAGIC), NULL, 0},
+        // {"Mach-o", MACHO_MAGIC, reverse_bytes(MACHO_MAGIC), NULL, 0},
         // { NULL, 0,         0,                 NULL }
     };
 
@@ -79,7 +79,6 @@ bool bx_binhead(baseer_target_t *target, void *arg)
         unsigned char* p = (unsigned char*)pattern;
         unsigned char* mgn = (unsigned char*)&magics[i].number;
         unsigned char* mgn_r = (unsigned char*)&magics[i].rnumber;
-        printf("%ld\n", n);
         flag_1 = 1, flag_2 = 1;
         for(int j=0; j< n; j++) {
             flag_1 &= (*mgn == *p);
@@ -91,7 +90,7 @@ bool bx_binhead(baseer_target_t *target, void *arg)
         }
 
         if(flag_1 || flag_2) {
-            printf("This file is %s\n", magics[i].name);
+            // printf("This file is %s\n", magics[i].name);
             bparser_apply(bp, *magics[i].parser, arg);
             break;
         }

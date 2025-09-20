@@ -33,7 +33,6 @@ Extensions add advanced capabilities:
 [docs](./docs/html)
 
 
-<<<<<<< HEAD
 ## Libraries Used
 - **udis86**: Used for disassembling x86 and x64 architecture binaries.  
   [GitHub Repository](https://github.com/vmt/udis86)
@@ -67,7 +66,6 @@ To uninstall:
 ```bash
 make uninstall
 ```
-=======
 
 ## Requirements
 - udis86
@@ -77,8 +75,6 @@ make uninstall
 make install
 ```
 
-
->>>>>>> 9c46ae5 (new changes)
 
 ## Usage
 

@@ -7,7 +7,7 @@
 /**
  * @brief Program entry point
  * 
- * Parses command-line arguments, opens file in memory or streaming mode
+ * Parses command-line arguments, opens file in memory and streaming mode
  * as required by the selected tools, and executes each requested tool.
  *
  * @param argc Number of command-line arguments
@@ -61,7 +61,7 @@ int main(int argc, char** args)
         // baseer_target_t *target = NULL;
         // if(is_memory_mode(args[i]) && mem_target) target = mem_target;
         // else if(is_stream_mode(args[i]) && stream_target) target = stream_target;
-        printf("%p\n", target);
+        // printf("%p\n", target);
         if(target){
             if(!baseer_execute(target , bx_binhead, &input)){
                 fprintf(stderr, "[!] Execution error for flag %s\n", args[i]);

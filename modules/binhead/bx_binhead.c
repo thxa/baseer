@@ -44,7 +44,7 @@ bool bx_binhead(baseer_target_t *target, void *arg)
     if (target == NULL || target->block == NULL)
         return false;
 
-    bparser* bp= NULL;
+    bparser* bp = NULL;
     // printf("%d\n", target->size);
     bp = bparser_load(target);
     // if (target->size > 0) {

@@ -47,16 +47,6 @@ bool bx_binhead(baseer_target_t *target, void *arg)
     bparser* bp = NULL;
     // printf("%d\n", target->size);
     bp = bparser_load(target);
-    // if (target->size > 0) {
-
-    //     bp = bparser_load(BPARSER_MEM, target->block);
-    //     if(!bp) return false;
-    // } else
-    // {
-    //     bp = bparser_load(BPARSER_FILE, target->block);
-    //     if(!bp) return false;
-    // }
-    
 
     bmagic magics[] = {
         {"ELF", ELF_MAGIC, reverse_bytes(ELF_MAGIC), bx_elf, 0},
@@ -92,6 +82,7 @@ bool bx_binhead(baseer_target_t *target, void *arg)
         if(flag_1 || flag_2) {
             // printf("This file is %s\n", magics[i].name);
             bparser_apply(bp, *magics[i].parser, arg);
+            free(pattern); // clean up because next free will not be reached
             break;
         }
 

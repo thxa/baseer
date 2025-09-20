@@ -6,7 +6,7 @@ LDFLAGS = -ldl
 CFLAGS += -Ilibs/libudis86
 
 # Source Files
-CORE            = main.c baseer.c utils/ui.c utils/flags.c
+CORE            = main.c baseer.c utils/ui.c
 DEFAULT         = modules/default/bx_default.c
 BX_BINHEAD      = modules/binhead/bx_binhead.c
 BPARSER         = modules/bparser/bparser.c

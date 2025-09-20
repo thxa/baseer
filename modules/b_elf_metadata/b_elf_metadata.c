@@ -18,11 +18,37 @@
  *   @ref dump_elf32_shdr(), @ref dump_elf64_shdr(),
  *   @ref dump_elf32_phdr(), @ref dump_elf64_phdr()
  *
- * @author Thamer
- * @date 2025
  */
 #include "b_elf_metadata.h"
 
+
+/**
+ * @brief Display a single byte in hexadecimal with color coding.
+ *
+ * This function prints the value of a byte in hex format (two digits) 
+ * and applies a color depending on its meaning:
+ * - Default (COLOR_YELLOW) for active instructions.
+ * - COLOR_RED for NOP (0x90), INT3 (0xCC), or filler bytes (0xFF).
+ * - COLOR_GRAY for padding or null bytes (0x00).
+ *
+ * @param byte Pointer to the byte to display.
+ *
+ * @note The color codes are ANSI escape sequences.
+ *       The color is reset after printing each byte using COLOR_RESET.
+ */
+void display_byte(const unsigned char *byte)
+{
+    const char *color = COLOR_YELLOW; // default for active instruction
+
+    if (*byte == 0x90 || *byte == 0xCC || *byte == 0xff) {
+        color = COLOR_RED;  // low / unused
+    }
+    else if (*byte == 0x00) {
+        color = COLOR_GRAY; // padding or null bytes
+    }
+
+    printf("%s%02x%s ", color, *byte, COLOR_RESET);
+}
 
 // ========================= BEGIN ELF HEADER ==================================
 /**
@@ -86,6 +112,183 @@ void dump_elf64hdr(Elf64_Ehdr *elf)
 }
 // ========================= END ELF HEADER ==================================
 
+// ========================= BEGIN SECTION HEADER ==================================
+/**
+ * @brief Dump the section header table of a 32-bit ELF file.
+ *
+ * This function iterates over the section headers of a 32-bit ELF file
+ * and prints human-readable information for each section.  
+ *
+ * Printed metadata includes:
+ * - Section index (ID)
+ * - Section name (resolved from the section string table)
+ * - Section type (as string and numeric)
+ * - Flags (W/A/X)
+ * - Virtual address, file offset, and section size
+ * - Link, Info, Alignment, and Entry size
+ *
+ * Raw section bytes:
+ * - If a section has size > 0, its contents are read from the ELF file
+ *   using @ref bparser_read and printed in hexadecimal format.
+ *
+ * @param elf Pointer to the ELF header (Elf32_Ehdr).
+ * @param shdrs Pointer to the section header table (array of Elf32_Shdr).
+ * @param parser Pointer to a bparser structure that provides access to the file data.
+ *
+ * @note Output is color formatted and written to standard output.
+ * @see dump_elf64_shdr()
+ */
+void dump_elf32_shdr(Elf32_Ehdr* elf , Elf32_Shdr* shdrs, bparser* parser) 
+{
+    Elf32_Shdr shstr = shdrs[elf->e_shstrndx];
+    const char* shstrtab = (const char*)(parser->block + shstr.sh_offset);
+    printf(COLOR_BLUE "\n=== Section Headers ===\n" COLOR_RESET);
+    print_section_header_legend();
+
+    for (int i = 0; i < elf->e_shnum; i++) {
+        // ============================ BEGIN SECTION METADATA =============================
+        // Section name
+        const char* name = &shstrtab[shdrs[i].sh_name];
+
+        // Type
+        const char* type_str = sh_type_to_str(shdrs[i].sh_type);
+
+        // Flags
+        char flags[8] = "";
+        if (shdrs[i].sh_flags & SHF_WRITE)     strcat(flags, "W");
+        if (shdrs[i].sh_flags & SHF_ALLOC)     strcat(flags, "A");
+        if (shdrs[i].sh_flags & SHF_EXECINSTR) strcat(flags, "X");
+
+        printf(COLOR_GREEN 
+                "%-3s %-20s %-10s %-6s %-10s %-10s %-8s %-5s %-5s %-10s %-10s\n" 
+                COLOR_RESET,
+                "ID", "Name", "Type", "Flags", "Addr", "Offset", "Size", "Link", "Info", "Align", "EntSize");
+        char* color = COLOR_CYAN;
+        printf("%s%-3d %-20s %-10s %-6s 0x%08x 0x%08x 0x%08x %-5d %-5d 0x%08x 0x%08x\n" 
+                COLOR_RESET,
+                color,
+                i, name, type_str, flags,
+                shdrs[i].sh_addr,
+                shdrs[i].sh_offset,
+                shdrs[i].sh_size,
+                shdrs[i].sh_link,
+                shdrs[i].sh_info,
+                shdrs[i].sh_addralign,
+                shdrs[i].sh_entsize);
+        // ============================ END SECTION METADATA =============================
+        
+
+        // ============================ BEGIN SECTION BODY =============================
+        if (shdrs[i].sh_size > 0) {
+            void* block = malloc(shdrs[i].sh_size);
+            bparser_read(parser, block, shdrs[i].sh_offset, shdrs[i].sh_size);
+
+            printf(COLOR_YELLOW "Section [%d] %s bytes:\n" COLOR_RESET, i, name);
+            unsigned char* ptr = (unsigned char*)block;
+            for (size_t j = 0; j < shdrs[i].sh_size; j++) {
+                display_byte(&ptr[j]);
+                if ((j + 1) % BLOCK_LENGTH  == 0) printf("\n");
+            }
+            printf("\n\n");
+
+            free(block);
+        }
+        // ============================ END SECTION BODY =============================
+    }
+
+}
+
+/**
+ * @brief Dump the section header table of a 64-bit ELF file.
+ *
+ * This function iterates over the section headers of a 64-bit ELF file
+ * and prints human-readable information for each section.  
+ *
+ * Printed metadata includes:
+ * - Section index (ID)
+ * - Section name (resolved from the section string table)
+ * - Section type (as string and numeric)
+ * - Flags (W/A/X)
+ * - Virtual address, file offset, and section size
+ * - Link, Info, Alignment, and Entry size
+ *
+ * Raw section bytes:
+ * - If a section has size > 0, its contents are read from the ELF file
+ *   using @ref bparser_read and printed in hexadecimal format.
+ *
+ * @param elf Pointer to the ELF header (Elf64_Ehdr).
+ * @param shdrs Pointer to the section header table (array of Elf64_Shdr).
+ * @param parser Pointer to a bparser structure that provides access to the file data.
+ *
+ * @note Output is color formatted and written to standard output.
+ * @see dump_elf32_shdr()
+ */
+void dump_elf64_shdr(Elf64_Ehdr* elf , Elf64_Shdr* shdrs, bparser* parser) 
+{
+    Elf64_Shdr shstr = shdrs[elf->e_shstrndx];
+    const char* shstrtab = (const char*)(parser->block + shstr.sh_offset);
+    printf(COLOR_BLUE "\n=== Section Headers ===\n" COLOR_RESET);
+    print_section_header_legend();
+    for (int i = 0; i < elf->e_shnum; i++) {
+        // ============================ BEGIN SECTION METADATA =============================
+        // Section name
+        const char* name = &shstrtab[shdrs[i].sh_name];
+        // Type
+        const char* type_str = sh_type_to_str(shdrs[i].sh_type);
+
+        // Flags
+        char flags[8] = "";
+        if (shdrs[i].sh_flags & SHF_WRITE)     strcat(flags, "W");
+        if (shdrs[i].sh_flags & SHF_ALLOC)     strcat(flags, "A");
+        if (shdrs[i].sh_flags & SHF_EXECINSTR) strcat(flags, "X");
+
+        char* color = COLOR_CYAN;
+        printf(COLOR_GREEN 
+                "%-3s %-20s %-10s %-6s %-10s %-10s %-8s %-5s %-5s %-10s %-10s\n" 
+                COLOR_RESET,
+                "ID", "Name", "Type", "Flags", "Addr", "Offset", "Size", "Link", "Info", "Align", "EntSize");
+
+        printf("%s%-3d %-20s %-10s %-6s 0x%08lx 0x%08lx 0x%08lx %-5d %-5d 0x%08lx 0x%08lx\n" 
+                COLOR_RESET,
+                color,
+                i, name, type_str, flags,
+                shdrs[i].sh_addr,
+                shdrs[i].sh_offset,
+                shdrs[i].sh_size,
+                shdrs[i].sh_link,
+                shdrs[i].sh_info,
+                shdrs[i].sh_addralign,
+                shdrs[i].sh_entsize);
+        // ============================ END SECTION METADATA =============================
+
+        // ============================ BEGIN SECTION BODY =============================
+        if (shdrs[i].sh_size > 0) {
+            void* block = malloc(shdrs[i].sh_size);
+            bparser_read(parser, block, shdrs[i].sh_offset, shdrs[i].sh_size);
+            printf(COLOR_YELLOW "Section [%d] %s bytes:\n" COLOR_RESET, i, name);
+            unsigned char* ptr = (unsigned char*)block;
+            for (size_t j = 0; j < shdrs[i].sh_size; j++) {
+                // printf("%02x ", ptr[j]);
+                display_byte(&ptr[j]);
+                if ((j + 1) % BLOCK_LENGTH  == 0) printf("\n");
+            }
+            printf("\n\n");
+            free(block);
+        }
+        // ============================ END SECTION BODY =============================
+    }
+}
+// ========================= END SECTION ==================================
+
+
+
+void format_flags(uint32_t p_flags, char *buf, size_t size) {
+    buf[0] = '\0';
+    if (p_flags & PF_R) strncat(buf, COLOR_GREEN "R" COLOR_RESET, size - strlen(buf) - 1);
+    if (p_flags & PF_W) strncat(buf, COLOR_RED "W" COLOR_RESET, size - strlen(buf) - 1);
+    if (p_flags & PF_X) strncat(buf, COLOR_YELLOW "X" COLOR_RESET, size - strlen(buf) - 1);
+}
+
 
 // ========================= BEGIN PROGRAM HEADER ==================================
 /**
@@ -124,18 +327,12 @@ void dump_elf32_phdr(Elf32_Ehdr *elf, Elf32_Phdr* phdr, bparser*parser)
     for (int i = 0; i < elf->e_phnum; i++) {
         // ============================ BEGIN PROGRAM METADATA =============================
         const char *type_str = type_p_to_str(phdr[i].p_type);
-
-        char flags[4] = "";
-        if (phdr[i].p_flags & PF_R) strcat(flags, "R");
-        if (phdr[i].p_flags & PF_W) strcat(flags, "W");
-        if (phdr[i].p_flags & PF_X) strcat(flags, "X");
-
-
         printf(COLOR_GREEN 
-            "%-3s %-15s %-8s %-10s %-10s %-10s %-10s %-10s %-10s\n" 
-            COLOR_RESET,
-            "ID", "Type", "Flags", "Offset", "VirtAddr", "PhysAddr", "FileSz", "MemSz", "Align");
-        printf(COLOR_GREEN "%-3d %-15s %-8s 0x%08lx 0x%08lx 0x%08lx 0x%08lx 0x%08lx 0x%08lx\n" COLOR_RESET,
+                "%-3s %-15s %-8s %-10s %-10s %-10s %-10s %-10s %-10s\n" COLOR_RESET,
+                "ID", "Type", "Flags", "Offset", "VirtAddr", "PhysAddr", "FileSz", "MemSz", "Align");
+        char flags[32];
+        format_flags(phdr[i].p_flags, flags, sizeof(flags));
+        printf(COLOR_CYAN "%-3d %-15s %-8s " COLOR_CYAN " 0x%08x 0x%08x 0x%08x 0x%08x 0x%08x 0x%08x\n" COLOR_RESET,
                 i, type_str, flags,
                 phdr[i].p_offset,
                 phdr[i].p_vaddr,
@@ -162,7 +359,7 @@ void dump_elf32_phdr(Elf32_Ehdr *elf, Elf32_Phdr* phdr, bparser*parser)
 
             unsigned char *ptr = (unsigned char*)block;
             for (size_t j = 0; j < phdr[i].p_filesz; j++) {
-                printf("%02x ", ptr[j]);
+                display_byte(&ptr[j]);
                 if ((j + 1) % BLOCK_LENGTH == 0) printf("\n");
             }
             printf("\n\n");
@@ -209,16 +406,15 @@ void dump_elf64_phdr(Elf64_Ehdr *elf, Elf64_Phdr* phdr, bparser*parser)
     for (int i = 0; i < elf->e_phnum; i++) {
         // ============================ BEGIN PROGRAM METADATA =============================
         const char *type_str = type_p_to_str(phdr[i].p_type);
-        char flags[4] = "";
-        if (phdr[i].p_flags & PF_R) strcat(flags, "R");
-        if (phdr[i].p_flags & PF_W) strcat(flags, "W");
-        if (phdr[i].p_flags & PF_X) strcat(flags, "X");
-        printf(COLOR_GREEN 
-            "%-3s %-15s %-8s %-10s %-10s %-10s %-10s %-10s %-10s\n" 
-            COLOR_RESET,
-            "ID", "Type", "Flags", "Offset", "VirtAddr", "PhysAddr", "FileSz", "MemSz", "Align");
 
-        printf(COLOR_GREEN "%-3d %-15s %-8s 0x%08lx 0x%08lx 0x%08lx 0x%08lx 0x%08lx 0x%08lx\n" COLOR_RESET,
+        printf(COLOR_GREEN 
+                "%-3s %-15s %-8s %-10s %-10s %-10s %-10s %-10s %-10s\n" COLOR_RESET,
+                "ID", "Type", "Flags", "Offset", "VirtAddr", "PhysAddr", "FileSz", "MemSz", "Align");
+        char flags[32];
+
+        format_flags(phdr[i].p_flags, flags, sizeof(flags));
+
+        printf(COLOR_CYAN "%-3d %-15s %-8s " COLOR_CYAN " 0x%08lx 0x%08lx 0x%08lx 0x%08lx 0x%08lx 0x%08lx\n" COLOR_RESET,
                 i, type_str, flags,
                 phdr[i].p_offset,
                 phdr[i].p_vaddr,
@@ -246,7 +442,7 @@ void dump_elf64_phdr(Elf64_Ehdr *elf, Elf64_Phdr* phdr, bparser*parser)
 
             unsigned char *ptr = (unsigned char*)block;
             for (size_t j = 0; j < phdr[i].p_filesz; j++) {
-                printf("%02x ", ptr[j]);
+                display_byte(&ptr[j]);
                 if ((j + 1) % BLOCK_LENGTH == 0) printf("\n");
             }
             printf("\n\n");
@@ -257,172 +453,6 @@ void dump_elf64_phdr(Elf64_Ehdr *elf, Elf64_Phdr* phdr, bparser*parser)
     }
 }
 // ========================= END PROGRAM HEADER ==================================
-
-
-// ========================= BEGIN SECTION HEADER ==================================
-/**
- * @brief Dump the section header table of a 32-bit ELF file.
- *
- * This function iterates over the section headers of a 32-bit ELF file
- * and prints human-readable information for each section.  
- *
- * Printed metadata includes:
- * - Section index (ID)
- * - Section name (resolved from the section string table)
- * - Section type (as string and numeric)
- * - Flags (W/A/X)
- * - Virtual address, file offset, and section size
- * - Link, Info, Alignment, and Entry size
- *
- * Raw section bytes:
- * - If a section has size > 0, its contents are read from the ELF file
- *   using @ref bparser_read and printed in hexadecimal format.
- *
- * @param elf Pointer to the ELF header (Elf32_Ehdr).
- * @param shdrs Pointer to the section header table (array of Elf32_Shdr).
- * @param parser Pointer to a bparser structure that provides access to the file data.
- *
- * @note Output is color formatted and written to standard output.
- * @see dump_elf64_shdr()
- */
-void dump_elf32_shdr(Elf32_Ehdr* elf , Elf32_Shdr* shdrs, bparser* parser) {
-    Elf32_Shdr shstr = shdrs[elf->e_shstrndx];
-    const char* shstrtab = (const char*)(parser->block + shstr.sh_offset);
-    printf(COLOR_BLUE "\n=== Section Headers ===\n" COLOR_RESET);
-    print_section_header_legend();
-
-    for (int i = 0; i < elf->e_shnum; i++) {
-        // ============================ BEGIN SECTION METADATA =============================
-        // Section name
-        const char* name = &shstrtab[shdrs[i].sh_name];
-
-        // Type
-        const char* type_str = sh_type_to_str(shdrs[i].sh_type);
-
-        // Flags
-        char flags[8] = "";
-        if (shdrs[i].sh_flags & SHF_WRITE)     strcat(flags, "W");
-        if (shdrs[i].sh_flags & SHF_ALLOC)     strcat(flags, "A");
-        if (shdrs[i].sh_flags & SHF_EXECINSTR) strcat(flags, "X");
-
-        printf(COLOR_GREEN 
-                "%-3s %-20s %-10s %-6s %-10s %-10s %-8s %-5s %-5s %-10s %-10s\n" 
-                COLOR_RESET,
-                "ID", "Name", "Type", "Flags", "Addr", "Offset", "Size", "Link", "Info", "Align", "EntSize");
-        char* color = COLOR_CYAN;
-        printf("%s%-3d %-20s %-10s %-6s 0x%08lx 0x%08lx 0x%08lx %-5d %-5d 0x%08lx 0x%08lx\n" 
-                COLOR_RESET,
-                color,
-                i, name, type_str, flags,
-                shdrs[i].sh_addr,
-                shdrs[i].sh_offset,
-                shdrs[i].sh_size,
-                shdrs[i].sh_link,
-                shdrs[i].sh_info,
-                shdrs[i].sh_addralign,
-                shdrs[i].sh_entsize);
-        // ============================ END SECTION METADATA =============================
-        
-
-        // ============================ BEGIN SECTION BODY =============================
-        if (shdrs[i].sh_size > 0) {
-            void* block = malloc(shdrs[i].sh_size);
-            bparser_read(parser, block, shdrs[i].sh_offset, shdrs[i].sh_size);
-
-            printf(COLOR_YELLOW "Section [%d] %s bytes:\n" COLOR_RESET, i, name);
-            unsigned char* ptr = (unsigned char*)block;
-            for (size_t j = 0; j < shdrs[i].sh_size; j++) {
-                printf("%02x ", ptr[j]);
-                if ((j + 1) % BLOCK_LENGTH  == 0) printf("\n");
-            }
-            printf("\n\n");
-
-            free(block);
-        }
-        // ============================ END SECTION BODY =============================
-    }
-
-}
-
-/**
- * @brief Dump the section header table of a 64-bit ELF file.
- *
- * This function iterates over the section headers of a 64-bit ELF file
- * and prints human-readable information for each section.  
- *
- * Printed metadata includes:
- * - Section index (ID)
- * - Section name (resolved from the section string table)
- * - Section type (as string and numeric)
- * - Flags (W/A/X)
- * - Virtual address, file offset, and section size
- * - Link, Info, Alignment, and Entry size
- *
- * Raw section bytes:
- * - If a section has size > 0, its contents are read from the ELF file
- *   using @ref bparser_read and printed in hexadecimal format.
- *
- * @param elf Pointer to the ELF header (Elf64_Ehdr).
- * @param shdrs Pointer to the section header table (array of Elf64_Shdr).
- * @param parser Pointer to a bparser structure that provides access to the file data.
- *
- * @note Output is color formatted and written to standard output.
- * @see dump_elf32_shdr()
- */
-void dump_elf64_shdr(Elf64_Ehdr* elf , Elf64_Shdr* shdrs, bparser* parser) {
-    Elf64_Shdr shstr = shdrs[elf->e_shstrndx];
-    const char* shstrtab = (const char*)(parser->block + shstr.sh_offset);
-    printf(COLOR_BLUE "\n=== Section Headers ===\n" COLOR_RESET);
-    print_section_header_legend();
-    for (int i = 0; i < elf->e_shnum; i++) {
-        // ============================ BEGIN SECTION METADATA =============================
-        // Section name
-        const char* name = &shstrtab[shdrs[i].sh_name];
-        // Type
-        const char* type_str = sh_type_to_str(shdrs[i].sh_type);
-
-        // Flags
-        char flags[8] = "";
-        if (shdrs[i].sh_flags & SHF_WRITE)     strcat(flags, "W");
-        if (shdrs[i].sh_flags & SHF_ALLOC)     strcat(flags, "A");
-        if (shdrs[i].sh_flags & SHF_EXECINSTR) strcat(flags, "X");
-
-        char* color = COLOR_CYAN;
-        printf(COLOR_GREEN 
-                "%-3s %-20s %-10s %-6s %-10s %-10s %-8s %-5s %-5s %-10s %-10s\n" 
-                COLOR_RESET,
-                "ID", "Name", "Type", "Flags", "Addr", "Offset", "Size", "Link", "Info", "Align", "EntSize");
-
-        printf("%s%-3d %-20s %-10s %-6s 0x%08lx 0x%08lx 0x%08lx %-5d %-5d 0x%08lx 0x%08lx\n" 
-                COLOR_RESET,
-                color,
-                i, name, type_str, flags,
-                shdrs[i].sh_addr,
-                shdrs[i].sh_offset,
-                shdrs[i].sh_size,
-                shdrs[i].sh_link,
-                shdrs[i].sh_info,
-                shdrs[i].sh_addralign,
-                shdrs[i].sh_entsize);
-        // ============================ END SECTION METADATA =============================
-
-        // ============================ BEGIN SECTION BODY =============================
-        if (shdrs[i].sh_size > 0) {
-            void* block = malloc(shdrs[i].sh_size);
-            bparser_read(parser, block, shdrs[i].sh_offset, shdrs[i].sh_size);
-            printf(COLOR_YELLOW "Section [%d] %s bytes:\n" COLOR_RESET, i, name);
-            unsigned char* ptr = (unsigned char*)block;
-            for (size_t j = 0; j < shdrs[i].sh_size; j++) {
-                printf("%02x ", ptr[j]);
-                if ((j + 1) % BLOCK_LENGTH  == 0) printf("\n");
-            }
-            printf("\n\n");
-            free(block);
-        }
-        // ============================ END SECTION BODY =============================
-    }
-}
-// ========================= END SECTION HEADER ==================================
 
 /**
  * @brief Print high-level metadata of an ELF file and dispatch detailed dump functions.
@@ -484,7 +514,7 @@ bool print_meta_data(bparser* parser, void* args) {
         return false;
     }
 
-    printf(COLOR_BLUE "=========================\n" COLOR_RESET);
+    // printf(COLOR_BLUE "=========================\n" COLOR_RESET);
     return true;
 }
 

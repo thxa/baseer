@@ -77,7 +77,8 @@ baseer_target_t *baseer_open(char *file_path)
 // }
 
 /* =================== Closeing =================== */
-void baseer_close(baseer_target_t *target, int mode)
+// void baseer_close(baseer_target_t *target, int mode)
+void baseer_close(baseer_target_t *target)
 {
     if(!target) return;
 

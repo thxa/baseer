@@ -41,14 +41,50 @@
 #define BASEER_BASE_OFFSET(b, i, sf) (b) + ((i) * (sf))
 
 #define COLOR_RESET      "\033[0m"
-#define COLOR_GREEN      "\033[1;32m"
-#define COLOR_BLUE       "\033[1;34m"
-#define COLOR_YELLOW     "\033[1;33m"
-#define COLOR_RED        "\033[1;31m"
+// Regular colors
+#define COLOR_BLACK      "\033[30m"
+#define COLOR_GRAY       "\033[90m"
+#define COLOR_RED        "\033[31m"
+#define COLOR_GREEN      "\033[32m"
+#define COLOR_YELLOW     "\033[33m"
+#define COLOR_BLUE       "\033[34m"
 #define COLOR_MAGENTA    "\033[35m"
 #define COLOR_CYAN       "\033[36m"
-#define COLOR_RAND(i, c1, c2) (i & 1)?c1:c2;
-#define BLOCK_LENGTH 40
+#define COLOR_WHITE      "\033[37m"
+// Bold (bright) colors
+#define COLOR_BBLACK     "\033[1;30m"
+#define COLOR_BRED       "\033[1;31m"
+#define COLOR_BGREEN     "\033[1;32m"
+#define COLOR_BYELLOW    "\033[1;33m"
+#define COLOR_BBLUE      "\033[1;34m"
+#define COLOR_BMAGENTA   "\033[1;35m"
+#define COLOR_BCYAN      "\033[1;36m"
+#define COLOR_BWHITE     "\033[1;37m"
+// Background colors
+#define COLOR_BG_BLACK   "\033[40m"
+#define COLOR_BG_RED     "\033[41m"
+#define COLOR_BG_GREEN   "\033[42m"
+#define COLOR_BG_YELLOW  "\033[43m"
+#define COLOR_BG_BLUE    "\033[44m"
+#define COLOR_BG_MAGENTA "\033[45m"
+#define COLOR_BG_CYAN    "\033[46m"
+#define COLOR_BG_WHITE   "\033[47m"
+
+
+#define DEFAULT_BLOCK_LENGTH 40
+// #define BLOCK_LENGTH 40
+#define BLOCK_LENGTH (get_block_length())
+
+static inline int get_block_length(void)
+{
+    char *env = getenv("BLOCK_LENGTH");
+    if (env != NULL) {
+        int val = atoi(env);
+        if (val > 0) return val;
+    }
+    return DEFAULT_BLOCK_LENGTH;
+}
+
 
 
 /**
@@ -104,7 +140,8 @@ baseer_target_t *baseer_open(char *file_path);
  * 
  * @param target Pointer to the file target
  */
-void baseer_close(baseer_target_t *target, int mode);
+// void baseer_close(baseer_target_t *target, int mode);
+void baseer_close(baseer_target_t *target);
 
 /**
  * @brief Print a hex dump of the file target

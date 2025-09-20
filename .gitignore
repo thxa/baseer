@@ -41,4 +41,6 @@ a.out
 *.swo
 *~
 
-.vscode
+.vscode/
+
+

@@ -2,7 +2,7 @@
 // #include "modules/default/bx_default.h"
 #include "modules/binhead/bx_binhead.h"
 #include "utils/ui.h"
-#include "utils/flags.h"
+// #include "utils/flags.h"
 
 /**
  * @brief Program entry point
@@ -73,6 +73,7 @@ int main(int argc, char** args)
     }
     
     // Clean up
+    baseer_close(target);
     // if(mem_target) baseer_close(mem_target, MEMORY);
     // if(stream_target) baseer_close(stream_target, STREAM);
 

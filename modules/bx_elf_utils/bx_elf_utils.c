@@ -1,77 +1,151 @@
 #include "bx_elf_utils.h"
 
+// void print_program_header_legend(void)
+// {
+//     printf(COLOR_YELLOW "=== Program Header Types Legend ===\n" COLOR_RESET);
+//     printf("+------------+------------------------------------------+\n");
+//     printf("| Type       | Meaning                                  |\n");
+//     printf("+------------+------------------------------------------+\n");
+//     printf("| NULL       | PT_NULL: Unused entry                    |\n");
+//     printf("| LOAD       | PT_LOAD: Loadable segment                |\n");
+//     printf("| DYNAMIC    | PT_DYNAMIC: Dynamic linking info         |\n");
+//     printf("| INTERP     | PT_INTERP: Interpreter path              |\n");
+//     printf("| NOTE       | PT_NOTE: Auxiliary information           |\n");
+//     printf("| SHLIB      | PT_SHLIB: Reserved                       |\n");
+//     printf("| PHDR       | PT_PHDR: Program header table itself     |\n");
+//     printf("| TLS        | PT_TLS: Thread-Local Storage template    |\n");
+//     printf("| GNU_STACK  | PT_GNU_STACK: Stack flags                |\n");
+//     printf("| GNU_RELRO  | PT_GNU_RELRO: Read-only after relocation |\n");
+//     printf("+------------+------------------------------------------+\n\n");
+
+//     printf(COLOR_YELLOW "=== Program Header Flags Legend ===\n" COLOR_RESET);
+//     printf("+-----+-----------------------------------+\n");
+//     printf("| Flag| Meaning                           |\n");
+//     printf("+-----+-----------------------------------+\n");
+//     printf("| " COLOR_GREEN  " R " COLOR_RESET "  | PF_R: Readable                    |\n");
+//     printf("| " COLOR_RED    " W " COLOR_RESET "  | PF_W: Writable                    |\n");
+//     printf("| " COLOR_YELLOW " X " COLOR_RESET "  | PF_X: Executable                   |\n");
+//     printf("+-----+-----------------------------------+\n\n");
+// }
+
+
 void print_program_header_legend(void)
 {
     printf(COLOR_YELLOW "=== Program Header Types Legend ===\n" COLOR_RESET);
-    printf("+------------+------------------------------------------+\n");
-    printf("| Type       | Meaning                                  |\n");
-    printf("+------------+------------------------------------------+\n");
-    printf("| NULL       | PT_NULL: Unused entry                    |\n");
-    printf("| LOAD       | PT_LOAD: Loadable segment                |\n");
-    printf("| DYNAMIC    | PT_DYNAMIC: Dynamic linking info         |\n");
-    printf("| INTERP     | PT_INTERP: Interpreter path              |\n");
-    printf("| NOTE       | PT_NOTE: Auxiliary information           |\n");
-    printf("| SHLIB      | PT_SHLIB: Reserved                       |\n");
-    printf("| PHDR       | PT_PHDR: Program header table itself     |\n");
-    printf("| TLS        | PT_TLS: Thread-Local Storage template    |\n");
-    printf("| GNU_STACK  | PT_GNU_STACK: Stack flags                |\n");
-    printf("| GNU_RELRO  | PT_GNU_RELRO: Read-only after relocation |\n");
-    printf("+------------+------------------------------------------+\n\n");
+    printf(COLOR_WHITE "+------------+------------------------------------------+\n" COLOR_RESET);
+    printf(COLOR_WHITE "| Type       | Meaning                                  |\n" COLOR_RESET);
+    printf(COLOR_WHITE "+------------+------------------------------------------+\n" COLOR_RESET);
+    printf("| " COLOR_RED   "NULL      " COLOR_RESET " | PT_NULL: Unused entry                    |\n");
+    printf("| " COLOR_CYAN  "LOAD      " COLOR_RESET " | PT_LOAD: Loadable segment                |\n");
+    printf("| " COLOR_MAGENTA "DYNAMIC   " COLOR_RESET " | PT_DYNAMIC: Dynamic linking info         |\n");
+    printf("| " COLOR_GREEN "INTERP    " COLOR_RESET " | PT_INTERP: Interpreter path              |\n");
+    printf("| " COLOR_BLUE  "NOTE      " COLOR_RESET " | PT_NOTE: Auxiliary information           |\n");
+    printf("| " COLOR_WHITE "SHLIB     " COLOR_RESET " | PT_SHLIB: Reserved                       |\n");
+    printf("| " COLOR_YELLOW "PHDR      " COLOR_RESET " | PT_PHDR: Program header table itself     |\n");
+    printf("| " COLOR_CYAN  "TLS       " COLOR_RESET " | PT_TLS: Thread-Local Storage template    |\n");
+    printf("| " COLOR_MAGENTA "GNU_STACK  " COLOR_RESET "| PT_GNU_STACK: Stack flags                |\n");
+    printf("| " COLOR_GREEN "GNU_RELRO  " COLOR_RESET "| PT_GNU_RELRO: Read-only after relocation |\n");
+    printf(COLOR_WHITE "+------------+------------------------------------------+\n\n" COLOR_RESET);
 
     printf(COLOR_YELLOW "=== Program Header Flags Legend ===\n" COLOR_RESET);
-    printf("+-----+-----------------------------------+\n");
-    printf("| Flag| Meaning                           |\n");
-    printf("+-----+-----------------------------------+\n");
+    printf(COLOR_WHITE "+-----+-----------------------------------+\n" COLOR_RESET);
+    printf(COLOR_WHITE "| Flag| Meaning                           |\n" COLOR_RESET);
+    printf(COLOR_WHITE "+-----+-----------------------------------+\n" COLOR_RESET);
     printf("| " COLOR_GREEN  " R " COLOR_RESET "  | PF_R: Readable                    |\n");
     printf("| " COLOR_RED    " W " COLOR_RESET "  | PF_W: Writable                    |\n");
-    printf("| " COLOR_YELLOW " X " COLOR_RESET "  | PF_X: Executable                   |\n");
-    printf("+-----+-----------------------------------+\n\n");
+    printf("| " COLOR_YELLOW " X " COLOR_RESET "  | PF_X: Executable                  |\n");
+    printf(COLOR_WHITE "+-----+-----------------------------------+\n\n" COLOR_RESET);
 }
+
+
+
+// void print_section_header_legend(void)
+// {
+//     printf(COLOR_YELLOW "=== Section Header Flags Legend ===\n" COLOR_RESET);
+//     printf("+-----+-----------------------------------+\n");
+//     printf("| Flag| Meaning                           |\n");
+//     printf("+-----+-----------------------------------+\n");
+//     printf("|  W  | SHF_WRITE: Writable               |\n");
+//     printf("|  A  | SHF_ALLOC: Occupies memory        |\n");
+//     printf("|  X  | SHF_EXECINSTR: Executable code    |\n");
+//     printf("|  M  | SHF_MERGE: Might be merged        |\n");
+//     printf("|  S  | SHF_STRINGS: Contains strings     |\n");
+//     printf("|  I  | SHF_INFO_LINK: sh_info contains   |\n");
+//     printf("|     | special meaning                   |\n");
+//     printf("|  L  | SHF_LINK_ORDER: Link order        |\n");
+//     printf("|  O  | SHF_OS_NONCONFORMING: OS specific |\n");
+//     printf("|  G  | SHF_GROUP: Section group          |\n");
+//     printf("|  T  | SHF_TLS: Thread-Local Storage     |\n");
+//     printf("+-----+-----------------------------------+\n\n");
+
+
+//     printf(COLOR_YELLOW "=== Section Header Types Legend ===\n" COLOR_RESET);
+//     printf("+---------------------+-----------------------------------+\n");
+//     printf("| Type                | Meaning                           |\n");
+//     printf("+---------------------+-----------------------------------+\n");
+//     printf("| NULL                | SHT_NULL: Unused section          |\n");
+//     printf("| PROGBITS            | SHT_PROGBITS: Program-defined data|\n");
+//     printf("| SYMTAB              | SHT_SYMTAB: Symbol table          |\n");
+//     printf("| STRTAB              | SHT_STRTAB: String table          |\n");
+//     printf("| RELA                | SHT_RELA: Relocation with addends |\n");
+//     printf("| HASH                | SHT_HASH: Symbol hash table       |\n");
+//     printf("| DYNAMIC             | SHT_DYNAMIC: Dynamic linking info |\n");
+//     printf("| NOTE                | SHT_NOTE: Auxiliary information   |\n");
+//     printf("| NOBITS              | SHT_NOBITS: Occupies no file space|\n");
+//     printf("| REL                 | SHT_REL: Relocation without addends|\n");
+//     printf("| SHLIB               | SHT_SHLIB: Reserved               |\n");
+//     printf("| DYNSYM              | SHT_DYNSYM: Dynamic symbol table  |\n");
+//     printf("| INIT_ARRAY          | SHT_INIT_ARRAY: Constructors array|\n");
+//     printf("| FINI_ARRAY          | SHT_FINI_ARRAY: Destructors array |\n");
+//     printf("| PREINIT_ARRAY       | SHT_PREINIT_ARRAY: Pre-initializers|\n");
+//     printf("| GROUP               | SHT_GROUP: Section group          |\n");
+//     printf("| SYMTAB_SHNDX        | SHT_SYMTAB_SHNDX: Extended indices|\n");
+//     printf("+---------------------+-----------------------------------+\n\n");
+// }
 
 
 void print_section_header_legend(void)
 {
     printf(COLOR_YELLOW "=== Section Header Flags Legend ===\n" COLOR_RESET);
-    printf("+-----+-----------------------------------+\n");
-    printf("| Flag| Meaning                           |\n");
-    printf("+-----+-----------------------------------+\n");
-    printf("|  W  | SHF_WRITE: Writable               |\n");
-    printf("|  A  | SHF_ALLOC: Occupies memory        |\n");
-    printf("|  X  | SHF_EXECINSTR: Executable code    |\n");
-    printf("|  M  | SHF_MERGE: Might be merged        |\n");
-    printf("|  S  | SHF_STRINGS: Contains strings     |\n");
-    printf("|  I  | SHF_INFO_LINK: sh_info contains   |\n");
-    printf("|     | special meaning                   |\n");
-    printf("|  L  | SHF_LINK_ORDER: Link order        |\n");
-    printf("|  O  | SHF_OS_NONCONFORMING: OS specific |\n");
-    printf("|  G  | SHF_GROUP: Section group          |\n");
-    printf("|  T  | SHF_TLS: Thread-Local Storage     |\n");
-    printf("+-----+-----------------------------------+\n\n");
-
+    printf(COLOR_WHITE "+-----+-----------------------------------+\n" COLOR_RESET);
+    printf(COLOR_WHITE "| Flag| Meaning                           |\n" COLOR_RESET);
+    printf(COLOR_WHITE "+-----+-----------------------------------+\n" COLOR_RESET);
+    printf("|" COLOR_RED    " W " COLOR_RESET "| SHF_WRITE: Writable                 |\n");
+    printf("|" COLOR_GREEN  " A " COLOR_RESET "| SHF_ALLOC: Occupies memory          |\n");
+    printf("|" COLOR_YELLOW " X " COLOR_RESET "| SHF_EXECINSTR: Executable code      |\n");
+    printf("|" COLOR_CYAN   " M " COLOR_RESET "| SHF_MERGE: Might be merged          |\n");
+    printf("|" COLOR_MAGENTA " S " COLOR_RESET "| SHF_STRINGS: Contains strings       |\n");
+    printf("|" COLOR_WHITE  " I " COLOR_RESET "| SHF_INFO_LINK: sh_info contains special meaning |\n");
+    printf("|" COLOR_BLUE   " L " COLOR_RESET "| SHF_LINK_ORDER: Link order          |\n");
+    printf("|" COLOR_GRAY   " O " COLOR_RESET "| SHF_OS_NONCONFORMING: OS specific   |\n");
+    printf("|" COLOR_CYAN   " G " COLOR_RESET "| SHF_GROUP: Section group            |\n");
+    printf("|" COLOR_YELLOW " T " COLOR_RESET "| SHF_TLS: Thread-Local Storage       |\n");
+    printf(COLOR_WHITE "+-----+-----------------------------------+\n\n" COLOR_RESET);
 
     printf(COLOR_YELLOW "=== Section Header Types Legend ===\n" COLOR_RESET);
-    printf("+---------------------+-----------------------------------+\n");
-    printf("| Type                | Meaning                           |\n");
-    printf("+---------------------+-----------------------------------+\n");
-    printf("| NULL                | SHT_NULL: Unused section          |\n");
-    printf("| PROGBITS            | SHT_PROGBITS: Program-defined data|\n");
-    printf("| SYMTAB              | SHT_SYMTAB: Symbol table          |\n");
-    printf("| STRTAB              | SHT_STRTAB: String table          |\n");
-    printf("| RELA                | SHT_RELA: Relocation with addends |\n");
-    printf("| HASH                | SHT_HASH: Symbol hash table       |\n");
-    printf("| DYNAMIC             | SHT_DYNAMIC: Dynamic linking info |\n");
-    printf("| NOTE                | SHT_NOTE: Auxiliary information   |\n");
-    printf("| NOBITS              | SHT_NOBITS: Occupies no file space|\n");
-    printf("| REL                 | SHT_REL: Relocation without addends|\n");
-    printf("| SHLIB               | SHT_SHLIB: Reserved               |\n");
-    printf("| DYNSYM              | SHT_DYNSYM: Dynamic symbol table  |\n");
-    printf("| INIT_ARRAY          | SHT_INIT_ARRAY: Constructors array|\n");
-    printf("| FINI_ARRAY          | SHT_FINI_ARRAY: Destructors array |\n");
-    printf("| PREINIT_ARRAY       | SHT_PREINIT_ARRAY: Pre-initializers|\n");
-    printf("| GROUP               | SHT_GROUP: Section group          |\n");
-    printf("| SYMTAB_SHNDX        | SHT_SYMTAB_SHNDX: Extended indices|\n");
-    printf("+---------------------+-----------------------------------+\n\n");
+    printf(COLOR_WHITE "+---------------------+-----------------------------------+\n" COLOR_RESET);
+    printf(COLOR_WHITE "| Type                | Meaning                           |\n" COLOR_RESET);
+    printf(COLOR_WHITE "+---------------------+-----------------------------------+\n" COLOR_RESET);
+    printf("| " COLOR_RED     "NULL                " COLOR_RESET "| SHT_NULL: Unused section          |\n");
+    printf("| " COLOR_CYAN    "PROGBITS            " COLOR_RESET "| SHT_PROGBITS: Program-defined data|\n");
+    printf("| " COLOR_MAGENTA "SYMTAB              " COLOR_RESET "| SHT_SYMTAB: Symbol table          |\n");
+    printf("| " COLOR_GREEN   "STRTAB              " COLOR_RESET "| SHT_STRTAB: String table          |\n");
+    printf("| " COLOR_YELLOW  "RELA                " COLOR_RESET "| SHT_RELA: Relocation with addends |\n");
+    printf("| " COLOR_BLUE    "HASH                " COLOR_RESET "| SHT_HASH: Symbol hash table       |\n");
+    printf("| " COLOR_CYAN    "DYNAMIC             " COLOR_RESET "| SHT_DYNAMIC: Dynamic linking info |\n");
+    printf("| " COLOR_MAGENTA "NOTE                " COLOR_RESET "| SHT_NOTE: Auxiliary information   |\n");
+    printf("| " COLOR_GRAY    "NOBITS              " COLOR_RESET "| SHT_NOBITS: Occupies no file space|\n");
+    printf("| " COLOR_WHITE   "REL                 " COLOR_RESET "| SHT_REL: Relocation without addends|\n");
+    printf("| " COLOR_RED     "SHLIB               " COLOR_RESET "| SHT_SHLIB: Reserved               |\n");
+    printf("| " COLOR_GREEN   "DYNSYM              " COLOR_RESET "| SHT_DYNSYM: Dynamic symbol table  |\n");
+    printf("| " COLOR_YELLOW  "INIT_ARRAY          " COLOR_RESET "| SHT_INIT_ARRAY: Constructors array|\n");
+    printf("| " COLOR_BLUE    "FINI_ARRAY          " COLOR_RESET "| SHT_FINI_ARRAY: Destructors array |\n");
+    printf("| " COLOR_CYAN    "PREINIT_ARRAY       " COLOR_RESET "| SHT_PREINIT_ARRAY: Pre-initializers|\n");
+    printf("| " COLOR_MAGENTA "GROUP               " COLOR_RESET "| SHT_GROUP: Section group          |\n");
+    printf("| " COLOR_WHITE   "SYMTAB_SHNDX        " COLOR_RESET "| SHT_SYMTAB_SHNDX: Extended indices|\n");
+    printf(COLOR_WHITE "+---------------------+-----------------------------------+\n\n" COLOR_RESET);
 }
+
 
 const char* elf_machine_to_str(unsigned int machine)
 {

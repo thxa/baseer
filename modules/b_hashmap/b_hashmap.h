@@ -2,14 +2,14 @@
 #include "string.h"
 #define TABLE_SIZE 200
 
-typedef struct func {
+typedef struct bht_node {
     char *name;
-    void *func_p;
-    struct func *next;
-} func_t;
+    void *bht_node_p;
+    struct bht_node *next;
+} bht_node_t;
 
 typedef struct {
-    func_t *buckets[TABLE_SIZE];
+    bht_node_t *buckets[TABLE_SIZE];
 } hashmap_t;
 
 

@@ -43,7 +43,7 @@ size_t bparser_read(bparser* parser, void* buf, unsigned int pos, size_t size) {
             return fread(buf, 1, size, parser->fp);
 
         case BASEER_MODE_BOTH:
-            if (parser->block && pos + size <= parser->size) {
+            if (parser->block && pos + size < parser->size) {
                 memcpy(buf, (unsigned char*)parser->block + pos, size);
                 return size;
             } else if (parser->fp) {

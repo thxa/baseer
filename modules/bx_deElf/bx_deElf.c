@@ -25,18 +25,16 @@ static int dump_to_temp_file(bparser *parser, const char *path) {
         return -1;
     }
 
-    unsigned char buffer[8192];
-    size_t bytesRead;
+    unsigned char buffer[parser->size];
     unsigned int offset = 0; // new
 
-    while ((bytesRead = bparser_read(parser, buffer, offset, sizeof(buffer))) > 0) {
-        offset += (unsigned int)bytesRead; // new
-        if (fwrite(buffer, 1, bytesRead, out) != bytesRead) {
-            perror("fwrite");
-            fclose(out);
-            return -1;
-        }
+    bparser_read(parser, buffer, offset, parser->size);
+    if (fwrite(buffer, 1, parser->size, out) != parser->size) {
+        perror("fwrite");
+        fclose(out);
+        return -1;
     }
+
 
     // Optional: check if bparser_read failed
     if (ferror(out)) {

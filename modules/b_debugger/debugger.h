@@ -16,7 +16,6 @@ typedef bool (*func_callback_t)(context *ctx,void *args);
 typedef struct{
     char *op;
     uint64_t addr;
-    uint64_t extra;
 }Cmd;
 struct sym_list{
     char *name;
@@ -57,7 +56,7 @@ struct e_FLAGS{
     char *FLAG_NAME;
     int offset;
 };
-void destroy_bp(bp *bpoint);
+void destroy_bp_sym(context *ctx);
 void destroy_all(context *ctx);
 void print_helpCMD();
 void init_values(bparser *target,context *ctx);
@@ -68,6 +67,7 @@ bool setBP(context *ctx, void *args);
 bool delBP(context *ctx, void *args);
 bool step_over(context *ctx,void *args);
 bool listBP(context *ctx, void *args);
+bool examin_mem(context *ctx,void *args);
 void restore_all_BP(context *ctx,int opt);
 bool handle_action(context *ctx,void *);
 void parse_cmd(context *ctx);
@@ -76,6 +76,7 @@ static func_list cmds[] = {
     {"dp",delBP},
     {"lp",listBP},
     {"so",step_over},
+    {"x",examin_mem},
     {"h",handle_action},
     {"c",handle_action},
     {"q",handle_action},

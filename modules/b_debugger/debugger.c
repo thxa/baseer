@@ -114,7 +114,7 @@ bool handle_action(context *ctx,void *args){
  *
  */
 void print_helpCMD(){
-	printf("bp    : set breakpoint {ex: bp 0x12354}\n");
+	printf("bp    : set breakpoint {ex: bp 0x12354 or bp func_name}\n");
 	printf("dp    : delete breakpoint {ex: dp breakpoint_id}\n");
 	printf("lp    : list all breakpoints {ex: lp}\n");
 	printf("si    : take one step execution (step into) {ex: si}\n");
@@ -122,8 +122,53 @@ void print_helpCMD(){
 	printf("c     : continue execution {ex: c}\n");
 	printf("h     : display help commands {ex: h}\n");
 	printf("vmmap : display maps memory {ex: vmmap}\n");
-	printf("i     : display function info {ex: i}\n");
+	printf("i     : display functions name and address {ex: i}\n");
+	printf("x     : examin value in memory {ex: x addr size : x 0x1234 10}\n");
 }
+
+bool examin_mem(context *ctx,void *args){
+	char *arg = (char*)args;
+	while(isspace((unsigned char)*arg)) arg++;
+	uint64_t addr = 0 ;
+	uint64_t size = 0 ;
+	uint32_t counter = 0 ;
+	char *tokens[2] = {0};
+	char *token = strtok(arg," ");
+	while(token != NULL && counter < 2){
+		tokens[counter++] = token;
+		token = strtok(NULL," ");
+	}
+	if(counter == 2){
+		addr = strtoul(tokens[0],NULL,16);
+		size = strtoul(tokens[1],NULL,10);
+	}else {
+		addr = strtoul(tokens[0],NULL,16);
+		size = 1;
+	}
+
+	char *fmt = (ctx->arch == 64) ? " 0x%016llx" : " 0x%08x";
+	for (int i = 0; i < size; i++) {
+
+		long v = ptrace(PTRACE_PEEKDATA, ctx->pid, 
+				(void*)(addr + i*(ctx->arch / 8 )), NULL);
+		if(v == -1){
+			printf("wrong address \n");
+			return true;
+		}
+		if(i % 2 == 0 ){
+			printf(COLOR_YELLOW "0x%llx" COLOR_RESET " : " , 
+				(addr + i * (ctx->arch / 8 )), v);
+			printf(fmt,v);
+
+		}else {
+			printf(fmt ,v);
+			printf("\n");
+		}
+	}
+	return true;
+}
+
+
 /**
  * @brief delete a breakpoint. 
  *
@@ -244,7 +289,7 @@ bool setBP(context *ctx, void* args){
 	if(is_str){
 		addr = find_sym(ctx, token);
 		if(addr == 0){
-			printf("undind symbol %s \n",token);
+			printf("undefined symbol %s \n",token);
 			return true;
 		}
 	}else {
@@ -405,14 +450,13 @@ void dis_ctx(context *ctx){
 	}
 
 	printf(COLOR_YELLOW "------------- stack ----------------\n" COLOR_RESET);
+	char *fmt = (ctx->arch == 64) ? " 0x%llx" : " 0x%x";
+	int data_len = ctx->arch / 8;
 	for(int i = 0; i < 10; i++) {
-		if(ctx->arch == 64){
-			long v = ptrace(PTRACE_PEEKDATA, ctx->pid, (void*)(ctx->regs.rsp + i*8), NULL);
-			printf(COLOR_YELLOW "\t0x%llx" COLOR_RESET " =>" COLOR_BLUE " 0x%lx\n"COLOR_RESET, (ctx->regs.rsp + i *8), v);
-		}else {
-			long v = ptrace(PTRACE_PEEKDATA, ctx->pid, (void*)(ctx->regs.rsp + i*4), NULL);
-			printf(COLOR_YELLOW "\t0x%llx" COLOR_RESET " =>"COLOR_BLUE " 0x%04x\n"COLOR_RESET, (ctx->regs.rsp + i *4), v);
-		}
+		long v = ptrace(PTRACE_PEEKDATA, ctx->pid, (void*)(ctx->regs.rsp + i*data_len), NULL);
+		printf(COLOR_YELLOW "\t0x%llx" COLOR_RESET " =>" COLOR_BLUE , (ctx->regs.rsp + i *data_len));
+		printf(fmt,v);
+		printf("\n" COLOR_RESET);
 	}
 
 }
@@ -443,25 +487,21 @@ void init_values(bparser *target, context *ctx){
 	if(ehdr->e_ident[EI_CLASS] == ELFCLASS32){
 		ctx->arch = 32;
 		ctx->entry = ctx->entry & 0xffffffff;
+
 		Elf32_Ehdr *ehdr = (Elf32_Ehdr*)target->block;
 		Elf32_Shdr *shdr = target->block + ehdr->e_shoff;
-
 		if (ehdr->e_shnum != 0) {
 			for (int i = 0; i < ehdr->e_shnum; i++) {
 				if (shdr[i].sh_type == SHT_SYMTAB) {
 					Elf32_Sym *syms = target->block + shdr[i].sh_offset;
 					Elf32_Shdr *strtab_hdr = &shdr[shdr[i].sh_link];
 					char *strtab = (char*)target->block + strtab_hdr->sh_offset;
-
 					int num = shdr[i].sh_size / shdr[i].sh_entsize;
 					for (int j = 0; j < num; j++) {
-						if (ELF32_ST_TYPE(syms[j].st_info) == STT_FUNC &&
-							syms[j].st_shndx != SHN_UNDEF) {
-
+						if (ELF32_ST_TYPE(syms[j].st_info) == STT_FUNC && syms[j].st_shndx != SHN_UNDEF) {
 							char *name = strtab + syms[j].st_name;
 							if (*name) {
 								sym_list *sym = malloc(sizeof(sym_list));
-
 								sym->name = strdup(name);
 								sym->addr = (ctx->base & 1) ? syms[j].st_value : ctx->base + syms[j].st_value;
 								sym->next = NULL;
@@ -516,17 +556,26 @@ void init_values(bparser *target, context *ctx){
 		}
 	}
 }
-void destroy_bp(bp *bpoint){
-	bp *ptr = bpoint;
+void destroy_bp_sym(context *ctx){
+	bp *ptr = ctx->list->first;
 	bp *tmp = NULL;
 	while (ptr != NULL) {
 		tmp = ptr->next;
 		free(ptr);
 		ptr = tmp;
 	}
+
+
+	sym_list *ptr1 = ctx->sym;
+	sym_list *temp = NULL;
+	while (ptr != NULL) {
+		temp = ptr1->next;
+		free(ptr1);
+		ptr1 = temp;
+	}
 }
 void destroy_all(context *ctx){
-	destroy_bp(ctx->list->first);
+	destroy_bp_sym(ctx);
 	free(ctx->list);
 	ctx->list = NULL;
 	free(ctx);
@@ -611,7 +660,6 @@ bool b_debugger(bparser *target, void *arg){
 			free(ctx->cmd.op);
 			ctx->cmd.op = 0;
 			ctx->cmd.addr = 0;
-			ctx->cmd.extra = 0;
 		}
 	}
 

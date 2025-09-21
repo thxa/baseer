@@ -51,9 +51,9 @@ void print_program_header_legend(void)
     printf(COLOR_WHITE "+-----+-----------------------------------+\n" COLOR_RESET);
     printf(COLOR_WHITE "| Flag| Meaning                           |\n" COLOR_RESET);
     printf(COLOR_WHITE "+-----+-----------------------------------+\n" COLOR_RESET);
-    printf("| " COLOR_GREEN  " R " COLOR_RESET "  | PF_R: Readable                    |\n");
-    printf("| " COLOR_RED    " W " COLOR_RESET "  | PF_W: Writable                    |\n");
-    printf("| " COLOR_YELLOW " X " COLOR_RESET "  | PF_X: Executable                  |\n");
+    printf("| " COLOR_GREEN  " R " COLOR_RESET "  | PF_R: Readable                   |\n");
+    printf("| " COLOR_RED    " W " COLOR_RESET "  | PF_W: Writable                   |\n");
+    printf("| " COLOR_YELLOW " X " COLOR_RESET "  | PF_X: Executable                 |\n");
     printf(COLOR_WHITE "+-----+-----------------------------------+\n\n" COLOR_RESET);
 }
 

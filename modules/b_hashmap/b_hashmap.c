@@ -17,7 +17,8 @@
  * @param key Null-terminated string key.
  * @return unsigned int Hash value within the range [0, TABLE_SIZE).
  */
-unsigned int hash(const char *key) {
+unsigned int hash(const char *key)
+{
     unsigned long hash = 5381;
     int c;
     while ((c = *key++))
@@ -32,7 +33,8 @@ unsigned int hash(const char *key) {
  *
  * @return hashmap_t* Pointer to newly allocated hashmap.
  */
-hashmap_t *create_map() {
+hashmap_t *create_map(void)
+{
     hashmap_t *map = malloc(sizeof(hashmap_t));
     for (int i = 0; i < TABLE_SIZE; i++)
         map->buckets[i] = NULL;
@@ -50,7 +52,8 @@ hashmap_t *create_map() {
  * @param name Null-terminated string key.
  * @param bht_node_p Pointer to the value to store.
  */
-void insert(hashmap_t *map, const char *name, void *bht_node_p) {
+void insert(hashmap_t *map, const char *name, void *bht_node_p)
+{
     unsigned int index = hash(name);
     bht_node_t *new_bht_node = malloc(sizeof(bht_node_t));
     new_bht_node->name = strdup(name);
@@ -69,7 +72,8 @@ void insert(hashmap_t *map, const char *name, void *bht_node_p) {
  * @param name Null-terminated string key.
  * @return void* Pointer to stored value, or NULL if not found.
  */
-void* get(hashmap_t *map, const char *name) {
+void* get(hashmap_t *map, const char *name)
+{
     unsigned int index = hash(name);
     bht_node_t *bht_node = map->buckets[index];
     while (bht_node != NULL) {
@@ -89,7 +93,8 @@ void* get(hashmap_t *map, const char *name) {
  *
  * @param map Pointer to hashmap.
  */
-void free_map(hashmap_t *map) {
+void free_map(hashmap_t *map)
+{
     for (int i = 0; i < TABLE_SIZE; i++) {
         bht_node_t *bht_node = map->buckets[i];
         while (bht_node != NULL) {

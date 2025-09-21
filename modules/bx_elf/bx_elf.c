@@ -7,17 +7,31 @@ bool bx_elf(bparser* parser, void *arg)
     // printf("This is from elf: %d\n", argc);
     // printf("This is from elf: %s\n", args_4);
 
-    if(strcmp("-m", args[2]) == 0) {
-        bparser_apply(parser, print_meta_data, arg);
-        // print_meta_data(parser);
-    } else if (strcmp("-a", args[2]) == 0) {
-        bparser_apply(parser, print_elf_disasm, arg);
-    } else if(strcmp("-d", args[2]) == 0) {
-        bparser_apply(parser, b_debugger, arg);
-    } else if (strcmp("-c", args[2]) == 0) {
-        bparser_apply(parser, decompile_elf, arg);
-    }else {
-        printf("Not %s implement yet.", args[2]);
+    // if(strcmp("-m", args[2]) == 0) {
+    //     bparser_apply(parser, print_meta_data, arg);
+    //     // print_meta_data(parser);
+    // } else if (strcmp("-a", args[2]) == 0) {
+    //     bparser_apply(parser, print_elf_disasm, arg);
+    // } else if(strcmp("-d", args[2]) == 0) {
+    //     bparser_apply(parser, b_debugger, arg);
+    // } else if (strcmp("-c", args[2]) == 0) {
+    //     bparser_apply(parser, decompile_elf, arg);
+    // }else {
+    //     printf("Not %s implement yet.", args[2]);
+    // }
+
+    for(int i = 2; i < argc; i++) {
+        if(strcmp("-m", args[i]) == 0) {
+            bparser_apply(parser, print_meta_data, arg);
+        } else if (strcmp("-a", args[i]) == 0) {
+            bparser_apply(parser, print_elf_disasm, arg);
+        } else if(strcmp("-d", args[i]) == 0) {
+            bparser_apply(parser, b_debugger, arg);
+        } else if (strcmp("-c", args[i]) == 0) {
+            bparser_apply(parser, decompile_elf, arg);
+        }else {
+            fprintf(stderr, "[!] Unsupported flag: %s\n", args[i]);
+        }
     }
 
     return true;

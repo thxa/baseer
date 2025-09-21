@@ -73,6 +73,7 @@
 
 #define DEFAULT_BLOCK_LENGTH 40
 // #define BLOCK_LENGTH 40
+
 #define BLOCK_LENGTH (get_block_length())
 
 static inline int get_block_length(void)
@@ -95,18 +96,23 @@ typedef struct {
     char**args;
 } inputs;
 
+/**
+ * @brief Enum representing file access modes
+ */
 typedef enum {
-    STREAM,
-    MEMORY
-} file_mode;
+    BASEER_MODE_MEMORY,
+    BASEER_MODE_STREAM,
+    BASEER_MODE_BOTH
+} baseer_mode_t;
 
 /**
  * @brief Struct representing a file target in memory or streaming mode.
  */
 typedef struct baseer_target_t {
-    FILE* fp;
-    unsigned int size; /**< File size in bytes */
-    void *block;       /**< Memory block or FILE* cast */
+    FILE* fp;           /**< File pointer */
+    baseer_mode_t mode; /**< File access mode */
+    unsigned int size;  /**< File size in bytes */
+    void *block;        /**< Memory block or FILE* cast */
 } baseer_target_t;
 
 /**
@@ -119,28 +125,20 @@ typedef struct baseer_target_t {
 typedef bool (*baseer_callback_t)(baseer_target_t *, void *arg);
 
 /**
- * @brief Open a file fully loaded into memory
+ * @brief Open a file in specified mode (memory, streaming, or both)
  * 
  * @param file_path Path to the file
+ * @param mode Access mode (MEMORY, STREAM, BOTH)
  * @return Pointer to baseer_target_t on success, NULL on failure
  */
 // baseer_target_t *baseer_open_memory(char *file_path);
-baseer_target_t *baseer_open(char *file_path);
-
-/**
- * @brief Open a file in streaming mode (FILE*) without full memory load
- * 
- * @param file_path Path to the file
- * @return Pointer to baseer_target_t on success, NULL on failure
- */
-// baseer_target_t *baseer_open_file(char *file_path);
+baseer_target_t *baseer_open(char *file_path, baseer_mode_t mode);
 
 /**
  * @brief Close a file target and free associated resources
  * 
  * @param target Pointer to the file target
  */
-// void baseer_close(baseer_target_t *target, int mode);
 void baseer_close(baseer_target_t *target);
 
 /**

@@ -14,34 +14,13 @@
 #include "../../baseer.h"
 
 /**
- * @brief Parser type: memory or streaming
- */
-// typedef enum {
-//     BPARSER_FILE,
-//     BPARSER_MEM
-// } bparser_type;
-
-/**
- * @brief Memory source for the parser
- */
-// typedef struct {
-//     const void *data;
-//     size_t size;
-// } bparser_mem_t;
-
-/**
  * @brief Parser object
  */
 typedef struct {
-    // union {
-        FILE *fp;
-        const void *block;
-        size_t size;
-        // void *mem;
-        // bparser_mem_t mem;
-    // } source;
-
-    // bparser_type type;
+    baseer_mode_t mode;
+    FILE *fp;
+    size_t size;
+    const void *block;
 } bparser;
 
 /**

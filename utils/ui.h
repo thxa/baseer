@@ -11,5 +11,6 @@
  * @brief Prints the Baseer banner.
  */
 void print_banner(void);
+void print_usage(void);
 
 #endif

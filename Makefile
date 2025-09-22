@@ -3,10 +3,10 @@
 CC      = gcc
 CFLAGS  = -Wall -fPIC
 LDFLAGS = -ldl
-CFLAGS += -Ilibs/libudis86
+CFLAGS += -Ilibs/libudis86 -Ilibs/linenoise 
 
 # Source Files
-CORE            = main.c baseer.c utils/ui.c
+CORE            = main.c baseer.c utils/ui.c utils/b_CLI.c libs/linenoise/linenoise.c
 DEFAULT         = modules/default/bx_default.c
 BX_BINHEAD      = modules/binhead/bx_binhead.c
 BPARSER         = modules/bparser/bparser.c

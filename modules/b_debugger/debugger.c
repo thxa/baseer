@@ -29,13 +29,10 @@
 void parse_cmd(context *ctx){
 	if(ctx == NULL)
 		return;
-	//char cmd[1024] = {0} ;
 	bool flag = false;
         char *cmd = linenoise("baseer-dbg> ");
-        if(!cmd) return; // Ctrl + D
+        if(!cmd) return;
         if(*cmd) linenoiseHistoryAdd(cmd);
-	//printf("baseer-dbg> ");
-	//read(0, cmd, 1020);
 	cmd[strcspn(cmd, "\n")] = 0;
 	char *op ;
 	char *args ;

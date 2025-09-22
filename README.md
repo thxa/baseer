@@ -103,6 +103,18 @@ baseer <file> -m
 ```
 
 
+- Compile and analyze the file
+- 64 bit
+```bash 
+make && export BLOCK_LENGTH=40 && ./build/baseer examples/64bit_x86_64 -m | less -r
+```
+
+- 32 bit
+```bash 
+make && export BLOCK_LENGTH=40 && ./build/baseer examples/32bit_x86 -m | less -r
+```
+
+
 <!-- 2. Run the Core and specify the file: -->
 <!-- - Show metadata of a file -->
 <!-- ./baseer <file> -m -->

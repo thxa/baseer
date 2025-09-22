@@ -23,7 +23,7 @@
 #include "../b_hashmap/b_hashmap.h"
 #include <elf.h>
 #include <string.h>
-
+#define META_LABEL_WIDTH -10
 
 /**
  * @brief Display a single byte in hexadecimal with color coding.
@@ -50,7 +50,7 @@ void display_byte(const unsigned char *byte)
         color = COLOR_GRAY; // padding or null bytes
     }
 
-    printf("%s%02x%s ", color, *byte, COLOR_RESET);
+    printf("%s%02x%s", color, *byte, COLOR_RESET);
 }
 
 // ========================= BEGIN ELF HEADER ==================================
@@ -150,7 +150,7 @@ void format_sh_flags(uint64_t sh_flags, char *buf, size_t size) {
     // printf("================= Size of flag: %ld ===========\n", size - strlen(buf) - 1);
     for(int i=0; i<5; i++)
         strncat(buf, " ", size - strlen(buf) - 1);
-    strncat(buf, COLOR_YELLOW, size - strlen(buf) - 1);
+    strncat(buf, COLOR_CYAN, size - strlen(buf) - 1);
 
 }
 
@@ -161,13 +161,18 @@ void format_sh_flags(uint64_t sh_flags, char *buf, size_t size) {
  * @param symtab Pointer to the symbol table section header.
  * @param strtab Pointer to the string table section header.
  */
-void print_symbols_32bit(bparser* parser, Elf32_Shdr *symtab, Elf32_Shdr *strtab) 
+void print_symbols_32bit(bparser* parser, Elf32_Ehdr* elf, Elf32_Shdr* shdrs, Elf32_Shdr *symtab, Elf32_Shdr *strtab) 
 {
+    Elf32_Shdr shstr = shdrs[elf->e_shstrndx];
+    const char* shstrtab = (const char*)(parser->block + shstr.sh_offset);
+
+    const char* name = &shstrtab[symtab -> sh_name];
     Elf32_Sym *syms = (Elf32_Sym *)(parser->block + symtab->sh_offset);
     const char *strs = (const char *)(parser->block + strtab->sh_offset);
+
     int count = symtab->sh_size / sizeof(Elf32_Sym);
 
-    printf(COLOR_YELLOW "\n=== Symbols (.symtab) ===\n" COLOR_RESET);
+    printf(COLOR_YELLOW "\n=== Symbols (%s) ===\n" COLOR_RESET, name);
     printf(COLOR_WHITE "%-6s %-10s %-10s %-12s %s\n" COLOR_RESET,
            "Index", "Value", "Size", "Type", "Name");
     printf(COLOR_WHITE "------------------------------------------------------------\n" COLOR_RESET);
@@ -240,6 +245,28 @@ void print_symbols_64bit(bparser* parser, Elf64_Shdr *symtab, Elf64_Shdr *strtab
     }
 }
 
+// inline function to print hex header row
+static inline void print_hex_header(unsigned long long offset) {
+    // left padding
+    printf("%13s", "");
+
+    // digits 0-9
+    printf(COLOR_GREEN);
+    for (int i = 0; i <= 9; i++) {
+        printf("%d", i);
+        printf((i & 1) ? "  " : " ");
+    }
+
+    // letters A-F
+    for (char c = 'A'; c <= 'F'; c++) {
+        printf("%c", c);
+        printf((c & 1) ? " " : "  ");
+    }
+    printf(COLOR_RESET "\n");
+
+    // offset row start
+    printf(COLOR_GREEN "0x%08llx: " COLOR_RESET, offset);
+}
 
 /**
  * @brief Dump the section header table of a 32-bit ELF file.
@@ -266,7 +293,7 @@ void print_symbols_64bit(bparser* parser, Elf64_Shdr *symtab, Elf64_Shdr *strtab
  * @note Output is color formatted and written to standard output.
  * @see dump_elf64_shdr()
  */
-void dump_elf32_shdr(Elf32_Ehdr* elf , Elf32_Shdr* shdrs, bparser* parser) 
+void dump_elf32_shdr(Elf32_Ehdr* elf, Elf32_Shdr* shdrs, bparser* parser) 
 {
     Elf32_Shdr shstr = shdrs[elf->e_shstrndx];
     const char* shstrtab = (const char*)(parser->block + shstr.sh_offset);
@@ -291,31 +318,78 @@ void dump_elf32_shdr(Elf32_Ehdr* elf , Elf32_Shdr* shdrs, bparser* parser)
         char flags[64] = "";
         format_sh_flags(shdrs[i].sh_flags, flags, sizeof(flags));
 
-        printf(COLOR_GREEN  "%-3s %-20s %-10s %-6s %-10s %-10s %-8s %-5s %-5s %-10s %-10s\n"  COLOR_RESET,
-                "ID", "Name", "Type", "Flags", "Addr", "Offset", "Size", "Link", "Info", "Align", "EntSize");
-        printf(COLOR_CYAN "%-3d " COLOR_BLUE "%-20s " COLOR_CYAN "%-10s %-6s 0x%08x 0x%08x 0x%08x %-5d %-5d 0x%08x 0x%08x\n" COLOR_RESET,
-                i, name, type_str, flags,
-                shdrs[i].sh_addr,
-                shdrs[i].sh_offset,
-                shdrs[i].sh_size,
-                shdrs[i].sh_link,
-                shdrs[i].sh_info,
-                shdrs[i].sh_addralign,
-                shdrs[i].sh_entsize);
+        // printf(COLOR_GREEN  "%-3s %-20s %-10s %-6s %-10s %-10s %-8s %-5s %-5s %-10s %-10s\n"  COLOR_RESET,
+        //         "ID", "Name", "Type", "Flags", "Addr", "Offset", "Size", "Link", "Info", "Align", "EntSize");
+        // printf(COLOR_CYAN "%-3d " COLOR_BLUE "%-20s " COLOR_CYAN "%-10s %-6s 0x%08x 0x%08x 0x%08x %-5d %-5d 0x%08x 0x%08x\n" COLOR_RESET,
+        //         i, name, type_str, flags,
+        //         shdrs[i].sh_addr,
+        //         shdrs[i].sh_offset,
+        //         shdrs[i].sh_size,
+        //         shdrs[i].sh_link,
+        //         shdrs[i].sh_info,
+        //         shdrs[i].sh_addralign,
+        //         shdrs[i].sh_entsize);
 
+        // printf("--------------------\n");
+
+        printf("\n");       
+        printf(COLOR_CYAN "|--Section [%d] " COLOR_BLUE "%s" COLOR_CYAN ":\n" COLOR_RESET, i, name);
+        printf(COLOR_GREEN "|---%-*s" COLOR_RESET "%d\n",   META_LABEL_WIDTH, "ID:", i);
+        printf(COLOR_GREEN "|---%-*s" COLOR_RESET "%s\n",   META_LABEL_WIDTH, "Name:", name);
+        printf(COLOR_GREEN "|---%-*s" COLOR_RESET "%s\n",   META_LABEL_WIDTH, "Type:", type_str);
+        printf(COLOR_GREEN "|---%-*s" COLOR_RESET "%s\n",   META_LABEL_WIDTH, "Flags:", flags);
+        printf(COLOR_GREEN "|---%-*s" COLOR_RESET "0x%x\n", META_LABEL_WIDTH, "Addr:", shdrs[i].sh_addr);
+        printf(COLOR_GREEN "|---%-*s" COLOR_RESET "0x%x\n", META_LABEL_WIDTH, "Offset:", shdrs[i].sh_offset);
+        printf(COLOR_GREEN "|---%-*s" COLOR_RESET "0x%x\n", META_LABEL_WIDTH, "Size:", shdrs[i].sh_size);
+        printf(COLOR_GREEN "|---%-*s" COLOR_RESET "%d\n",   META_LABEL_WIDTH, "Link:", shdrs[i].sh_link);
+        printf(COLOR_GREEN "|---%-*s" COLOR_RESET "0x%x\n", META_LABEL_WIDTH, "Info:", shdrs[i].sh_info);
+        printf(COLOR_GREEN "|---%-*s" COLOR_RESET "0x%x\n", META_LABEL_WIDTH, "Align:", shdrs[i].sh_addralign);
+        printf(COLOR_GREEN "|---%-*s" COLOR_RESET "0x%x\n", META_LABEL_WIDTH, "EntSize:", shdrs[i].sh_entsize);
         // ============================ END SECTION METADATA =============================
         
 
         // ============================ BEGIN SECTION BODY =============================
+        long long int offset = shdrs[i].sh_offset;
         if (shdrs[i].sh_size > 0) {
             void* block = malloc(shdrs[i].sh_size);
             bparser_read(parser, block, shdrs[i].sh_offset, shdrs[i].sh_size);
 
-            printf(COLOR_CYAN "Section [%d] " COLOR_BLUE "%s" COLOR_CYAN " bytes:\n" COLOR_RESET, i, name);
+            // printf(COLOR_CYAN "Section [%d] " COLOR_BLUE "%s" COLOR_CYAN " bytes:\n" COLOR_RESET, i, name);
             unsigned char* ptr = (unsigned char*)block;
+            int cnt=0;
+            printf(COLOR_GREEN "|" COLOR_RESET  );
+            printf("%17s", "");
+            printf(COLOR_GREEN);
+            for(int i=0; i<=9; i++) {
+                printf("%d", i);
+                printf((i & 1)?"  ":" ");
+            }
+            for(char c='A'; c <= 'F'; c++){
+                printf("%c", c);
+                printf((c & 1)?" ":"  ");
+            }
+
+            printf(COLOR_RESET);
+            printf("\n");
+            printf(COLOR_GREEN "|----0x%08llx: " COLOR_RESET, offset);
+
+
+            printf(" ");
             for (size_t j = 0; j < shdrs[i].sh_size; j++) {
+                if(cnt == 2) {
+                    printf(" ");
+                    cnt=0;
+                }
+                
                 display_byte(&ptr[j]);
-                if ((j + 1) % BLOCK_LENGTH  == 0) printf("\n");
+
+                if ((j + 1) % BLOCK_LENGTH  == 0){
+                    printf("\n");
+                    printf(COLOR_GREEN "|----0x%08llx: " COLOR_RESET, offset);
+                }
+
+                cnt++;
+                offset += 16;
             }
             printf("\n\n");
 
@@ -325,9 +399,18 @@ void dump_elf32_shdr(Elf32_Ehdr* elf , Elf32_Shdr* shdrs, bparser* parser)
     }
 
     Elf32_Shdr *symtab, *strtab;
-    if((symtab = (Elf32_Shdr*)get(map, ".symtab")) != NULL && (strtab = (Elf32_Shdr*)get(map, ".strtab")) != NULL) {
-        print_symbols_32bit(parser, symtab, strtab);
+    if((symtab = (Elf32_Shdr*)get(map, ".dynsym")) != NULL && (strtab = (Elf32_Shdr*)get(map, ".dynstr")) != NULL) {
+        print_symbols_32bit(parser, elf, shdrs, symtab, strtab);
     }
+
+    printf("\n\n");
+
+    if((symtab = (Elf32_Shdr*)get(map, ".symtab")) != NULL && (strtab = (Elf32_Shdr*)get(map, ".strtab")) != NULL) {
+        print_symbols_32bit(parser, elf, shdrs, symtab, strtab);
+    }
+
+
+
     
     free_map(map);
 }
@@ -371,9 +454,9 @@ void dump_elf64_shdr(Elf64_Ehdr* elf , Elf64_Shdr* shdrs, bparser* parser)
         // ============================ BEGIN SECTION METADATA =============================
         // Section name
         const char* name = &shstrtab[shdrs[i].sh_name];
+
         // Type
         const char* type_str = sh_type_to_str(shdrs[i].sh_type);
-        
 
         // Insert section header pointers into a hashmap for quick retrieval by name
         insert(map, name, &shdrs[i]);
@@ -438,7 +521,7 @@ void format_p_flags(uint32_t p_flags, char *buf, size_t size) {
     if (p_flags & PF_X) strncat(buf, COLOR_YELLOW "X" COLOR_RESET, size - strlen(buf) - 1);
     for(int i=0; i<5; i++)
         strncat(buf, " ", size - strlen(buf) - 1);
-    strncat(buf, COLOR_YELLOW , size - strlen(buf) - 1);
+    strncat(buf, COLOR_CYAN , size - strlen(buf) - 1);
 }
 
 /**

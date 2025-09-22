@@ -71,7 +71,7 @@
 #define COLOR_BG_WHITE   "\033[47m"
 
 
-#define DEFAULT_BLOCK_LENGTH 40
+#define DEFAULT_BLOCK_LENGTH 16
 // #define BLOCK_LENGTH 40
 
 #define BLOCK_LENGTH (get_block_length())

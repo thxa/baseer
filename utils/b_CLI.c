@@ -53,7 +53,7 @@ void baseer_CLI(void) {
     printf("\nWelcome to Baseer CLI. Type 'help' for commands.\n");
 
     while (1) {
-        char *line = linenoise(COLOR_WHITE"Baseer \033[5;31mCLI "COLOR_RESET"-> "COLOR_RESET);
+        char *line = linenoise(COLOR_WHITE"Baseer-\033[5;31mCLI "COLOR_RESET"-> "COLOR_RESET);
         if(!line) break; // Ctrl + D
         if(*line) linenoiseHistoryAdd(line);
 

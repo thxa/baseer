@@ -30,7 +30,7 @@ void parse_cmd(context *ctx){
 	if(ctx == NULL)
 		return;
 	bool flag = false;
-        char *cmd = linenoise("baseer-dbg> ");
+        char *cmd = linenoise("Baseer-" COLOR_BLUE "DBG "COLOR_RESET"-> ");
         if(!cmd) return;
         if(*cmd) linenoiseHistoryAdd(cmd);
 	cmd[strcspn(cmd, "\n")] = 0;
@@ -136,6 +136,7 @@ void print_helpCMD(){
 	printf(COLOR_BLUE "i    " COLOR_RESET " : display functions name and address {ex: i}\n");
 	printf(COLOR_BLUE "x    " COLOR_RESET " : examin value in memory {ex: x addr size : x 0x1234 10}\n");
 	printf(COLOR_BLUE "set  " COLOR_RESET " : change memory or register value {ex: set $eax=0x20 : set 0x1234=0x20}\n");
+	printf(COLOR_BLUE "q    " COLOR_RESET " : for quit the debugger \n");
 }
 
 /**

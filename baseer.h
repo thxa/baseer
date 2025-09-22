@@ -18,7 +18,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
-
+#include "linenoise.h"
 #define BASEER_VERSION_MAJOR 0  
 #define BASEER_VERSION_MINOR 1   
 #define BASEER_VERSION_MICRO 0  

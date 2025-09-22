@@ -1,4 +1,5 @@
 #define _GNU_SOURCE
+#include <stdint.h>
 #include <elf.h>
 #include <stdio.h>
 #include <ctype.h>
@@ -28,10 +29,13 @@
 void parse_cmd(context *ctx){
 	if(ctx == NULL)
 		return;
-	char cmd[1024] = {0} ;
+	//char cmd[1024] = {0} ;
 	bool flag = false;
-	printf("baseer-dbg> ");
-	read(0, cmd, 1020);
+        char *cmd = linenoise("baseer-dbg> ");
+        if(!cmd) return; // Ctrl + D
+        if(*cmd) linenoiseHistoryAdd(cmd);
+	//printf("baseer-dbg> ");
+	//read(0, cmd, 1020);
 	cmd[strcspn(cmd, "\n")] = 0;
 	char *op ;
 	char *args ;
@@ -58,10 +62,11 @@ void parse_cmd(context *ctx){
 
 	}
 	if(!flag){
-		printf("unkonw command\n");
+		ERROR("wrong command\n");
 		print_helpCMD();
 		ctx->do_wait = false;
 	}
+	free(cmd);
 
 }
 /**
@@ -74,11 +79,20 @@ bool handle_action(context *ctx,void *args){
 	if(strcmp(ctx->cmd.op,"q") == 0){
 		ptrace(PTRACE_CONT, ctx->pid, NULL, SIGKILL);
 		destroy_all(ctx);
-		exit(0);
+		ctx->do_wait = false;
+		ctx->base |= 2;
+		return true;
 	}else if (strcmp(ctx->cmd.op,"h") == 0) {
 		print_helpCMD();
 		return true;
 	}else if (strcmp(ctx->cmd.op,"vmmap") == 0) {
+		free(ctx->mmaps);
+		char mmaps[512] = {0};
+		sprintf(mmaps, "/proc/%d/maps", ctx->pid);
+		FILE *file = fopen(mmaps,"r");
+		size_t size = 0;
+		getdelim(&ctx->mmaps,&size,'\0' , file);
+		fclose(file);
 		printf("%s\n",ctx->mmaps);
 		ctx->do_wait = false;
 		return true;
@@ -90,7 +104,6 @@ bool handle_action(context *ctx,void *args){
 		ctx->do_wait = true;
 		return true;
 	}else if (strcmp(ctx->cmd.op,"si") == 0) {
-		restore_all_BP(ctx, 1);
 		if (ptrace(PTRACE_SINGLESTEP, ctx->pid, 0, 0) == -1) {
 			perror("SINGLESTEP");
 			return true;
@@ -114,26 +127,95 @@ bool handle_action(context *ctx,void *args){
  *
  */
 void print_helpCMD(){
-	printf("bp    : set breakpoint {ex: bp 0x12354 or bp func_name}\n");
-	printf("dp    : delete breakpoint {ex: dp breakpoint_id}\n");
-	printf("lp    : list all breakpoints {ex: lp}\n");
-	printf("si    : take one step execution (step into) {ex: si}\n");
-	printf("so    : take one step execution (step over){ex: so}\n");
-	printf("c     : continue execution {ex: c}\n");
-	printf("h     : display help commands {ex: h}\n");
-	printf("vmmap : display maps memory {ex: vmmap}\n");
-	printf("i     : display functions name and address {ex: i}\n");
-	printf("x     : examin value in memory {ex: x addr size : x 0x1234 10}\n");
+	printf("\n");
+	printf(COLOR_BLUE "bp   " COLOR_RESET " : set breakpoint {ex: bp 0x12354 or bp func_name}\n");
+	printf(COLOR_BLUE "dp   " COLOR_RESET " : delete breakpoint {ex: dp breakpoint_id}\n");
+	printf(COLOR_BLUE "lp   " COLOR_RESET " : list all breakpoints {ex: lp}\n");
+	printf(COLOR_BLUE "si   " COLOR_RESET " : take one step execution (step into) {ex: si}\n");
+	printf(COLOR_BLUE "so   " COLOR_RESET " : take one step execution (step over){ex: so}\n");
+	printf(COLOR_BLUE "c    " COLOR_RESET " : continue execution {ex: c}\n");
+	printf(COLOR_BLUE "h    " COLOR_RESET " : display help commands {ex: h}\n");
+	printf(COLOR_BLUE "vmmap" COLOR_RESET " : display maps memory {ex: vmmap}\n");
+	printf(COLOR_BLUE "i    " COLOR_RESET " : display functions name and address {ex: i}\n");
+	printf(COLOR_BLUE "x    " COLOR_RESET " : examin value in memory {ex: x addr size : x 0x1234 10}\n");
+	printf(COLOR_BLUE "set  " COLOR_RESET " : change memory or register value {ex: set $eax=0x20 : set 0x1234=0x20}\n");
 }
 
+/**
+ * @brief change the value in address or register. 
+ *
+ */
+bool set_mem_reg(context *ctx,void *args){
+	ctx->do_wait = false;
+	char *arg = (char*)args;
+	if(arg == '\0')
+		return false;
+	while(arg != '\0' && isspace((unsigned char)*arg))arg++;
+	uint32_t counter = 0 ;
+	char *tokens[2] = {0};
+	char *token = strtok(arg,"=");
+	if(token == NULL){
+		return false;
+	}
+	while(token != NULL && counter < 2){
+		tokens[counter++] = token;
+		token = strtok(NULL," ");
+	}
+	if(counter < 2) 
+		return false;
+	// check if the first is register 
+	uint64_t val = (strstr(tokens[1],"0x") != NULL) ? strtoul(tokens[1], NULL, 16) : strtoul(tokens[1], NULL, 10);
+	if(val == 0){
+		ERROR("wrong value\n");
+		return false;
+	}
+	if(tokens[0][0] == '$'){
+		tokens[0]++ ;
+		int len = sizeof(regs_64)/sizeof(pos_name);
+		pos_name *regs = (ctx->arch == 64) ? regs_64 : regs_32;
+       
+		char *ptr = tokens[0];
+		while(*ptr){
+			if(isupper(*ptr))
+				continue;
+			*ptr = toupper(*ptr);
+			ptr++;
+		}
+		for (int i=0; i< len; i++) {
+			if(strncmp(tokens[0], regs[i].name,3) == 0){
+				*(unsigned long*)((unsigned char*)&ctx->regs + regs[i].pos)  = val;
+			}
+		
+		}
+		ptrace(PTRACE_SETREGS, ctx->pid, 0, &ctx->regs);
+	}else if (strstr(tokens[0],"0x") != NULL) {
+		// if the first is memory address 
+		uint64_t addr = strtoul(tokens[0], NULL, 16);
+		if (ptrace(PTRACE_POKETEXT, ctx->pid, (void*)addr, (void*)val) == -1) {
+			ERROR("invalid address\n");
+			return false;
+		}
+	
+	}
+	return true;
+}
+
+/**
+ * @brief print memory value in specific address . 
+ *
+ */
 bool examin_mem(context *ctx,void *args){
 	char *arg = (char*)args;
-	while(isspace((unsigned char)*arg)) arg++;
+	if(arg == '\0') return false;
+	while(arg != '\0' && isspace((unsigned char)*arg))arg++;
 	uint64_t addr = 0 ;
 	uint64_t size = 0 ;
 	uint32_t counter = 0 ;
 	char *tokens[2] = {0};
 	char *token = strtok(arg," ");
+	if(token == NULL){
+		return false;
+	}
 	while(token != NULL && counter < 2){
 		tokens[counter++] = token;
 		token = strtok(NULL," ");
@@ -152,7 +234,7 @@ bool examin_mem(context *ctx,void *args){
 		long v = ptrace(PTRACE_PEEKDATA, ctx->pid, 
 				(void*)(addr + i*(ctx->arch / 8 )), NULL);
 		if(v == -1){
-			printf("wrong address \n");
+			ERROR("wrong address \n");
 			return true;
 		}
 		if(i % 2 == 0 ){
@@ -180,11 +262,11 @@ bool delBP(context *ctx, void* args){
 	char *token = strtok(arg, " ");
 	uint64_t id = strtol(token,NULL,16);
 	if(id == 0){
-		printf("wrong id\n");
+		ERROR("wrong id\n");
 		return false;
 	}
 	if(ctx->list->first == NULL){
-		printf("no breakpoints found\n");
+		INFO("no breakpoints found\n");
 		return true;
 	}
 	bp *ptr = ctx->list->first;
@@ -257,6 +339,10 @@ bool step_over(context *ctx,void *args){
 	return true;
 }
 
+/**
+ * @brief search for symbols in context struct . 
+ *
+ */
 
 uint64_t find_sym(context *ctx,char *name){
 	sym_list *sym = ctx->sym;
@@ -279,7 +365,10 @@ bool setBP(context *ctx, void* args){
 	char *arg = (char*)args;
 	ctx->do_wait = false;
 
-	while(isspace((unsigned char)*arg)) arg++;
+	if(arg == '\0')
+		return false;
+	while(arg != '\0' && isspace((unsigned char)*arg))arg++;
+
 	char *token = strtok(arg, " ");
 	if(token == NULL){
 		return false;
@@ -318,6 +407,11 @@ bool setBP(context *ctx, void* args){
 	return true;
 
 }
+
+/**
+ * @brief handle a break point . 
+ *
+ */
 void handle_bpoint(context *ctx) {
 	ptrace(PTRACE_GETREGS, ctx->pid, 0, &ctx->regs);
 	bp *b = NULL;
@@ -337,12 +431,12 @@ void handle_bpoint(context *ctx) {
 	ctx->regs.rip = b->addr;
 	ptrace(PTRACE_SETREGS, ctx->pid, 0, &ctx->regs);
 
-	if (ptrace(PTRACE_SINGLESTEP, ctx->pid, 0, 0) == -1) {
-		perror("SINGLESTEP");
-		return;
-	}
 }
 
+/**
+ * @brief list all break points . 
+ *
+ */
 bool listBP(context *ctx,void *args){
 	ptrace(PTRACE_GETREGS, ctx->pid, NULL, &ctx->regs);
 	ctx->do_wait = false;
@@ -359,6 +453,10 @@ bool listBP(context *ctx,void *args){
 	}
 	return true;
 }
+/**
+ * @brief set break points on or off. 
+ *
+ */
 void restore_all_BP(context *ctx,int opt){
 	ptrace(PTRACE_GETREGS, ctx->pid, NULL, &ctx->regs);
 	if(ctx->list->first != NULL){
@@ -366,66 +464,44 @@ void restore_all_BP(context *ctx,int opt){
 		bp *ptr = head;
 		while (ptr != NULL) {
 			if (opt == 1){
-				ptrace(PTRACE_POKETEXT, ctx->pid, (void*)ptr->addr, (void*)ptr->orig);
+				if(ptrace(PTRACE_POKETEXT, ctx->pid, (void*)ptr->addr, ptr->orig) == -1){
+					ERROR("error restore org value\n");
+				}
 			}else if(opt == 0){
 				long trap = (ptr->orig & ~0xff) | 0xCC;
-				ptrace(PTRACE_POKETEXT, ctx->pid, (void*)ptr->addr, (void*)trap);
+				if(ptrace(PTRACE_POKETEXT, ctx->pid, (void*)ptr->addr, (void*)trap) == -1){
+					ERROR("error reset bp\n");
+				}
 			}
 			ptr = ptr->next;
 		}
 	}
 }
+
+/**
+ * @brief display the porocess current  status . 
+ *
+ */
 void dis_ctx(context *ctx){
 
+	ptrace(PTRACE_GETREGS, ctx->pid, NULL, &ctx->regs);
 	ud_t ud_obj;
 	uint8_t data[160];
 	printf(COLOR_YELLOW "------------- regs ----------------\n" COLOR_RESET);
-	if(ctx->arch == 64){
-		printf(COLOR_CYAN "\tRAX " COLOR_RESET "=> " COLOR_BLUE "0x%llx\n"COLOR_RESET, ctx->regs.rax);
-		printf(COLOR_CYAN "\tRDX " COLOR_RESET "=> " COLOR_BLUE "0x%llx\n"COLOR_RESET, ctx->regs.rdx);
-		printf(COLOR_CYAN "\tRCX " COLOR_RESET "=> " COLOR_BLUE "0x%llx\n"COLOR_RESET, ctx->regs.rcx);
-		printf(COLOR_CYAN "\tRBX " COLOR_RESET "=> " COLOR_BLUE "0x%llx\n"COLOR_RESET, ctx->regs.rbx);
-		printf(COLOR_CYAN "\tRDI " COLOR_RESET "=> " COLOR_BLUE "0x%llx\n"COLOR_RESET, ctx->regs.rdi);
-		printf(COLOR_CYAN "\tRSI " COLOR_RESET "=> " COLOR_BLUE "0x%llx\n"COLOR_RESET, ctx->regs.rsi);
-		printf(COLOR_CYAN "\tR8  " COLOR_RESET "=> " COLOR_BLUE "0x%llx\n"COLOR_RESET, ctx->regs.r8);
-		printf(COLOR_CYAN "\tR9  " COLOR_RESET "=> " COLOR_BLUE "0x%llx\n"COLOR_RESET, ctx->regs.r9);
-		printf(COLOR_CYAN "\tR10 " COLOR_RESET "=> " COLOR_BLUE "0x%llx\n"COLOR_RESET, ctx->regs.r10);
-		printf(COLOR_CYAN "\tR11 " COLOR_RESET "=> " COLOR_BLUE "0x%llx\n"COLOR_RESET, ctx->regs.r11);
-		printf(COLOR_CYAN "\tR12 " COLOR_RESET "=> " COLOR_BLUE "0x%llx\n"COLOR_RESET, ctx->regs.r12);
-		printf(COLOR_CYAN "\tR13 " COLOR_RESET "=> " COLOR_BLUE "0x%llx\n"COLOR_RESET, ctx->regs.r13);
-		printf(COLOR_CYAN "\tR14 " COLOR_RESET "=> " COLOR_BLUE "0x%llx\n"COLOR_RESET, ctx->regs.r14);
-		printf(COLOR_CYAN "\tR15 " COLOR_RESET "=> " COLOR_BLUE "0x%llx\n"COLOR_RESET, ctx->regs.r15);
-		printf(COLOR_CYAN "\tRSP " COLOR_RESET "=> " COLOR_BLUE "0x%llx\n"COLOR_RESET, ctx->regs.rsp);
-		printf(COLOR_CYAN "\tRBP " COLOR_RESET "=> " COLOR_BLUE "0x%llx\n"COLOR_RESET, ctx->regs.rbp);
-		printf(COLOR_CYAN "\tRIP " COLOR_RESET "=> " COLOR_BLUE "0x%llx\n"COLOR_RESET, ctx->regs.rip);
-	}else {
+	int len = sizeof(regs_64)/sizeof(pos_name);
+	pos_name *regs = (ctx->arch == 64) ? regs_64 : regs_32;
 
-		printf(COLOR_CYAN "\tEAX  " COLOR_RESET "=> " COLOR_RESET "0x%llx\n", ctx->regs.rax);
-		printf(COLOR_CYAN "\tEDX  " COLOR_RESET "=> " COLOR_RESET "0x%llx\n", ctx->regs.rdx);
-		printf(COLOR_CYAN "\tECX  " COLOR_RESET "=> " COLOR_RESET "0x%llx\n", ctx->regs.rcx);
-		printf(COLOR_CYAN "\tEBX  " COLOR_RESET "=> " COLOR_RESET "0x%llx\n", ctx->regs.rbx);
-		printf(COLOR_CYAN "\tEDI  " COLOR_RESET "=> " COLOR_RESET "0x%llx\n", ctx->regs.rdi);
-		printf(COLOR_CYAN "\tESI  " COLOR_RESET "=> " COLOR_RESET "0x%llx\n", ctx->regs.rsi);
-		printf(COLOR_CYAN "\tR8d  " COLOR_RESET "=> " COLOR_RESET "0x%llx\n", ctx->regs.r8);
-		printf(COLOR_CYAN "\tR9d  " COLOR_RESET "=> " COLOR_RESET "0x%llx\n", ctx->regs.r9);
-		printf(COLOR_CYAN "\tR10d " COLOR_RESET "=> " COLOR_RESET "0x%llx\n", ctx->regs.r10);
-		printf(COLOR_CYAN "\tR11d " COLOR_RESET "=> " COLOR_RESET "0x%llx\n", ctx->regs.r11);
-		printf(COLOR_CYAN "\tR12d " COLOR_RESET "=> " COLOR_RESET "0x%llx\n", ctx->regs.r12);
-		printf(COLOR_CYAN "\tR13d " COLOR_RESET "=> " COLOR_RESET "0x%llx\n", ctx->regs.r13);
-		printf(COLOR_CYAN "\tR14d " COLOR_RESET "=> " COLOR_RESET "0x%llx\n", ctx->regs.r14);
-		printf(COLOR_CYAN "\tR15d " COLOR_RESET "=> " COLOR_RESET "0x%llx\n", ctx->regs.r15);
-		printf(COLOR_CYAN "\tESP  " COLOR_RESET "=> " COLOR_RESET "0x%llx\n", ctx->regs.rsp);
-		printf(COLOR_CYAN "\tEBP  " COLOR_RESET "=> " COLOR_RESET "0x%llx\n", ctx->regs.rbp);
-		printf(COLOR_CYAN "\tEIP  " COLOR_RESET "=> " COLOR_RESET "0x%llx\n", ctx->regs.rip);
+	for (int i = 0 ; i < len; i++) {
+		printf(COLOR_CYAN "\t%s" COLOR_RESET "=> " COLOR_BLUE "0x%llx\n"COLOR_RESET, regs[i].name ,*(uint64_t*)((char*)&ctx->regs+regs[i].pos) );
 	}
-	int len =sizeof(flags)/sizeof(e_FLAGS) ;
+	len =sizeof(flags)/sizeof(pos_name) ;
 	printf("FLAGS: ");
 	for (int i = 0 ; i<len ; i++) {
-		int is_set = (ctx->regs.eflags >> flags[i].offset) & 1;
+		int is_set = (ctx->regs.eflags >> flags[i].pos) & 1;
 		if(is_set){
-			printf(COLOR_GREEN  "%s " COLOR_RESET, flags[i].FLAG_NAME);
+			printf(COLOR_GREEN  "%s " COLOR_RESET, flags[i].name);
 		}else {
-			printf(COLOR_RED    "%s " COLOR_RESET, flags[i].FLAG_NAME);
+			printf(COLOR_RED    "%s " COLOR_RESET, flags[i].name);
 		}
 	}
 	printf("\n");
@@ -463,6 +539,10 @@ void dis_ctx(context *ctx){
 
 
 
+/**
+ * @brief initialize the context struct values. 
+ *
+ */
 
 void init_values(bparser *target, context *ctx){
 	bp_list *list = malloc(sizeof(bp_list));
@@ -476,7 +556,8 @@ void init_values(bparser *target, context *ctx){
 	sprintf(mmaps, "/proc/%d/maps", ctx->pid);
 	FILE *file = fopen(mmaps,"r");
 	size_t size = 0;
-	ssize_t b_read = getdelim(&ctx->mmaps,&size,'\0' , file);
+	getdelim(&ctx->mmaps,&size,'\0' , file);
+	fclose(file);
 	sscanf(ctx->mmaps, "%lx", &ctx->base);
 	if(ehdr->e_type == ET_EXEC){
 		ctx->entry = ehdr->e_entry;
@@ -556,6 +637,11 @@ void init_values(bparser *target, context *ctx){
 		}
 	}
 }
+
+/**
+ * @brief destroy the sub structs. 
+ *
+ */
 void destroy_bp_sym(context *ctx){
 	bp *ptr = ctx->list->first;
 	bp *tmp = NULL;
@@ -574,6 +660,11 @@ void destroy_bp_sym(context *ctx){
 		ptr1 = temp;
 	}
 }
+
+/**
+ * @brief destroy the context structs. 
+ *
+ */
 void destroy_all(context *ctx){
 	destroy_bp_sym(ctx);
 	free(ctx->list);
@@ -581,6 +672,11 @@ void destroy_all(context *ctx){
 	free(ctx);
 	ctx = NULL;
 }
+
+/**
+ * @brief main function that fork a child then set break point on the entry point the execute parse_cmd function. 
+ *
+ */
 bool b_debugger(bparser *target, void *arg){
 	setbuf(stdout, NULL);
 	int argc = *((inputs*)arg) -> argc;
@@ -621,7 +717,6 @@ bool b_debugger(bparser *target, void *arg){
 
 		ctx->pid = pid;
 		init_values(target, ctx);
-
 		unsigned long orig = ptrace(PTRACE_PEEKTEXT, ctx->pid, (void*)ctx->entry, NULL);
 		long trap = (orig & ~0xff) | 0xCC;
 		if (ptrace(PTRACE_POKETEXT, ctx->pid, (void*)ctx->entry, (void*)trap) == -1) {
@@ -633,10 +728,10 @@ bool b_debugger(bparser *target, void *arg){
 		if (WIFSTOPPED(stats) && WSTOPSIG(stats) == SIGTRAP) {
 
 			if(ptrace(PTRACE_GETREGS, ctx->pid, NULL, &ctx->regs) == -1){
-				printf("failed to read regs\n");
+				ERROR("failed to read regs\n");
 			}
 			if(ptrace(PTRACE_POKETEXT, ctx->pid, (void*)ctx->entry, (void*)orig)== -1){
-				printf("failed to restore entry point\n");
+				ERROR("failed to restore entry point\n");
 			}
 			ctx->regs.rip = ctx->entry;
 			ptrace(PTRACE_SETREGS, ctx->pid, NULL, &ctx->regs);
@@ -649,17 +744,20 @@ bool b_debugger(bparser *target, void *arg){
 				waitpid(ctx->pid, &stats, 0);
 				if (WIFSTOPPED(stats) && WSTOPSIG(stats) == SIGTRAP) {
 					handle_bpoint(ctx);
-					restore_all_BP(ctx,1);
+					restore_all_BP(ctx, 1);
 					dis_ctx(ctx);
 				} else if (WIFEXITED(stats) || (WIFSTOPPED(stats) && WSTOPSIG(stats) != SIGTRAP)  ) {
 					destroy_all(ctx);
-					exit(0);
+					ctx->base |= 2;
 				}
 
 			}
 			free(ctx->cmd.op);
 			ctx->cmd.op = 0;
 			ctx->cmd.addr = 0;
+			if((ctx->base & 2)){
+				break;
+			}
 		}
 	}
 

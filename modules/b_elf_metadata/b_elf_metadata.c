@@ -39,7 +39,7 @@
  * @note The color codes are ANSI escape sequences.
  *       The color is reset after printing each byte using COLOR_RESET.
  */
-void display_byte(const unsigned char *byte)
+inline void display_byte(const unsigned char *byte)
 {
     const char *color = COLOR_YELLOW; // default for active instruction
 
@@ -49,9 +49,41 @@ void display_byte(const unsigned char *byte)
     else if (*byte == 0x00) {
         color = COLOR_GRAY; // padding or null bytes
     }
-
     printf("%s%02x%s", color, *byte, COLOR_RESET);
 }
+
+/**
+ * @brief Display a single byte as a printable character with color coding.
+ * 
+ * This function prints the ASCII representation of a byte. Non-printable
+ * bytes are shown as a '.' character. The output is color-coded based
+ * on the byte value:
+ *   - 0x90, 0xCC, 0xFF → COLOR_RED (low / unused bytes)
+ *   - 0x00             → COLOR_GRAY (padding or null bytes)
+ *   - All other bytes  → COLOR_YELLOW (default / active instruction)
+ * 
+ * Printable ASCII characters (32-126) are displayed as-is, while
+ * non-printable bytes are represented with '.'.
+ * 
+ * @param byte Pointer to the byte to display.
+ */
+void display_byte_char(const unsigned char *byte)
+{
+    const char *color = COLOR_YELLOW; // default for active instruction 
+    unsigned char c = *byte;
+    if (*byte == 0x90 || *byte == 0xCC || *byte == 0xff) {
+        color = COLOR_RED;  // low / unused
+    }
+    else if (*byte == 0x00) {
+        color = COLOR_GRAY; // padding or null bytes
+    }
+    if (c >= 32 && c <= 126) { // printable ASCII range
+        printf("%s%c%s", color, c, COLOR_RESET);
+    } else {
+        printf("%s.%s", color, COLOR_RESET); // non-printable
+    }
+}
+
 
 // ========================= BEGIN ELF HEADER ==================================
 /**
@@ -319,17 +351,16 @@ static inline void print_hex_header(unsigned long long offset) {
 
     
     // Ascii Dump
-    // printf("%-2s", "");
-    // for(int i=0; i<=9; i++)
-    //     printf("%d", i);
-    // for(char c='A'; c <= 'F'; c++)
-    //     printf("%c", c);
-
+    printf("%-2s", "");
+    for(int i=0; i<=9; i++)
+        printf("%d", i);
+    for(char c='A'; c <= 'F'; c++)
+        printf("%c", c);
 
     printf(COLOR_RESET);
     printf("\n");
-    printf(COLOR_GREEN "|----0x%08llx: " COLOR_RESET, offset);
-    printf(" ");
+    // printf(COLOR_GREEN "|----0x%08llx: " COLOR_RESET, offset);
+    // printf(" ");
 }
 
 
@@ -395,6 +426,37 @@ static inline void print_program_header_metadata_64bit(unsigned int id, const ch
     printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%lx\n", META_LABEL_WIDTH, "Align:", phdr[id].p_align);
 }
 
+void print_body_bytes(unsigned char *ptr, size_t size, unsigned long long offset) {
+    printf(COLOR_GREEN "|" COLOR_RESET  );
+    print_hex_header(offset);
+    
+    size_t i, j;
+    for (i = 0; i < size; i += BLOCK_LENGTH) {
+        // Print offset
+        printf(COLOR_GREEN "|----0x%08llx:  " COLOR_RESET, offset + i);
+
+        // Print hex bytes
+        for (j = 0; j < BLOCK_LENGTH; j++) {
+            if (i + j < size)
+                display_byte(&ptr[i+j]);
+                // printf("%02x", ptr[i + j]);
+            else
+                printf("   "); // padding for alignment
+                               
+            if ((j + 1) % 2 == 0)
+                printf(" "); // extra space every 2 bytes
+        }
+
+        // Print ASCII chars
+        printf(" |");
+        for (j = 0; j < BLOCK_LENGTH && i + j < size; j++) {
+            unsigned char c = ptr[i + j];
+            display_byte_char(&ptr[i+j]);
+            // printf("%c", (c >= 32 && c <= 126) ? c : '.');
+        }
+        printf("|\n");
+    }
+}
 
 /**
  * @brief Dump the section header table of a 32-bit ELF file.
@@ -456,28 +518,8 @@ void dump_elf32_shdr(Elf32_Ehdr* elf, Elf32_Shdr* shdrs, bparser* parser)
         if (shdrs[i].sh_size > 0) {
             void* block = malloc(shdrs[i].sh_size);
             bparser_read(parser, block, shdrs[i].sh_offset, shdrs[i].sh_size);
-
-            // printf(COLOR_CYAN "Section [%d] " COLOR_BLUE "%s" COLOR_CYAN " bytes:\n" COLOR_RESET, i, name);
             unsigned char* ptr = (unsigned char*)block;
-            int cnt=0;
-            printf(COLOR_GREEN "|" COLOR_RESET  );
-            print_hex_header(offset);
-            for (size_t j = 0; j < shdrs[i].sh_size; j++) {
-                if(cnt == 2) {
-                    printf(" ");
-                    cnt=0;
-                }
-                display_byte(&ptr[j]);
-                if ((j + 1) % BLOCK_LENGTH  == 0){
-                    offset += 16;
-                    printf("\n");
-                    printf(COLOR_GREEN "|----0x%08llx: " COLOR_RESET, offset);
-                }
-
-                cnt++;
-            }
-            printf("\n\n");
-
+            print_body_bytes(ptr, shdrs[i].sh_size, shdrs[i].sh_offset);
             free(block);
         }
         // ============================ END SECTION BODY =============================
@@ -552,32 +594,11 @@ void dump_elf64_shdr(Elf64_Ehdr* elf , Elf64_Shdr* shdrs, bparser* parser)
 
 
         // ============================ BEGIN SECTION BODY =============================
-        long long int offset = shdrs[i].sh_offset;
         if (shdrs[i].sh_size > 0) {
             void* block = malloc(shdrs[i].sh_size);
             bparser_read(parser, block, shdrs[i].sh_offset, shdrs[i].sh_size);
-
-            // printf(COLOR_CYAN "Section [%d] " COLOR_BLUE "%s" COLOR_CYAN " bytes:\n" COLOR_RESET, i, name);
             unsigned char* ptr = (unsigned char*)block;
-            int cnt=0;
-            printf(COLOR_GREEN "|" COLOR_RESET  );
-            print_hex_header(offset);
-            for (size_t j = 0; j < shdrs[i].sh_size; j++) {
-                if(cnt == 2) {
-                    printf(" ");
-                    cnt=0;
-                }
-                display_byte(&ptr[j]);
-                if ((j + 1) % BLOCK_LENGTH  == 0){
-                    offset += 16;
-                    printf("\n");
-                    printf(COLOR_GREEN "|----0x%08llx: " COLOR_RESET, offset);
-                }
-
-                cnt++;
-            }
-            printf("\n\n");
-
+            print_body_bytes(ptr, shdrs[i].sh_size, shdrs[i].sh_offset);
             free(block);
         }
         // ============================ END SECTION BODY =============================
@@ -671,25 +692,8 @@ void dump_elf32_phdr(Elf32_Ehdr *elf, Elf32_Phdr* phdr, bparser*parser)
         if (phdr[i].p_filesz > 0) {
             void *block = malloc(phdr[i].p_filesz);
             bparser_read(parser, block, phdr[i].p_offset, phdr[i].p_filesz);
-
             unsigned char* ptr = (unsigned char*)block;
-            int cnt=0;
-            printf(COLOR_GREEN "|" COLOR_RESET  );
-            print_hex_header(offset);
-            for (size_t j = 0; j < phdr[i].p_filesz; j++) {
-                if(cnt == 2) {
-                    printf(" ");
-                    cnt=0;
-                }
-                display_byte(&ptr[j]);
-                if ((j + 1) % BLOCK_LENGTH  == 0){
-                    offset += 16;
-                    printf("\n");
-                    printf(COLOR_GREEN "|----0x%08llx: " COLOR_RESET, offset);
-                }
-                cnt++;
-            }
-            printf("\n\n");
+            print_body_bytes(ptr, phdr[i].p_filesz, phdr[i].p_offset);
             free(block);
         }
         // ============================ END PROGRAM BODY =============================
@@ -752,25 +756,8 @@ void dump_elf64_phdr(Elf64_Ehdr *elf, Elf64_Phdr* phdr, bparser*parser)
         if (phdr[i].p_filesz > 0) {
             void *block = malloc(phdr[i].p_filesz);
             bparser_read(parser, block, phdr[i].p_offset, phdr[i].p_filesz);
-
             unsigned char* ptr = (unsigned char*)block;
-            int cnt=0;
-            printf(COLOR_GREEN "|" COLOR_RESET  );
-            print_hex_header(offset);
-            for (size_t j = 0; j < phdr[i].p_filesz; j++) {
-                if(cnt == 2) {
-                    printf(" ");
-                    cnt=0;
-                }
-                display_byte(&ptr[j]);
-                if ((j + 1) % BLOCK_LENGTH  == 0){
-                    offset += 16;
-                    printf("\n");
-                    printf(COLOR_GREEN "|----0x%08llx: " COLOR_RESET, offset);
-                }
-                cnt++;
-            }
-            printf("\n\n");
+            print_body_bytes(ptr, phdr[i].p_filesz, phdr[i].p_offset);
             free(block);
         }
         // ============================ END PROGRAM BODY =============================

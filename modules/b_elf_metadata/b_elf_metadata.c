@@ -385,15 +385,15 @@ static inline void print_section_header_metadata_64bit(unsigned int id, const ch
     printf(COLOR_BG_WHITE COLOR_BCYAN "|--Section [%d]"  COLOR_RESET COLOR_BLUE " %s" COLOR_CYAN ":\n" COLOR_RESET, id, name);
     // printf(COLOR_GREEN "|---%-*s" COLOR_RESET "%d\n",   META_LABEL_WIDTH, "ID:", id);
     // printf(COLOR_GREEN "|---%-*s" COLOR_RESET "%s\n",   META_LABEL_WIDTH, "Name:", name);
-    printf(COLOR_GREEN "|---%-*s" COLOR_RESET "%s\n",   META_LABEL_WIDTH, "Type:", type_str);
-    printf(COLOR_GREEN "|---%-*s" COLOR_RESET "%s\n",   META_LABEL_WIDTH, "Flags:", flags);
-    printf(COLOR_GREEN "|---%-*s" COLOR_RESET "0x%lx\n", META_LABEL_WIDTH, "Addr:", shdrs[id].sh_addr);
-    printf(COLOR_GREEN "|---%-*s" COLOR_RESET "0x%lx\n", META_LABEL_WIDTH, "Offset:", shdrs[id].sh_offset);
-    printf(COLOR_GREEN "|---%-*s" COLOR_RESET "0x%lx\n", META_LABEL_WIDTH, "Size:", shdrs[id].sh_size);
-    printf(COLOR_GREEN "|---%-*s" COLOR_RESET "%d\n",   META_LABEL_WIDTH, "Link:", shdrs[id].sh_link);
-    printf(COLOR_GREEN "|---%-*s" COLOR_RESET "0x%x\n", META_LABEL_WIDTH, "Info:", shdrs[id].sh_info);
-    printf(COLOR_GREEN "|---%-*s" COLOR_RESET "0x%lx\n", META_LABEL_WIDTH, "Align:", shdrs[id].sh_addralign);
-    printf(COLOR_GREEN "|---%-*s" COLOR_RESET "0x%lx\n", META_LABEL_WIDTH, "EntSize:", shdrs[id].sh_entsize);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "%s\n",   META_LABEL_WIDTH, "Type:", type_str);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "%s\n",   META_LABEL_WIDTH, "Flags:", flags);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%lx\n", META_LABEL_WIDTH, "Addr:", shdrs[id].sh_addr);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%lx\n", META_LABEL_WIDTH, "Offset:", shdrs[id].sh_offset);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%lx\n", META_LABEL_WIDTH, "Size:", shdrs[id].sh_size);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "%d\n",   META_LABEL_WIDTH, "Link:", shdrs[id].sh_link);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%x\n", META_LABEL_WIDTH, "Info:", shdrs[id].sh_info);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%lx\n", META_LABEL_WIDTH, "Align:", shdrs[id].sh_addralign);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%lx\n", META_LABEL_WIDTH, "EntSize:", shdrs[id].sh_entsize);
 
 }
 
@@ -426,7 +426,7 @@ static inline void print_program_header_metadata_64bit(unsigned int id, const ch
     printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%lx\n", META_LABEL_WIDTH, "Align:", phdr[id].p_align);
 }
 
-void print_body_bytes(unsigned char *ptr, size_t size, unsigned long long offset) {
+void print_body_bytes(unsigned char *ptr, size_t size, unsigned long long offset, int disasm, unsigned char bit_type) {
     printf(COLOR_GREEN "|" COLOR_RESET  );
     print_hex_header(offset);
     
@@ -452,10 +452,28 @@ void print_body_bytes(unsigned char *ptr, size_t size, unsigned long long offset
         for (j = 0; j < BLOCK_LENGTH && i + j < size; j++) {
             unsigned char c = ptr[i + j];
             display_byte_char(&ptr[i+j]);
-            // printf("%c", (c >= 32 && c <= 126) ? c : '.');
         }
-        printf("|\n");
+        printf("|");
+        printf("\n");
+
     }
+
+    if (disasm & SHF_EXECINSTR) {
+        ud_t ud_obj;
+        ud_init(&ud_obj);
+        ud_set_input_buffer(&ud_obj, ptr, size);
+        ud_set_mode(&ud_obj, (bit_type == ELFCLASS32) ? 32: 64);        // change to 64 for x86_64
+        ud_set_syntax(&ud_obj, UD_SYN_INTEL);
+        ud_set_pc(&ud_obj, offset);
+        // printf(COLOR_YELLOW "\nDisassembly:\n" COLOR_RESET);
+        while (ud_disassemble(&ud_obj)) {
+            printf(COLOR_YELLOW "|----0x%08llx:  " COLOR_RESET " %s\n",
+                    (unsigned long long)ud_insn_off(&ud_obj),
+                    ud_insn_asm(&ud_obj));
+        }
+    }
+
+
 }
 
 /**
@@ -487,6 +505,7 @@ void dump_elf32_shdr(Elf32_Ehdr* elf, Elf32_Shdr* shdrs, bparser* parser)
 {
     Elf32_Shdr shstr = shdrs[elf->e_shstrndx];
     const char* shstrtab = (const char*)(parser->block + shstr.sh_offset);
+
     printf(COLOR_BLUE "\n=== Section Headers ===\n" COLOR_RESET);
     print_section_header_legend();
 
@@ -519,7 +538,8 @@ void dump_elf32_shdr(Elf32_Ehdr* elf, Elf32_Shdr* shdrs, bparser* parser)
             void* block = malloc(shdrs[i].sh_size);
             bparser_read(parser, block, shdrs[i].sh_offset, shdrs[i].sh_size);
             unsigned char* ptr = (unsigned char*)block;
-            print_body_bytes(ptr, shdrs[i].sh_size, shdrs[i].sh_offset);
+            unsigned char bit_type = ((unsigned char*)parser->block)[EI_CLASS];
+            print_body_bytes(ptr, shdrs[i].sh_size, shdrs[i].sh_offset, shdrs[i].sh_flags, bit_type);
             free(block);
         }
         // ============================ END SECTION BODY =============================
@@ -598,7 +618,9 @@ void dump_elf64_shdr(Elf64_Ehdr* elf , Elf64_Shdr* shdrs, bparser* parser)
             void* block = malloc(shdrs[i].sh_size);
             bparser_read(parser, block, shdrs[i].sh_offset, shdrs[i].sh_size);
             unsigned char* ptr = (unsigned char*)block;
-            print_body_bytes(ptr, shdrs[i].sh_size, shdrs[i].sh_offset);
+            // print_body_bytes(ptr, shdrs[i].sh_size, shdrs[i].sh_offset, shdrs[i].sh_flags);
+            unsigned char bit_type = ((unsigned char*)parser->block)[EI_CLASS];
+            print_body_bytes(ptr, shdrs[i].sh_size, shdrs[i].sh_offset, shdrs[i].sh_flags, bit_type);
             free(block);
         }
         // ============================ END SECTION BODY =============================
@@ -688,12 +710,12 @@ void dump_elf32_phdr(Elf32_Ehdr *elf, Elf32_Phdr* phdr, bparser*parser)
         // ============================ END PROGRAM METADATA ============================
 
         // ============================ BEGIN PROGRAM BODY =============================
-        long long int offset = phdr[i].p_offset;
         if (phdr[i].p_filesz > 0) {
             void *block = malloc(phdr[i].p_filesz);
             bparser_read(parser, block, phdr[i].p_offset, phdr[i].p_filesz);
             unsigned char* ptr = (unsigned char*)block;
-            print_body_bytes(ptr, phdr[i].p_filesz, phdr[i].p_offset);
+            print_body_bytes(ptr, phdr[i].p_filesz, phdr[i].p_offset, 0, 0);
+            // print_body_bytes(ptr, phdr[i].p_filesz, phdr[i].p_offset, phdr[i].p_flags);
             free(block);
         }
         // ============================ END PROGRAM BODY =============================
@@ -752,12 +774,12 @@ void dump_elf64_phdr(Elf64_Ehdr *elf, Elf64_Phdr* phdr, bparser*parser)
         // ============================ END PROGRAM METADATA =============================
         
         // ============================ BEGIN PROGRAM BODY =============================
-        long long int offset = phdr[i].p_offset;
         if (phdr[i].p_filesz > 0) {
             void *block = malloc(phdr[i].p_filesz);
             bparser_read(parser, block, phdr[i].p_offset, phdr[i].p_filesz);
             unsigned char* ptr = (unsigned char*)block;
-            print_body_bytes(ptr, phdr[i].p_filesz, phdr[i].p_offset);
+            // print_body_bytes(ptr, phdr[i].p_filesz, phdr[i].p_offset, phdr[i].p_flags);
+            print_body_bytes(ptr, phdr[i].p_filesz, phdr[i].p_offset, 0, 0);
             free(block);
         }
         // ============================ END PROGRAM BODY =============================

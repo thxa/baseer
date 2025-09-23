@@ -15,22 +15,30 @@
 
 /**
  * @file debugger.c
- * @brief Functions to handle debugging binary and command logic. 
+ * @brief Implementation of a lightweight debugger for ELF binaries using ptrace.
  *
+ * This file provides functionality for:
+ * - Parsing user commands
+ * - Handling breakpoints
+ * - Inspecting and modifying memory and registers
+ * - Displaying disassembly and process state
+ * - Running a target program under debugger control
  */
 
 
-
 /**
- * @brief Function to handle user commands. 
- * @param ctx is the cpu status
+ * @brief Parse and execute a user command entered in the debugger prompt.
  *
+ * Reads a command from stdin, splits it into operator and arguments,
+ * and executes the corresponding debugger function.
+ *
+ * @param ctx Pointer to debugger context structure containing process state.
  */
 void parse_cmd(context *ctx){
 	if(ctx == NULL)
 		return;
 	bool flag = false;
-        char *cmd = linenoise("Baseer-" COLOR_BLUE "DBG "COLOR_RESET"-> ");
+        char *cmd = linenoise(COLOR_BLUE "\rBaseer-DBG "COLOR_RESET"-> ");
         if(!cmd) return;
         if(*cmd) linenoiseHistoryAdd(cmd);
 	cmd[strcspn(cmd, "\n")] = 0;
@@ -66,10 +74,14 @@ void parse_cmd(context *ctx){
 	free(cmd);
 
 }
+
 /**
- * @brief Function to handle command that don't need a function . 
- * @param ctx is the cpu status
+ * @brief Handle actions that correspond directly to simple commands
+ * (e.g., quit, help, continue, single-step).
  *
+ * @param ctx Pointer to debugger context.
+ * @param args Optional arguments passed with the command.
+ * @return true if the command was successfully handled, false otherwise.
  */
 bool handle_action(context *ctx,void *args){
 
@@ -77,7 +89,7 @@ bool handle_action(context *ctx,void *args){
 		ptrace(PTRACE_CONT, ctx->pid, NULL, SIGKILL);
 		destroy_all(ctx);
 		ctx->do_wait = false;
-		ctx->base |= 2;
+		ctx->do_exit = true;
 		return true;
 	}else if (strcmp(ctx->cmd.op,"h") == 0) {
 		print_helpCMD();
@@ -120,8 +132,7 @@ bool handle_action(context *ctx,void *args){
 }
 
 /**
- * @brief print the help commands . 
- *
+ * @brief Print the list of available debugger commands.
  */
 void print_helpCMD(){
 	printf("\n");
@@ -140,8 +151,13 @@ void print_helpCMD(){
 }
 
 /**
- * @brief change the value in address or register. 
+ * @brief Modify the value of a register or memory location.
  *
+ * Command format: `$REG=VALUE` or `ADDR=VALUE`
+ *
+ * @param ctx Pointer to debugger context.
+ * @param args Command argument string.
+ * @return true on success, false otherwise.
  */
 bool set_mem_reg(context *ctx,void *args){
 	ctx->do_wait = false;
@@ -161,12 +177,12 @@ bool set_mem_reg(context *ctx,void *args){
 	}
 	if(counter < 2) 
 		return false;
-	// check if the first is register 
 	uint64_t val = (strstr(tokens[1],"0x") != NULL) ? strtoul(tokens[1], NULL, 16) : strtoul(tokens[1], NULL, 10);
 	if(val == 0){
 		ERROR("wrong value\n");
 		return false;
 	}
+	// check if the first is register 
 	if(tokens[0][0] == '$'){
 		tokens[0]++ ;
 		int len = sizeof(regs_64)/sizeof(pos_name);
@@ -186,8 +202,9 @@ bool set_mem_reg(context *ctx,void *args){
 		
 		}
 		ptrace(PTRACE_SETREGS, ctx->pid, 0, &ctx->regs);
+	
+	// if the first is memory address 
 	}else if (strstr(tokens[0],"0x") != NULL) {
-		// if the first is memory address 
 		uint64_t addr = strtoul(tokens[0], NULL, 16);
 		if (ptrace(PTRACE_POKETEXT, ctx->pid, (void*)addr, (void*)val) == -1) {
 			ERROR("invalid address\n");
@@ -199,8 +216,13 @@ bool set_mem_reg(context *ctx,void *args){
 }
 
 /**
- * @brief print memory value in specific address . 
+ * @brief Examine memory at a specific address.
  *
+ * Command format: `x ADDR SIZE`
+ *
+ * @param ctx Pointer to debugger context.
+ * @param args Address and size arguments.
+ * @return true on success, false otherwise.
  */
 bool examin_mem(context *ctx,void *args){
 	char *arg = (char*)args;
@@ -245,13 +267,18 @@ bool examin_mem(context *ctx,void *args){
 			printf("\n");
 		}
 	}
+	if(size % 2 == 1)
+		printf("\n");
 	return true;
 }
 
 
 /**
- * @brief delete a breakpoint. 
+ * @brief Delete a breakpoint by ID.
  *
+ * @param ctx Pointer to debugger context.
+ * @param args Breakpoint ID.
+ * @return true if deletion succeeds, false otherwise.
  */
 bool delBP(context *ctx, void* args){
 	char *arg = (char*)args;
@@ -285,6 +312,7 @@ bool delBP(context *ctx, void* args){
 			if(ptr == ctx->list->last){
 				ctx->list->last = tmp;
 			}
+			INFO("")
 			printf("deleted breakpoint at: %llx\n",ptr->addr);
 			free(ptr);
 			return true;
@@ -292,13 +320,19 @@ bool delBP(context *ctx, void* args){
 		tmp = ptr;
 		ptr = ptr->next;
 	}
+	ERROR("")
 	printf("breakpoint with id: %d not found\n",id);
 	return true;
 	
 }
 /**
- * @brief function that do step over a function call. 
+ * @brief Step over a function call instruction.
  *
+ * Inserts a temporary breakpoint after the call instruction and continues execution.
+ *
+ * @param ctx Pointer to debugger context.
+ * @param args Unused.
+ * @return true on success, false otherwise.
  */
 bool step_over(context *ctx,void *args){
 	ctx->do_wait = false;
@@ -331,6 +365,7 @@ bool step_over(context *ctx,void *args){
 		perror("PTRACE_POKETEXT");
 		return true;
 	}
+	ptrace(PTRACE_GETREGS, ctx->pid, 0, &ctx->regs);
 	ctx->regs.rip = addr;
 	ptrace(PTRACE_SETREGS, ctx->pid, 0, &ctx->regs);
 	dis_ctx(ctx);
@@ -338,8 +373,11 @@ bool step_over(context *ctx,void *args){
 }
 
 /**
- * @brief search for symbols in context struct . 
+ * @brief Find the address of a symbol in the loaded program.
  *
+ * @param ctx Pointer to debugger context.
+ * @param name Symbol name to search for.
+ * @return Symbol address if found, 0 otherwise.
  */
 
 uint64_t find_sym(context *ctx,char *name){
@@ -356,8 +394,11 @@ uint64_t find_sym(context *ctx,char *name){
 
 
 /**
- * @brief set a breakpoint. 
+ * @brief Set a breakpoint at a given address or symbol name.
  *
+ * @param ctx Pointer to debugger context.
+ * @param args Address or symbol name.
+ * @return true if the breakpoint was successfully set, false otherwise.
  */
 bool setBP(context *ctx, void* args){
 	char *arg = (char*)args;
@@ -376,6 +417,7 @@ bool setBP(context *ctx, void* args){
 	if(is_str){
 		addr = find_sym(ctx, token);
 		if(addr == 0){
+			ERROR("");
 			printf("undefined symbol %s \n",token);
 			return true;
 		}
@@ -407,8 +449,9 @@ bool setBP(context *ctx, void* args){
 }
 
 /**
- * @brief handle a break point . 
+ * @brief Handle a breakpoint hit by restoring the instruction and adjusting RIP.
  *
+ * @param ctx Pointer to debugger context.
  */
 void handle_bpoint(context *ctx) {
 	ptrace(PTRACE_GETREGS, ctx->pid, 0, &ctx->regs);
@@ -432,13 +475,18 @@ void handle_bpoint(context *ctx) {
 }
 
 /**
- * @brief list all break points . 
+ * @brief List all active breakpoints.
  *
+ * @param ctx Pointer to debugger context.
+ * @param args Unused.
+ * @return true always.
  */
+
 bool listBP(context *ctx,void *args){
 	ptrace(PTRACE_GETREGS, ctx->pid, NULL, &ctx->regs);
 	ctx->do_wait = false;
 	if(ctx->list->first == NULL){
+		INFO("")
 		printf("there is no break points\n");
 		return true;
 	}
@@ -446,14 +494,17 @@ bool listBP(context *ctx,void *args){
 	bp *head = ctx->list->first;
 	bp *ptr = head;
 	while (ptr != NULL) {
-		printf("[*] break point id: %d at : 0x%llx\n",ptr->id,ptr->addr);
+		INFO("")
+		printf("break point id: %d at : 0x%llx\n",ptr->id,ptr->addr);
 		ptr = ptr->next;
 	}
 	return true;
 }
 /**
- * @brief set break points on or off. 
+ * @brief Restore all breakpoints to their original values or reapply traps.
  *
+ * @param ctx Pointer to debugger context.
+ * @param opt If 1, restore original instruction. If 0, reset breakpoint trap.
  */
 void restore_all_BP(context *ctx,int opt){
 	ptrace(PTRACE_GETREGS, ctx->pid, NULL, &ctx->regs);
@@ -466,6 +517,10 @@ void restore_all_BP(context *ctx,int opt){
 					ERROR("error restore org value\n");
 				}
 			}else if(opt == 0){
+				if(ctx->regs.rip == ptr->addr){
+					ptr = ptr->next;
+					continue;
+				}
 				long trap = (ptr->orig & ~0xff) | 0xCC;
 				if(ptrace(PTRACE_POKETEXT, ctx->pid, (void*)ptr->addr, (void*)trap) == -1){
 					ERROR("error reset bp\n");
@@ -477,11 +532,12 @@ void restore_all_BP(context *ctx,int opt){
 }
 
 /**
- * @brief display the porocess current  status . 
+ * @brief Display process registers, flags, disassembly, and stack contents.
  *
+ * @param ctx Pointer to debugger context.
  */
 void dis_ctx(context *ctx){
-
+	linenoiseClearScreen();
 	ptrace(PTRACE_GETREGS, ctx->pid, NULL, &ctx->regs);
 	ud_t ud_obj;
 	uint8_t data[160];
@@ -538,14 +594,18 @@ void dis_ctx(context *ctx){
 
 
 /**
- * @brief initialize the context struct values. 
+ * @brief Initialize the debugger context from a parsed ELF binary.
  *
+ * Reads ELF headers and symbol tables to populate context values.
+ *
+ * @param target Pointer to binary parser structure with ELF data.
+ * @param ctx Pointer to debugger context to initialize.
  */
-
 void init_values(bparser *target, context *ctx){
 	bp_list *list = malloc(sizeof(bp_list));
 	char mmaps[512]= {0};
 	ctx->do_wait = false;
+	ctx->do_exit = false;
 	ctx->sym = NULL;
 	memset(list, 0, sizeof(bp_list));
 	list->counter = 0;
@@ -559,7 +619,7 @@ void init_values(bparser *target, context *ctx){
 	sscanf(ctx->mmaps, "%lx", &ctx->base);
 	if(ehdr->e_type == ET_EXEC){
 		ctx->entry = ehdr->e_entry;
-		ctx->base |= 1 ;
+		ctx->pie = true ;
 	}else {
 		ctx->entry = ctx->base + ehdr->e_entry;
 	}	
@@ -582,7 +642,7 @@ void init_values(bparser *target, context *ctx){
 							if (*name) {
 								sym_list *sym = malloc(sizeof(sym_list));
 								sym->name = strdup(name);
-								sym->addr = (ctx->base & 1) ? syms[j].st_value : ctx->base + syms[j].st_value;
+								sym->addr = (ctx->pie) ? syms[j].st_value : ctx->base + syms[j].st_value;
 								sym->next = NULL;
 
 								if (ctx->sym == NULL) {
@@ -616,7 +676,7 @@ void init_values(bparser *target, context *ctx){
 							if(*name){
 								sym_list *sym = malloc(sizeof(sym_list));
 								sym->name = strdup(name);
-								sym->addr = (ctx->base & 1) ? syms[j].st_value : ctx->base + syms[j].st_value;
+								sym->addr = (ctx->pie) ? syms[j].st_value : ctx->base + syms[j].st_value;
 								sym->next = NULL;
 								if(ctx->sym == NULL){
 									ctx->sym = sym;
@@ -637,8 +697,9 @@ void init_values(bparser *target, context *ctx){
 }
 
 /**
- * @brief destroy the sub structs. 
+ * @brief Free all breakpoint and symbol structures in the context.
  *
+ * @param ctx Pointer to debugger context.
  */
 void destroy_bp_sym(context *ctx){
 	bp *ptr = ctx->list->first;
@@ -660,8 +721,9 @@ void destroy_bp_sym(context *ctx){
 }
 
 /**
- * @brief destroy the context structs. 
+ * @brief Free all allocated resources in the debugger context.
  *
+ * @param ctx Pointer to debugger context.
  */
 void destroy_all(context *ctx){
 	destroy_bp_sym(ctx);
@@ -672,8 +734,14 @@ void destroy_all(context *ctx){
 }
 
 /**
- * @brief main function that fork a child then set break point on the entry point the execute parse_cmd function. 
+ * @brief Run the debugger on a given binary.
  *
+ * Forks a child process, loads the binary via memfd_create, and sets an initial breakpoint.
+ * Then enters the main command loop for user interaction.
+ *
+ * @param target Pointer to binary parser structure with ELF data.
+ * @param arg Arguments structure containing argc and argv.
+ * @return true on success, false otherwise.
  */
 bool b_debugger(bparser *target, void *arg){
 	setbuf(stdout, NULL);
@@ -746,14 +814,14 @@ bool b_debugger(bparser *target, void *arg){
 					dis_ctx(ctx);
 				} else if (WIFEXITED(stats) || (WIFSTOPPED(stats) && WSTOPSIG(stats) != SIGTRAP)  ) {
 					destroy_all(ctx);
-					ctx->base |= 2;
+					ctx->do_exit = true;
 				}
 
 			}
 			free(ctx->cmd.op);
 			ctx->cmd.op = 0;
 			ctx->cmd.addr = 0;
-			if((ctx->base & 2)){
+			if((ctx->do_exit)){
 				break;
 			}
 		}

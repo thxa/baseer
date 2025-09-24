@@ -159,7 +159,7 @@ void baseer_CLI(void) {
 
             char *tok = strtok(argline, " ");
             while (input.input_argc < MAX_INPUT_ARGS && tok) {
-                input.input_args[input.input_argc] = tok;
+                input.input_args[input.input_argc] = strdup(tok);
                 input.input_argc++;
                 tok = strtok(NULL, " ");
             }

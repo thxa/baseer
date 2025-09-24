@@ -774,17 +774,16 @@ bool b_debugger(bparser *target, void *arg){
 			perror("PTRACE_TRACEME failed");
 			return -1;
 		}
+		
 		char *argv[MAX_INPUT_ARGS];
 		argv[0] = args[1];
-		printf("\n %d", ((inputs*)arg)->input_argc);
 		if (((inputs*)arg)->input_argc > 0 ){
-			for (int i = 0 , j = 1; i < ((inputs*)arg)->input_argc ; i++, j++){
-					argv[j] = ((inputs*)arg)->input_args[i];
-					printf(" %s ",((inputs*)arg)->input_args[i]);
+			int j = 1;
+			for (int i = 0; i < ((inputs*)arg)->input_argc; i++, j++){
+				argv[j] = ((inputs*)arg)->input_args[i];
 			}
-			//  argv[((inputs*)arg)->input_argc ] = NULL;
-		
-		}else{
+			argv[j] = NULL;
+		} else {
 			argv[1] = NULL;
 		}
 

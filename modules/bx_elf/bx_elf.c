@@ -29,6 +29,8 @@ bool bx_elf(bparser* parser, void *arg)
             bparser_apply(parser, b_debugger, arg);
         } else if (strcmp("-c", args[i]) == 0) {
             bparser_apply(parser, decompile_elf, arg);
+        }else if(strcmp("--args", args[i]) == 0){
+            break;
         }else {
             fprintf(stderr, "[!] Unsupported flag: %s\n", args[i]);
         }

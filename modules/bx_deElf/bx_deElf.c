@@ -12,6 +12,136 @@
 #define RETDEC_DEFAULT_BIN "/home/m97/Desktop/Project_dec/retttt/RetDec-v5.0-Linux-Release/bin/retdec-decompiler"
 #endif
 
+#define COLOR_RESET   "\033[0m"
+#define COLOR_KEYWORD "\033[1;34m"  // bright blue
+#define COLOR_TYPE    "\033[1;36m"  // cyan
+#define COLOR_STRING  "\033[0;32m"  // green
+#define COLOR_NUMBER  "\033[1;33m"  // yellow
+#define COLOR_COMMENT "\033[0;35m"  // magenta
+#define COLOR_LINENO  "\033[0;90m"  // gray
+
+static const char *keywords[] = {
+    "if","else","for","while","do","switch","case","break",
+    "continue","return","goto","default",NULL
+};
+
+static const char *types[] = {
+    "int","long","short","char","void","bool","float","double",
+    "size_t","unsigned","signed","struct","union","enum",NULL
+};
+
+static int is_word(const char *p, const char *word) {
+    size_t len = strlen(word);
+    return strncmp(p, word, len) == 0 &&
+           !isalnum((unsigned char)p[len]) && p[len] != '_';
+}
+
+void print_decompiled_code(const char *c_code, int with_line_numbers) {
+    if (!c_code) return;
+
+    const char *p = c_code;
+    int line_number = 1;
+
+    if (with_line_numbers)
+        printf(COLOR_LINENO "%4d | " COLOR_RESET, line_number);
+
+    while (*p) {
+        // Handle comments
+        if (*p == '/' && *(p+1) == '/') {
+            printf(COLOR_COMMENT "//");
+            p += 2;
+            while (*p && *p != '\n') {
+                putchar(*p++);
+            }
+            printf(COLOR_RESET);
+            continue;
+        }
+        if (*p == '/' && *(p+1) == '*') {
+            printf(COLOR_COMMENT "/*");
+            p += 2;
+            while (*p && !(*p == '*' && *(p+1) == '/')) {
+                putchar(*p++);
+            }
+            if (*p) { printf("*/"); p += 2; }
+            printf(COLOR_RESET);
+            continue;
+        }
+
+        // Handle strings
+        if (*p == '"' || *p == '\'') {
+            char quote = *p;
+            printf(COLOR_STRING "%c", quote);
+            p++;
+            while (*p && *p != quote) {
+                if (*p == '\\' && *(p+1)) {
+                    putchar(*p++);
+                }
+                putchar(*p++);
+            }
+            if (*p == quote) {
+                printf("%c", *p++);
+            }
+            printf(COLOR_RESET);
+            continue;
+        }
+
+        // Handle numbers
+        if (isdigit((unsigned char)*p)) {
+            printf(COLOR_NUMBER);
+            while (isdigit((unsigned char)*p)) {
+                putchar(*p++);
+            }
+            printf(COLOR_RESET);
+            continue;
+        }
+
+        // Handle identifiers (check for keywords/types)
+        if (isalpha((unsigned char)*p) || *p == '_') {
+            int matched = 0;
+            for (const char **kw = keywords; *kw; kw++) {
+                if (is_word(p, *kw)) {
+                    printf(COLOR_KEYWORD "%s" COLOR_RESET, *kw);
+                    p += strlen(*kw);
+                    matched = 1;
+                    break;
+                }
+            }
+            if (!matched) {
+                for (const char **ty = types; *ty; ty++) {
+                    if (is_word(p, *ty)) {
+                        printf(COLOR_TYPE "%s" COLOR_RESET, *ty);
+                        p += strlen(*ty);
+                        matched = 1;
+                        break;
+                    }
+                }
+            }
+            if (!matched) {
+                putchar(*p++);
+            }
+            continue;
+        }
+
+        // Handle newline
+        if (*p == '\n') {
+            putchar('\n');
+            p++;
+            if (with_line_numbers && *p) {
+                line_number++;
+                printf(COLOR_LINENO "%4d | " COLOR_RESET, line_number);
+            }
+            continue;
+        }
+
+        // Default
+        putchar(*p++);
+    }
+    if(p != c_code && *(p - 1) != '\n') {
+        putchar('\n');
+    }
+}
+
+
 static int dump_to_temp_file(bparser *parser, const char *path) {
 
     if (!parser || !path) {
@@ -47,37 +177,11 @@ static int dump_to_temp_file(bparser *parser, const char *path) {
     return 0;
 }
 
-void print_decompiled_code(const char *c_code, int with_line_numbers){
-    if (!c_code) return;
-
-    if (!with_line_numbers) {
-        printf("%s\n", c_code);
-        return;
-    }
-
-    const char *p = c_code;
-    int line_number = 1;
-    printf("%4d |  ", line_number);
-    while (*p) {
-        putchar(*p);
-        if (*p == '\n') {
-            if (*(p + 1)) {
-                line_number++;
-                printf("%4d |  ", line_number);
-            }
-        }
-        p++;
-    }
-    if(p != c_code && *(p - 1) != '\n') {
-        putchar('\n');
-    }
-}
-
 static bool run_retdec(const char *in_path, const char *out_path) {
     char cmd[2048];
     const char *retdec_bin = RETDEC_DEFAULT_BIN;
 
-    int n = snprintf(cmd, sizeof(cmd), "%s -o %s %s > /dev/null 2>&1", retdec_bin, out_path, in_path);
+    int n = snprintf(cmd, sizeof(cmd), "%s --cleanup -s %s -o %s > /dev/null 2>&1", retdec_bin, in_path, out_path);
     if (n < 0 || n >= (size_t)sizeof(cmd)) {
         fprintf(stderr, "[!] command too long or snprintf error\n");
         return false;

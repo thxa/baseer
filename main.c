@@ -29,13 +29,15 @@ int main(int argc, char** args)
         fprintf(stderr, "[!] Invalid usage.\n");
         return 1;
     }
-    if (argc >= 3 && argc <= 6){
+    if (argc >= 3){
         baseer_target_t *target = baseer_open(args[1], BASEER_MODE_BOTH);
         if (!target) {
             fprintf(stderr, COLOR_RED"[!] Failed to open file : "COLOR_RESET"%s\n", args[1]);
             return 1;
             }
         inputs input = {&argc, args};
+        parse_args(&input);
+        
         if(target){
             if(!baseer_execute(target , bx_binhead, &input)){
                 fprintf(stderr, "[!] Execution error\n");

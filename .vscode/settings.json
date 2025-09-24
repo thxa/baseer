@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "flags.h": "c",
-        "string.h": "c"
+        "string.h": "c",
+        "b_cli.h": "c"
     }
 }

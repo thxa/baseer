@@ -70,7 +70,7 @@
 #define COLOR_BG_CYAN    "\033[46m"
 #define COLOR_BG_WHITE   "\033[47m"
 
-
+#define MAX_INPUT_ARGS 20
 #define DEFAULT_BLOCK_LENGTH 16
 // #define BLOCK_LENGTH 40
 
@@ -92,8 +92,10 @@ static inline int get_block_length(void)
  * @brief Struct representing command-line inputs
  */
 typedef struct {
-    int* argc;
-    char**args;
+    int *argc;
+    char** args;
+    int input_argc;
+    char* input_args[MAX_INPUT_ARGS];
 } inputs;
 
 /**

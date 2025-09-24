@@ -6,5 +6,6 @@
 #include <dirent.h>
 
 void baseer_CLI(void);
+void parse_args(inputs *input);
 
 #endif

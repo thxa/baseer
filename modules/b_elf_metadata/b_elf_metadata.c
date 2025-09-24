@@ -810,6 +810,12 @@ void dump_elf64_phdr(Elf64_Ehdr *elf, Elf64_Phdr* phdr, bparser*parser)
  * @see dump_elf32hdr(), dump_elf32_shdr(), dump_elf32_phdr(),
  *      dump_elf64hdr(), dump_elf64_shdr(), dump_elf64_phdr()
  */
+
+// #define (n, pfsz, value) \
+//     Elf##pfsz_Shdr *n = #value;
+// READ_BYTES(md, 64)
+
+
 bool print_meta_data(bparser* parser, void* args) {
     unsigned char *data = (unsigned char*) parser->block;
     char bit_type = data[EI_CLASS];

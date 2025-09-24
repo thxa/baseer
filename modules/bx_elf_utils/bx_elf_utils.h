@@ -7,6 +7,12 @@
 #include<string.h>
 
 
+typedef struct {
+    const char *name;
+    const char *desc;
+    const char *color;
+} legend_entry;
+
 void print_program_header_legend(void);
 void print_section_header_legend(void);
 const char* elf_machine_to_str(unsigned int machine);

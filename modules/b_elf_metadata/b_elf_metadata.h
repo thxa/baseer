@@ -24,6 +24,7 @@
 #include <elf.h>
 #include<string.h>
 #include "../bx_elf_utils/bx_elf_utils.h"
+#include "udis86.h"
 
 void display_byte(const unsigned char *byte);
 void dump_elf32hdr(Elf32_Ehdr *elf);

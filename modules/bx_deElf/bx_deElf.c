@@ -9,7 +9,7 @@
 #include <stdint.h>
 
 #ifndef RETDEC_DEFAULT_BIN
-#define RETDEC_DEFAULT_BIN "/home/m97/Desktop/Project_dec/retttt/RetDec-v5.0-Linux-Release/bin/retdec-decompiler"
+#define RETDEC_DEFAULT_BIN "/home/t/RetDec-v5.0-Linux-Release/bin/retdec-decompiler"
 #endif
 
 static int dump_to_temp_file(bparser *parser, const char *path) {
@@ -108,8 +108,8 @@ bool decompile_elf(bparser *parser, void *arg){
         return false;
     }
 
-    char in_path[] = "/home/m97/Desktop/baseer/temp/baseer_input_XXXXXX";
-    char out_path[] = "/home/m97/Desktop/baseer/temp/baseer_output_XXXXXX";
+    char in_path[] = "./tmp/baseer_input_XXXXXX";
+    char out_path[] = "./tmp/baseer_output_XXXXXX";
 
     int in_fd = mkstemp(in_path);
     if (in_fd < 0) {

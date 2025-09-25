@@ -38,7 +38,7 @@ void parse_cmd(context *ctx){
 	if(ctx == NULL)
 		return;
 	bool flag = false;
-        char *cmd = linenoise(COLOR_BLUE "\rBaseer-DBG "COLOR_RESET"-> ");
+        char *cmd = linenoise(COLOR_WHITE"Baseer-\033[5;34mDBG"COLOR_RESET"-> "COLOR_RESET);
         if(!cmd) return;
         if(*cmd) linenoiseHistoryAdd(cmd);
 	cmd[strcspn(cmd, "\n")] = 0;
@@ -60,6 +60,8 @@ void parse_cmd(context *ctx){
 	uint32_t len = sizeof(cmds)/sizeof(func_list); 
 	for (int i = 0; i< len ; i++) {
 		if(strcmp(ctx->cmd.op,cmds[i].cmd) == 0){
+			if(ctx->base == 0 && (strcmp(ctx->cmd.op,"q") != 0) )
+				return;
 			flag = cmds[i].func(ctx,(void*)args);
 			break;
 
@@ -87,7 +89,6 @@ bool handle_action(context *ctx,void *args){
 
 	if(strcmp(ctx->cmd.op,"q") == 0){
 		ptrace(PTRACE_CONT, ctx->pid, NULL, SIGKILL);
-		destroy_all(ctx);
 		ctx->do_wait = false;
 		ctx->do_exit = true;
 		return true;
@@ -251,7 +252,7 @@ bool examin_mem(context *ctx,void *args){
 	char *fmt = (ctx->arch == 64) ? " 0x%016llx" : " 0x%08x";
 	for (int i = 0; i < size; i++) {
 
-		long v = ptrace(PTRACE_PEEKDATA, ctx->pid, 
+		long v = ptrace(PTRACE_PEEKTEXT, ctx->pid, 
 				(void*)(addr + i*(ctx->arch / 8 )), NULL);
 		if(v == -1){
 			ERROR("wrong address \n");
@@ -341,7 +342,7 @@ bool step_over(context *ctx,void *args){
 	uint64_t orig;
 	uint8_t data[160];
 	for(int i = 0; i < 20; i++) {
-		long inst = ptrace(PTRACE_PEEKDATA, ctx->pid, (void*)(ctx->regs.rip + i*8), NULL);
+		long inst = ptrace(PTRACE_PEEKTEXT, ctx->pid, (void*)(ctx->regs.rip + i*8), NULL);
 		memcpy((void*)&data[i*8], (void*)&inst , sizeof(inst));
 	}
 	ud_init(&ud_obj);
@@ -561,7 +562,7 @@ void dis_ctx(context *ctx){
 	printf("\n");
 	printf(COLOR_YELLOW "------------- disass ----------------\n" COLOR_RESET);
 	for(int i = 0; i < 20; i++) {
-		long inst = ptrace(PTRACE_PEEKDATA, ctx->pid, (void*)(ctx->regs.rip + i*8), NULL);
+		long inst = ptrace(PTRACE_PEEKTEXT, ctx->pid, (void*)(ctx->regs.rip + i*8), NULL);
 		memcpy((void*)&data[i*8], (void*)&inst , sizeof(inst));
 	}
 	ud_init(&ud_obj);
@@ -583,7 +584,7 @@ void dis_ctx(context *ctx){
 	char *fmt = (ctx->arch == 64) ? " 0x%llx" : " 0x%x";
 	int data_len = ctx->arch / 8;
 	for(int i = 0; i < 10; i++) {
-		long v = ptrace(PTRACE_PEEKDATA, ctx->pid, (void*)(ctx->regs.rsp + i*data_len), NULL);
+		long v = ptrace(PTRACE_PEEKTEXT, ctx->pid, (void*)(ctx->regs.rsp + i*data_len), NULL);
 		printf(COLOR_YELLOW "\t0x%llx" COLOR_RESET " =>" COLOR_BLUE , (ctx->regs.rsp + i *data_len));
 		printf(fmt,v);
 		printf("\n" COLOR_RESET);
@@ -726,6 +727,8 @@ void destroy_bp_sym(context *ctx){
  * @param ctx Pointer to debugger context.
  */
 void destroy_all(context *ctx){
+	if(ctx == NULL)
+		return;
 	destroy_bp_sym(ctx);
 	free(ctx->list);
 	ctx->list = NULL;
@@ -771,7 +774,20 @@ bool b_debugger(bparser *target, void *arg){
 			perror("PTRACE_TRACEME failed");
 			return -1;
 		}
-		char *argv[] = {args[1], NULL};
+		
+		char *argv[MAX_INPUT_ARGS];
+		argv[0] = args[1];
+		if (((inputs*)arg)->input_argc > 0 ){
+			int j = 1;
+			for (int i = 0; i < ((inputs*)arg)->input_argc; i++, j++){
+				argv[j] = ((inputs*)arg)->input_args[i];
+			}
+			argv[j] = NULL;
+		} else {
+			argv[1] = NULL;
+		}
+
+		
 		char *envp[] = {NULL};
 
 		if (fexecve(fd, argv, envp) == -1) {
@@ -812,16 +828,19 @@ bool b_debugger(bparser *target, void *arg){
 					handle_bpoint(ctx);
 					restore_all_BP(ctx, 1);
 					dis_ctx(ctx);
-				} else if (WIFEXITED(stats) || (WIFSTOPPED(stats) && WSTOPSIG(stats) != SIGTRAP)  ) {
-					destroy_all(ctx);
-					ctx->do_exit = true;
+				} else if (WIFEXITED(stats) )   {
+					// using base to determen if the process exit 
+					INFO("the process has EXITED\n")
+					ctx->base = 0;
 				}
 
 			}
 			free(ctx->cmd.op);
 			ctx->cmd.op = 0;
 			ctx->cmd.addr = 0;
+
 			if((ctx->do_exit)){
+				destroy_all(ctx);
 				break;
 			}
 		}

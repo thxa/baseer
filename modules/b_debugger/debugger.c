@@ -12,7 +12,7 @@
 #include <sys/wait.h>
 #include "debugger.h"
 #include <sys/ptrace.h>
-
+#include "../bx_elf_utils/bx_elf_utils.h"
 /**
  * @file debugger.c
  * @brief Implementation of a lightweight debugger for ELF binaries using ptrace.
@@ -570,11 +570,19 @@ void dis_ctx(context *ctx){
 	ud_set_syntax(&ud_obj, UD_SYN_INTEL);
 	ud_set_pc(&ud_obj, ctx->regs.rip);
 	while(ud_disassemble(&ud_obj)){
-		if(ud_insn_off(&ud_obj) == ctx->regs.rip){
-			printf(COLOR_GREEN "    --> 0x%llx: %s\n"COLOR_RESET,(uint64_t)ud_insn_off(&ud_obj),ud_insn_asm(&ud_obj));
+		// if(ud_insn_off(&ud_obj) == ctx->regs.rip){
+		// 	printf(COLOR_GREEN "    --> 0x%llx: %s\n"COLOR_RESET,(uint64_t)ud_insn_off(&ud_obj),ud_insn_asm(&ud_obj));
+		// }else {
+		// 	printf(COLOR_MAGENTA "\t0x%llx: %s\n"COLOR_RESET,(uint64_t)ud_insn_off(&ud_obj),ud_insn_asm(&ud_obj));
+		// }
+                if(ud_insn_off(&ud_obj) == ctx->regs.rip){
+			printf(COLOR_GREEN "    --> 0x%llx: "COLOR_RESET,(uint64_t)ud_insn_off(&ud_obj));
+                        print_highlight_asm(ud_insn_asm(&ud_obj));
 		}else {
-			printf(COLOR_MAGENTA "\t0x%llx: %s\n"COLOR_RESET,(uint64_t)ud_insn_off(&ud_obj),ud_insn_asm(&ud_obj));
+			printf(COLOR_MAGENTA "\t0x%llx: " COLOR_RESET,(uint64_t)ud_insn_off(&ud_obj));
+                        print_highlight_asm(ud_insn_asm(&ud_obj));
 		}
+
 		if(ud_insn_mnemonic(&ud_obj)  == UD_Iret || ud_insn_off(&ud_obj) >= (ctx->regs.rip + 0x20))
 			break;
 	}

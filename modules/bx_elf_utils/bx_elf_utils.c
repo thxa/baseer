@@ -285,22 +285,18 @@ const char *type_p_to_str(unsigned int p_type)
 #define COLOR_LINENO "\033[0;35m"  // magenta
 #define COLOR_COMMENT  "\033[0;90m"  // gray
 #define COLOR_PUNCTUATION "\033[0;37m" // Light gray for punctuation (braces, etc.)
-
-static const char *keywords[] = {
-    "if", "else", "for", "while", "do", "switch", "case", "break", "continue", "return", "goto", "default", "const", "static", "volatile", NULL
-};
-
-static const char *types[] = {
-    "int", "long", "short", "char", "void", "bool", "float", "double", "size_t", "unsigned", "signed", "struct", "union", "enum", "int8_t", "int16_t", "int32_t", "int64_t", "uint8_t", "uint16_t", "uint32_t", "uint64_t", NULL
-};
-
+                                       
 // ================= Categories =================
 static const char *data_mov[] = {
-    "mov","movsx","movzx","lea","push","pop","xchg",NULL
+    "mov","movsx","movzx","lea","push","pop","xchg", NULL
+};
+
+static const char* invalid[] = {
+    "invalid", NULL
 };
 
 static const char *arithmetic[] = {
-    "add","sub","inc","dec","imul","mul","idiv","div","neg","adc","sbb",NULL
+    "add","sub","inc","dec","imul","mul","idiv","div","neg","adc","sbb", "cmp", NULL
 };
 
 static const char *logic_ops[] = {
@@ -328,26 +324,90 @@ static const char *system_ops[] = {
 };
 
 static const char *asm_types[] = {
+    // ----- Data definition -----
     "db",   // define byte
-    "dw",   // define word
-    "dd",   // define doubleword
-    "dq",   // define quadword
-    "resb", // reserve byte
-    "resw", // reserve word
-    "resd", // reserve dword
-    "resq", // reserve qword
-    "equ",  // constant definition
-    "section", "segment", "global", "extern",
+    "dw",   // define word (16-bit)
+    "dd",   // define double word (32-bit)
+    "dq",   // define quad word (64-bit)
+    "dt",   // define ten bytes (80-bit, FPU)
+    "do",   // define octa word (128-bit)
+    "dy",   // define yword (256-bit)
+    "dz",   // define zword (512-bit)
+
+    // ----- Reservation -----
+    "resb", // reserve bytes
+    "resw", // reserve words
+    "resd", // reserve double words
+    "resq", // reserve quad words
+    "rest", // reserve ten bytes
+    "reso", // reserve 128-bit
+    "resy", // reserve 256-bit
+    "resz", // reserve 512-bit
+
+    // ----- Size specifiers -----
+    "byte",
+    "word",
+    "dword",
+    "qword",
+    "tword",  // 80-bit
+    "oword",  // 128-bit
+    "yword",  // 256-bit
+    "zword",  // 512-bit
+
+    // ----- Instruction prefixes -----
+    "lock",
+    "rep",
+    "repe", "repz",
+    "repne", "repnz",
+    "o16",   // operand-size override (0x66)
+    "a16",   // address-size override (0x67)
+    "a32",
+    "a64",
+    "rex", "rexw", "rexr", "rexx", "rexb",
+
+    // ----- Segment overrides -----
+    "cs", "ds", "ss", "es", "fs", "gs",
+
+    // ----- Directives -----
+    "equ",     // constant definition
+    "org",     // origin
+    "align",   // alignment
+    "section", "segment",
+    "global", "extern",
+
+    // ----- Special keywords -----
+    "short",
+    "near",
+    "far",
+
     NULL
 };
 
 static const char *asm_registers[] = {
-    "eax", "ebx", "ecx", "edx",
-    "esi", "edi", "ebp", "esp",
-    "rax", "rbx", "rcx", "rdx",
-    "rsi", "rdi", "rbp", "rsp",
-    "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
-    "al", "ah", "bl", "bh", "cl", "ch", "dl", "dh",
+    // 64-bit
+    "rax","rbx","rcx","rdx",
+    "rsi","rdi","rbp","rsp",
+    "r8","r9","r10","r11","r12","r13","r14","r15",
+    "rip",
+
+    // 32-bit
+    "eax","ebx","ecx","edx",
+    "esi","edi","ebp","esp",
+    "r8d","r9d","r10d","r11d","r12d","r13d","r14d","r15d",
+
+    // 16-bit
+    "ax","bx","cx","dx",
+    "si","di","bp","sp",
+    "r8w","r9w","r10w","r11w","r12w","r13w","r14w","r15w",
+
+    // 8-bit (low)
+    "al","bl","cl","dl",
+    "sil","dil","bpl","spl",
+    "r8b","r9b","r10b","r11b","r12b","r13b","r14b","r15b",
+
+    // 8-bit (high) - legacy only
+    "ah","bh","ch","dh",
+
     NULL
 };
 
@@ -377,11 +437,14 @@ const char* get_color(const char *word) {
     if (is_in_list(word, string_ops)) return COLOR_MAGENTA;
     if (is_in_list(word, system_ops)) return COLOR_BLUE;
     if (is_in_list(word, asm_registers)) return COLOR_CYAN;
+    if (is_in_list(word, asm_types )) return COLOR_WHITE;
+    if(is_in_list(word, invalid)) return COLOR_GRAY;
     return COLOR_RESET;
 }
 
 static int is_punctuation(char c) { 
-    return c == '{' || c == '}' || c == '(' || c == ')' || c == ';' || c == ',' || c == '=' || c == '*' || c == '&' || c == '[' || c == ']' || c == '-' || c == '+'; 
+    return c == '{' || c == '}' || c == '(' || c == ')' || c == ';' || c == ',' || 
+           c == '=' || c == '*' || c == '&' || c == '[' || c == ']' || c == '-' || c == '+' || c == ':'; 
 }
 
 // ================ Printing ===================
@@ -392,7 +455,6 @@ void print_highlight_asm(const char *line) {
     char word[64];
 
     while (*p) {
-        // if (isspace(*p) || *p==':' || *p==',' || *p=='[' || *p==']') {
         if (isspace(*p) || is_punctuation(*p)) {
             putchar(*p);
             p++;

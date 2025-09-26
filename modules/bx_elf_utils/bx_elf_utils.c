@@ -380,10 +380,9 @@ const char* get_color(const char *word) {
     return COLOR_RESET;
 }
 
-
-
-
-
+static int is_punctuation(char c) { 
+    return c == '{' || c == '}' || c == '(' || c == ')' || c == ';' || c == ',' || c == '=' || c == '*' || c == '&' || c == '[' || c == ']' || c == '-' || c == '+'; 
+}
 
 // ================ Printing ===================
 void print_highlight_asm(const char *line) {
@@ -393,24 +392,27 @@ void print_highlight_asm(const char *line) {
     char word[64];
 
     while (*p) {
-        if (isspace(*p) || *p==':' || *p==',' || *p=='[' || *p==']') {
+        // if (isspace(*p) || *p==':' || *p==',' || *p=='[' || *p==']') {
+        if (isspace(*p) || is_punctuation(*p)) {
             putchar(*p);
             p++;
             continue;
         }
 
         int i=0;
-        while (*p && !isspace(*p) && *p!=':' && *p!=',' && *p!='[' && *p!=']') {
+        while (*p && !isspace(*p) && !is_punctuation(*p)) {
             word[i++] = *p;
             p++;
         }
-        word[i] = '\0';
 
+        word[i] = '\0';
         const char *color = get_color(word);
+
         if (color != COLOR_RESET)
             printf("%s%s%s", color, word, COLOR_RESET);
         else
             printf("%s", word);
+
     }
     printf("\n");
 }
@@ -420,54 +422,5 @@ void print_highlight_asm(const char *line) {
 //     return strncmp(p, word, len) == 0 &&
 //            !isalnum((unsigned char)p[len]) && p[len] != '_';
 // }
-
-// static int is_punctuation(char c) { 
-//     return c == '{' || c == '}' || c == '(' || c == ')' || c == ';' || c == ',' || c == '=' || c == '*' || c == '&' || c == '[' || c == ']'; 
-// }
-
-// int is_asm_keyword(const char *word) {
-//     for (int i = 0; asm_keywords[i] != NULL; i++) {
-//         if (strcmp(word, asm_keywords[i]) == 0) return 1;
-//     }
-//     return 0;
-// }
-
-// void print_highlight_asm(const char *line) {
-//     if (!line) return;
-
-//     const char *p = line;
-//     char word[64];
-
-//     while (*p) {
-//         if (isspace(*p) || is_punctuation(*p)) {
-//             putchar(*p);
-//             p++;
-//             continue;
-//         }
-
-//         // extract word
-//         int i = 0;
-//         while (*p && !isspace(*p) && !is_punctuation(*p)) {
-//             word[i++] = *p;
-//             p++;
-//         }
-//         word[i] = '\0';
-
-//         if (is_asm_keyword(word)) {
-//             printf(COLOR_RED "%s" COLOR_RESET, word);
-//         } else {
-//             printf("%s", word);
-//         }
-//     }
-//     printf("\n");
-// }
-
-
-// // void print_highlight_asm(const char *asm_instructions) {
-// //     if (!asm_instructions) return;
-// //     printf("%s\n", asm_instructions);
-// // }
-
-
 
 

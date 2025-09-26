@@ -26,15 +26,12 @@
 #include "../bx_elf_utils/bx_elf_utils.h"
 #include "udis86.h"
 
-void display_byte(const unsigned char *byte);
 void dump_elf32hdr(Elf32_Ehdr *elf);
 void dump_elf64hdr(Elf64_Ehdr *elf);
 void dump_elf32_shdr(Elf32_Ehdr *elf , Elf32_Shdr *shdrs, bparser *parser);
 void dump_elf64_shdr(Elf64_Ehdr *elf , Elf64_Shdr *shdrs, bparser *parser);
 void dump_elf32_phdr(Elf32_Ehdr *elf, Elf32_Phdr *phdr, bparser *parser);
 void dump_elf64_phdr(Elf64_Ehdr *elf, Elf64_Phdr *phdr, bparser *parser);
-
-
 bool print_meta_data(bparser *parser, void *args);
 
 #endif

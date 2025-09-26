@@ -1,5 +1,7 @@
 #include "bx_elf_utils.h"
 
+
+
 void print_section_header_legend(void)
 {
     legend_entry types[] = {
@@ -258,6 +260,71 @@ const char *type_p_to_str(unsigned int p_type)
     return type_str;
 }
 
+
+/**
+ * @brief Display a single byte in hexadecimal with color coding.
+ *
+ * This function prints the value of a byte in hex format (two digits) 
+ * and applies a color depending on its meaning:
+ * - Default (COLOR_YELLOW) for active instructions.
+ * - COLOR_RED for NOP (0x90), INT3 (0xCC), or filler bytes (0xFF).
+ * - COLOR_GRAY for padding or null bytes (0x00).
+ *
+ * @param byte Pointer to the byte to display.
+ *
+ * @note The color codes are ANSI escape sequences.
+ *       The color is reset after printing each byte using COLOR_RESET.
+ */
+void display_byte(const unsigned char *byte)
+{
+    const char *color = COLOR_YELLOW; // default for active instruction
+
+    if (*byte == 0x90 || *byte == 0xCC || *byte == 0xff) {
+        color = COLOR_RED;  // low / unused
+    }
+    else if (*byte == 0x00) {
+        color = COLOR_GRAY; // padding or null bytes
+    }
+    printf("%s%02x%s", color, *byte, COLOR_RESET);
+}
+
+/**
+ * @brief Display a single byte as a printable character with color coding.
+ * 
+ * This function prints the ASCII representation of a byte. Non-printable
+ * bytes are shown as a '.' character. The output is color-coded based
+ * on the byte value:
+ *   - 0x90, 0xCC, 0xFF → COLOR_RED (low / unused bytes)
+ *   - 0x00             → COLOR_GRAY (padding or null bytes)
+ *   - All other bytes  → COLOR_YELLOW (default / active instruction)
+ * 
+ * Printable ASCII characters (32-126) are displayed as-is, while
+ * non-printable bytes are represented with '.'.
+ * 
+ * @param byte Pointer to the byte to display.
+ */
+void display_byte_char(const unsigned char *byte)
+{
+    const char *color = COLOR_YELLOW; // default for active instruction 
+    unsigned char c = *byte;
+    if (*byte == 0x90 || *byte == 0xCC || *byte == 0xff) {
+        color = COLOR_RED;  // low / unused
+    }
+    else if (*byte == 0x00) {
+        color = COLOR_GRAY; // padding or null bytes
+    }
+    if (c >= 32 && c <= 126) { // printable ASCII range
+        printf("%s%c%s", color, c, COLOR_RESET);
+    } else {
+        printf("%s.%s", color, COLOR_RESET); // non-printable
+    }
+}
+
+
+
+
+
+
 // // List of metadata sections
 // const char* metadata_sections[] = {
 //     ".rela.dyn",
@@ -479,10 +546,340 @@ void print_highlight_asm(const char *line) {
     printf("\n");
 }
 
-// static int is_word(const char *p, const char *word) {
-//     size_t len = strlen(word);
-//     return strncmp(p, word, len) == 0 &&
-//            !isalnum((unsigned char)p[len]) && p[len] != '_';
-// }
+
+/**
+ * @brief Format ELF section header flags into a colored string.
+ *
+ * @param sh_flags Section header flags (bitmask).
+ * @param buf Buffer to write formatted flags into.
+ * @param size Size of the buffer.
+ */
+void format_sh_flags(uint64_t sh_flags, char *buf, size_t size)
+{
+    buf[0] = '\0'; // start empty
+    if (sh_flags & SHF_WRITE)
+        strncat(buf, COLOR_RED "W" COLOR_RESET, size - strlen(buf) - 1);
+    if (sh_flags & SHF_ALLOC)
+        strncat(buf, COLOR_GREEN "A" COLOR_RESET, size - strlen(buf) - 1);
+    if (sh_flags & SHF_EXECINSTR)
+        strncat(buf, COLOR_YELLOW "X" COLOR_RESET, size - strlen(buf) - 1);
+    if (sh_flags & SHF_MERGE)
+        strncat(buf, COLOR_CYAN "M" COLOR_RESET, size - strlen(buf) - 1);
+    if (sh_flags & SHF_STRINGS)
+        strncat(buf, COLOR_MAGENTA "S" COLOR_RESET, size - strlen(buf) - 1);
+    if (sh_flags & SHF_INFO_LINK)
+        strncat(buf, COLOR_WHITE "I" COLOR_RESET, size - strlen(buf) - 1);
+    if (sh_flags & SHF_LINK_ORDER)
+        strncat(buf, COLOR_BLUE "L" COLOR_RESET, size - strlen(buf) - 1);
+    if (sh_flags & SHF_OS_NONCONFORMING)
+        strncat(buf, COLOR_GRAY "O" COLOR_RESET, size - strlen(buf) - 1);
+    if (sh_flags & SHF_GROUP)
+        strncat(buf, COLOR_CYAN "G" COLOR_RESET, size - strlen(buf) - 1);
+    if (sh_flags & SHF_TLS)
+        strncat(buf, COLOR_YELLOW "T" COLOR_RESET, size - strlen(buf) - 1);
+
+    // printf("================= Size of flag: %ld ===========\n", size - strlen(buf) - 1);
+    for(int i=0; i<5; i++)
+        strncat(buf, " ", size - strlen(buf) - 1);
+    strncat(buf, COLOR_CYAN, size - strlen(buf) - 1);
+}
+
+/**
+ * @brief Print all symbols from a 32-bit ELF file (with colors).
+ *
+ * This function iterates over the ELF32 symbol table (`symtab`) and its
+ * associated string table (`strtab`) to display information about each symbol.
+ * It prints a nicely formatted and colorized table that includes:
+ * - **Index** : The symbol index in the table.
+ * - **Value** : The symbol value (address in executables/shared objects,
+ *               or section offset in relocatable files).
+ * - **Size**  : The size of the symbol in bytes.
+ * - **Type**  : The decoded symbol type (FUNC, OBJECT, SECTION, FILE, etc.).
+ * - **Name**  : The symbol name resolved from the string table.
+ *
+ * @param parser   Pointer to the binary parser context (holds loaded ELF data in memory).
+ * @param elf      Pointer to the ELF32 header structure.
+ * @param shdrs    Pointer to the array of section headers in the ELF file.
+ * @param symtab   Pointer to the section header for the symbol table (.symtab).
+ * @param strtab   Pointer to the section header for the associated string table (.strtab).
+ *
+ * @note 
+ * - For **relocatable ELF (.o)** files: `Value` is the symbol’s offset
+ *   relative to its section.
+ * - For **executables / shared objects**: `Value` is the virtual memory
+ *   address of the symbol at runtime.
+ * - For **undefined symbols**: `Value = 0` since the address will be resolved later.
+ *
+ * @warning
+ * Output uses ANSI color codes, so results may look odd in non-color terminals.
+ */
+void print_symbols_32bit(bparser* parser, Elf32_Ehdr* elf, Elf32_Shdr* shdrs, Elf32_Shdr *symtab, Elf32_Shdr *strtab) 
+{
+    Elf32_Shdr shstr = shdrs[elf->e_shstrndx];
+    const char* shstrtab = (const char*)(parser->block + shstr.sh_offset);
+
+    const char* symname = &shstrtab[symtab -> sh_name];
+    const char* strname = &shstrtab[strtab -> sh_name];
+
+    Elf32_Sym *syms = (Elf32_Sym *)(parser->block + symtab->sh_offset);
+    const char *strs = (const char *)(parser->block + strtab->sh_offset);
+
+    unsigned int count = symtab->sh_size / sizeof(Elf32_Sym);
+
+    printf(COLOR_RESET);
+    printf(COLOR_YELLOW"=== Symbols (" COLOR_BLUE "%s" COLOR_YELLOW " + " COLOR_BLUE "%s" COLOR_YELLOW ") ===\n" COLOR_RESET, symname, strname);
+    printf(COLOR_WHITE "%-6s %-10s %-10s %-12s %s\n" COLOR_RESET,
+           "Index", "Value", "Size", "Type", "Name");
+    printf(COLOR_WHITE "------------------------------------------------------------\n" COLOR_RESET);
+
+    for (int i = 0; i < count; i++) {
+        const char *name = strs + syms[i].st_name;
+
+        // Decode type
+        unsigned char type = ELF32_ST_TYPE(syms[i].st_info);
+        const char *type_str = "UNKNOWN";
+        const char *color    = COLOR_GRAY; // default
+
+        switch (type) {
+            case STT_NOTYPE:   type_str = "NOTYPE";  color = COLOR_GRAY;    break;
+            case STT_OBJECT:   type_str = "OBJECT";  color = COLOR_GREEN;   break;
+            case STT_FUNC:     type_str = "FUNC";    color = COLOR_YELLOW;  break;
+            case STT_SECTION:  type_str = "SECTION"; color = COLOR_BLUE;    break;
+            case STT_FILE:     type_str = "FILE";    color = COLOR_CYAN;    break;
+        }
+
+        printf("%-6d 0x%08x %-10u %s%-12s%s %s\n",
+               i,
+               syms[i].st_value,
+               syms[i].st_size,
+               color, type_str, COLOR_RESET,
+               name);
+    }
+}
+
+/**
+ * @brief Print all symbols from a 64-bit ELF file (with colors).
+ *
+ * This function iterates over the ELF64 symbol table (`symtab`) and its
+ * associated string table (`strtab`) to display information about each symbol.
+ * It prints a formatted and colorized table including:
+ * - **Index** : The symbol index in the table.
+ * - **Value** : The symbol value (for executables/shared objects, this is
+ *               the virtual address at runtime; for relocatable objects,
+ *               this is the section-relative offset).
+ * - **Size**  : The size of the symbol in bytes.
+ * - **Type**  : The decoded symbol type (FUNC, OBJECT, SECTION, FILE, etc.).
+ * - **Name**  : The symbol’s name resolved from the string table.
+ *
+ * @param parser   Pointer to the binary parser context (holds loaded ELF data in memory).
+ * @param elf      Pointer to the ELF64 header structure.
+ * @param shdrs    Pointer to the array of section headers in the ELF file.
+ * @param symtab   Pointer to the section header for the symbol table (.symtab).
+ * @param strtab   Pointer to the section header for the associated string table (.strtab).
+ *
+ * @note 
+ * - For **relocatable ELF (.o)**: `Value` is the offset relative to its section.
+ * - For **executables / shared objects**: `Value` is the virtual memory
+ *   address of the symbol.
+ * - For **undefined symbols**: `Value = 0` since resolution is deferred to the linker/loader.
+ *
+ * @warning
+ * Output uses ANSI color codes, so results may appear incorrect in terminals
+ * without color support.
+ */
+void print_symbols_64bit(bparser* parser, Elf64_Ehdr* elf, Elf64_Shdr* shdrs, Elf64_Shdr *symtab, Elf64_Shdr *strtab) 
+{
+    Elf64_Shdr shstr = shdrs[elf->e_shstrndx];
+    const char* shstrtab = (const char*)(parser->block + shstr.sh_offset);
+
+    const char* symname = &shstrtab[symtab -> sh_name];
+    const char* strname = &shstrtab[strtab -> sh_name];
+
+    Elf64_Sym *syms = (Elf64_Sym *)(parser->block + symtab->sh_offset);
+    const char *strs = (const char *)(parser->block + strtab->sh_offset);
+
+    unsigned int count = symtab->sh_size / sizeof(Elf64_Sym);
+
+    printf(COLOR_YELLOW "\n=== Symbols (%s + %s) ===\n" COLOR_RESET, symname, strname);
+
+    printf(COLOR_WHITE "%-6s %-10s %-10s %-12s %s\n" COLOR_RESET,
+           "Index", "Value", "Size", "Type", "Name");
+    printf(COLOR_WHITE "------------------------------------------------------------\n" COLOR_RESET);
+
+    for (int i = 0; i < count; i++) {
+        const char *name = strs + syms[i].st_name;
+
+        // Decode type
+        unsigned char type = ELF64_ST_TYPE(syms[i].st_info);
+        const char *type_str = "UNKNOWN";
+        const char *color    = COLOR_GRAY; // default
+
+        switch (type) {
+            case STT_NOTYPE:   type_str = "NOTYPE";  color = COLOR_GRAY;    break;
+            case STT_OBJECT:   type_str = "OBJECT";  color = COLOR_GREEN;   break;
+            case STT_FUNC:     type_str = "FUNC";    color = COLOR_YELLOW;  break;
+            case STT_SECTION:  type_str = "SECTION"; color = COLOR_BLUE;    break;
+            case STT_FILE:     type_str = "FILE";    color = COLOR_CYAN;    break;
+        }
+
+        printf("%-6d 0x%08lx %-10lu %s%-12s%s %s\n",
+               i,
+               syms[i].st_value,
+               syms[i].st_size,
+               color, type_str, COLOR_RESET,
+               name);
+    }
+}
+
+// inline function to print hex header row
+void print_hex_header(unsigned long long offset)
+{
+    printf(COLOR_GREEN "\n|\n" COLOR_GREEN);
+    printf(COLOR_GREEN "|    --Offset--%3s" COLOR_RESET, "");
+    printf(COLOR_GREEN);
+
+    // Hex dump
+    for(int i=0; i<=9; i++) {
+        printf("%d", i);
+        printf((i & 1)?"  ":" ");
+    }
+    for(char c='A'; c <= 'F'; c++){
+        printf("%c", c);
+        printf((c & 1)?" ":"  ");
+    }
+    
+    // Ascii Dump
+    printf("%-2s", "");
+    for(int i=0; i<=9; i++)
+        printf("%d", i);
+    for(char c='A'; c <= 'F'; c++)
+        printf("%c", c);
+
+    printf(COLOR_RESET);
+    printf("\n");
+}
+
+void print_section_header_metadata_32bit(unsigned int id, const char* name, const char*type_str, const char* flags, Elf32_Shdr* shdrs) 
+{
+    printf(COLOR_BG_WHITE COLOR_BCYAN "|--Section [%d]"  COLOR_RESET COLOR_BLUE " %s" COLOR_CYAN ":\n" COLOR_RESET, id, name);
+    // printf(COLOR_GREEN "|---%-*s" COLOR_RESET "%d\n",   META_LABEL_WIDTH, "ID:", id);
+    // printf(COLOR_GREEN "|---%-*s" COLOR_RESET "%s\n",   META_LABEL_WIDTH, "Name:", name);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "%s\n",   META_LABEL_WIDTH, "Type:", type_str);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "%s\n",   META_LABEL_WIDTH, "Flags:", flags);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%08x\n", META_LABEL_WIDTH, "Addr:", shdrs[id].sh_addr);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%08x\n", META_LABEL_WIDTH, "Offset:", shdrs[id].sh_offset);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%x\n", META_LABEL_WIDTH, "Size:", shdrs[id].sh_size);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "%d\n",   META_LABEL_WIDTH, "Link:", shdrs[id].sh_link);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%x\n", META_LABEL_WIDTH, "Info:", shdrs[id].sh_info);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%x\n", META_LABEL_WIDTH, "Align:", shdrs[id].sh_addralign);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%x\n", META_LABEL_WIDTH, "EntSize:", shdrs[id].sh_entsize);
+}
+
+void print_section_header_metadata_64bit(unsigned int id, const char* name, const char*type_str, const char* flags, Elf64_Shdr* shdrs) 
+{
+    printf(COLOR_BG_WHITE COLOR_BCYAN "|--Section [%d]"  COLOR_RESET COLOR_BLUE " %s" COLOR_CYAN ":\n" COLOR_RESET, id, name);
+    // printf(COLOR_GREEN "|---%-*s" COLOR_RESET "%d\n",   META_LABEL_WIDTH, "ID:", id);
+    // printf(COLOR_GREEN "|---%-*s" COLOR_RESET "%s\n",   META_LABEL_WIDTH, "Name:", name);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "%s\n",   META_LABEL_WIDTH, "Type:", type_str);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "%s\n",   META_LABEL_WIDTH, "Flags:", flags);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%lx\n", META_LABEL_WIDTH, "Addr:", shdrs[id].sh_addr);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%lx\n", META_LABEL_WIDTH, "Offset:", shdrs[id].sh_offset);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%lx\n", META_LABEL_WIDTH, "Size:", shdrs[id].sh_size);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "%d\n",   META_LABEL_WIDTH, "Link:", shdrs[id].sh_link);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%x\n", META_LABEL_WIDTH, "Info:", shdrs[id].sh_info);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%lx\n", META_LABEL_WIDTH, "Align:", shdrs[id].sh_addralign);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%lx\n", META_LABEL_WIDTH, "EntSize:", shdrs[id].sh_entsize);
+
+}
+
+void print_program_header_metadata_32bit(unsigned int id, const char*type_str, const char* flags, Elf32_Phdr* phdr) 
+{
+    printf(COLOR_BG_WHITE COLOR_BCYAN "|--Program Segment [%d]:" COLOR_RESET "\n", id);
+    // printf(COLOR_GREEN "|---%-*s" COLOR_RESET "%d\n",   META_LABEL_WIDTH, "ID:", id);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "%s\n",   META_LABEL_WIDTH, "Type:", type_str);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "%s\n",   META_LABEL_WIDTH,"Flags:", flags);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%08x\n", META_LABEL_WIDTH, "Offset:", phdr[id].p_offset);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%08x\n", META_LABEL_WIDTH, "VirtAddr:", phdr[id].p_vaddr);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%08x\n", META_LABEL_WIDTH, "PhysAddr:", phdr[id].p_paddr);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%x\n",   META_LABEL_WIDTH, "FileSz:", phdr[id].p_filesz);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%x\n", META_LABEL_WIDTH, "MemSz:", phdr[id].p_memsz);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%x\n", META_LABEL_WIDTH, "Align:", phdr[id].p_align);
+}
+
+void print_program_header_metadata_64bit(unsigned int id, const char*type_str, const char* flags, Elf64_Phdr* phdr) 
+{
+    // printf(COLOR_CYAN "|--Program Segment [%d]:\n" COLOR_RESET, id);
+    printf(COLOR_BG_WHITE COLOR_BCYAN "|--Program Segment [%d]:" COLOR_RESET "\n", id);
+    // printf(COLOR_GREEN "|---%-*s" COLOR_RESET "%d\n",   META_LABEL_WIDTH, "ID:", id);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "%s\n",   META_LABEL_WIDTH, "Type:", type_str);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "%s\n",   META_LABEL_WIDTH,"Flags:", flags);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%08lx\n", META_LABEL_WIDTH, "Offset:", phdr[id].p_offset);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%lx\n", META_LABEL_WIDTH, "VirtAddr:", phdr[id].p_vaddr);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%lx\n", META_LABEL_WIDTH, "PhysAddr:", phdr[id].p_paddr);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%lx\n",   META_LABEL_WIDTH, "FileSz:", phdr[id].p_filesz);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%lx\n", META_LABEL_WIDTH, "MemSz:", phdr[id].p_memsz);
+    printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%lx\n", META_LABEL_WIDTH, "Align:", phdr[id].p_align);
+}
+
+
+
+void print_body_bytes(unsigned char *ptr, size_t size, unsigned long long offset, int disasm, unsigned char bit_type)
+{
+    printf(COLOR_GREEN "|" COLOR_RESET  );
+    print_hex_header(offset);
+    
+    size_t i, j;
+    for (i = 0; i < size; i += BLOCK_LENGTH) {
+        // Print offset
+        printf(COLOR_GREEN "|----0x%08llx:  " COLOR_RESET, offset + i);
+
+        // Print hex bytes
+        for (j = 0; j < BLOCK_LENGTH; j++) {
+            if (i + j < size)
+                display_byte(&ptr[i+j]);
+                // printf("%02x", ptr[i + j]);
+            else
+                printf("   "); // padding for alignment
+                               
+            if ((j + 1) % 2 == 0)
+                printf(" "); // extra space every 2 bytes
+        }
+
+        // Print ASCII chars
+        printf(" |");
+        for (j = 0; j < BLOCK_LENGTH && i + j < size; j++) {
+            unsigned char c = ptr[i + j];
+            display_byte_char(&ptr[i+j]);
+        }
+        printf("|");
+        printf("\n");
+
+    }
+
+    if (disasm & SHF_EXECINSTR) {
+        ud_t ud_obj;
+        ud_init(&ud_obj);
+        ud_set_input_buffer(&ud_obj, ptr, size);
+        ud_set_mode(&ud_obj, (bit_type == ELFCLASS32) ? 32: 64);        // change to 64 for x86_64
+        ud_set_syntax(&ud_obj, UD_SYN_INTEL);
+        ud_set_pc(&ud_obj, offset);
+        // printf(COLOR_YELLOW "\nDisassembly:\n" COLOR_RESET);
+        while (ud_disassemble(&ud_obj)) {
+            printf(COLOR_YELLOW "|----0x%08llx:  " COLOR_RESET, (unsigned long long)ud_insn_off(&ud_obj));
+            print_highlight_asm(ud_insn_asm(&ud_obj));
+        }
+    }
+}
+
+void format_p_flags(uint32_t p_flags, char *buf, size_t size)
+{
+    buf[0] = '\0';
+    if (p_flags & PF_R) strncat(buf, COLOR_GREEN "R" COLOR_RESET, size - strlen(buf) - 1);
+    if (p_flags & PF_W) strncat(buf, COLOR_RED "W" COLOR_RESET, size - strlen(buf) - 1);
+    if (p_flags & PF_X) strncat(buf, COLOR_YELLOW "X" COLOR_RESET, size - strlen(buf) - 1);
+    for(int i=0; i<5; i++)
+        strncat(buf, " ", size - strlen(buf) - 1);
+    strncat(buf, COLOR_CYAN , size - strlen(buf) - 1);
+}
 
 

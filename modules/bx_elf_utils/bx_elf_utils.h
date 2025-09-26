@@ -19,5 +19,6 @@ const char* elf_machine_to_str(unsigned int machine);
 const char* sh_type_to_str(unsigned int sh_type);
 const char* elf_type_to_str(unsigned int type);
 const char *type_p_to_str(unsigned int p_type);
+void print_highlight_asm(const char *asm_instructions);
 // bool is_metadata_section(const char* name);
 #endif // !BX_ELF_UTILS

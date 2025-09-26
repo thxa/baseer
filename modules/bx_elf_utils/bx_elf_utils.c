@@ -1,9 +1,7 @@
 #include "bx_elf_utils.h"
 
-
 void print_section_header_legend(void)
 {
-
     legend_entry types[] = {
         {"NULL",          "SHT_NULL: Unused section",              COLOR_RED},
         {"PROGBITS",      "SHT_PROGBITS: Program-defined data",    COLOR_CYAN},
@@ -26,7 +24,7 @@ void print_section_header_legend(void)
 
     printf(COLOR_YELLOW "=== Section Header Types Legend ===\n" COLOR_RESET);
     printf(COLOR_WHITE "+---------------------+------------------------------------+\n" COLOR_RESET);
-    printf(COLOR_WHITE "| Type                | Meaning                            |\n" COLOR_RESET);
+    printf(COLOR_WHITE "| Type                | Description                        |\n" COLOR_RESET);
     printf(COLOR_WHITE "+---------------------+------------------------------------+\n" COLOR_RESET);
 
     for (size_t i = 0; i < sizeof(types)/sizeof(types[0]); i++) {
@@ -52,7 +50,7 @@ void print_section_header_legend(void)
 
     printf(COLOR_YELLOW "=== Section Header Flags Legend ===\n" COLOR_RESET);
     printf(COLOR_WHITE "+------+-------------------------------------------+\n" COLOR_RESET);
-    printf(COLOR_WHITE "| Flag | Meaning                                   |\n" COLOR_RESET);
+    printf(COLOR_WHITE "| Flag | Description                               |\n" COLOR_RESET);
     printf(COLOR_WHITE "+------+-------------------------------------------+\n" COLOR_RESET);
 
     for (size_t i = 0; i < sizeof(flags)/sizeof(flags[0]); i++) {
@@ -81,7 +79,7 @@ void print_program_header_legend(void)
 
     printf(COLOR_YELLOW "=== Program Header Types Legend ===\n" COLOR_RESET);
     printf(COLOR_WHITE "+------------+------------------------------------------+\n" COLOR_RESET);
-    printf(COLOR_WHITE "| Type       | Meaning                                  |\n" COLOR_RESET);
+    printf(COLOR_WHITE "| Type       | Description                              |\n" COLOR_RESET);
     printf(COLOR_WHITE "+------------+------------------------------------------+\n" COLOR_RESET);
     for (size_t i = 0; i < sizeof(types)/sizeof(types[0]); i++) {
         printf("| %s%-10s%s | %s%-40s%s|\n",
@@ -97,7 +95,7 @@ void print_program_header_legend(void)
     };
     printf(COLOR_YELLOW "=== Program Header Flags Legend ===\n" COLOR_RESET);
     printf(COLOR_WHITE "+-----+-----------------------------------+\n" COLOR_RESET);
-    printf(COLOR_WHITE "| Flag| Meaning                           |\n" COLOR_RESET);
+    printf(COLOR_WHITE "| Flag| Description                       |\n" COLOR_RESET);
     printf(COLOR_WHITE "+-----+-----------------------------------+\n" COLOR_RESET);
     for (size_t i = 0; i < sizeof(flags)/sizeof(flags[0]); i++) {
         printf("| %s%-3s%s | %s%-33s%s|\n",
@@ -282,5 +280,194 @@ const char *type_p_to_str(unsigned int p_type)
 //     }
 //     return false;
 // }
+
+#define COLOR_STRING  "\033[0;32m"  // green
+#define COLOR_LINENO "\033[0;35m"  // magenta
+#define COLOR_COMMENT  "\033[0;90m"  // gray
+#define COLOR_PUNCTUATION "\033[0;37m" // Light gray for punctuation (braces, etc.)
+
+static const char *keywords[] = {
+    "if", "else", "for", "while", "do", "switch", "case", "break", "continue", "return", "goto", "default", "const", "static", "volatile", NULL
+};
+
+static const char *types[] = {
+    "int", "long", "short", "char", "void", "bool", "float", "double", "size_t", "unsigned", "signed", "struct", "union", "enum", "int8_t", "int16_t", "int32_t", "int64_t", "uint8_t", "uint16_t", "uint32_t", "uint64_t", NULL
+};
+
+// ================= Categories =================
+static const char *data_mov[] = {
+    "mov","movsx","movzx","lea","push","pop","xchg",NULL
+};
+
+static const char *arithmetic[] = {
+    "add","sub","inc","dec","imul","mul","idiv","div","neg","adc","sbb",NULL
+};
+
+static const char *logic_ops[] = {
+    "and","or","xor","not","test","shl","shr","sar","sal",
+    "rol","ror","rcl","rcr","bt","bts","btr","btc",NULL
+};
+
+static const char *jumps[] = {
+    "jmp","je","jne","jz","jnz","ja","jae","jb","jbe",
+    "jg","jge","jl","jle","jc","jnc","jo","jno","js","jns",
+    "jp","jnp","jcxz","jecxz","loop","loope","loopne",
+    "call","ret","enter","leave",NULL
+};
+
+static const char *string_ops[] = {
+    "movsb","movsw","movsd","movsq","cmpsb","cmpsw","cmpsd","cmpsq",
+    "scasb","scasw","scasd","scasq","lodsb","lodsw","lodsd","lodsq",
+    "stosb","stosw","stosd","stosq","rep","repe","repne",NULL
+};
+
+static const char *system_ops[] = {
+    "int","int3","into","iret","syscall","sysret","sysenter","sysexit",
+    "nop","hlt","wait","stc","clc","cmc","std","cld","sti","cli",
+    "cpuid","rdtsc","rsm",NULL
+};
+
+static const char *asm_types[] = {
+    "db",   // define byte
+    "dw",   // define word
+    "dd",   // define doubleword
+    "dq",   // define quadword
+    "resb", // reserve byte
+    "resw", // reserve word
+    "resd", // reserve dword
+    "resq", // reserve qword
+    "equ",  // constant definition
+    "section", "segment", "global", "extern",
+    NULL
+};
+
+static const char *asm_registers[] = {
+    "eax", "ebx", "ecx", "edx",
+    "esi", "edi", "ebp", "esp",
+    "rax", "rbx", "rcx", "rdx",
+    "rsi", "rdi", "rbp", "rsp",
+    "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+    "al", "ah", "bl", "bh", "cl", "ch", "dl", "dh",
+    NULL
+};
+
+// ================ Helper =====================
+int is_in_list(const char *word, const char *list[]) {
+    for (int i=0; list[i]; i++)
+        if (strcmp(word, list[i]) == 0) return 1;
+    return 0;
+}
+
+int is_number(const char *word) {
+    // Hexadecimal like 0x123
+    if (strlen(word) > 2 && word[0]=='0' && (word[1]=='x' || word[1]=='X'))
+        return 1;
+    // Decimal like 1234
+    for (int i=0; word[i]; i++) {
+        if (!isdigit((unsigned char)word[i])) return 0;
+    }
+    return (word[0] != '\0'); // not empty
+}
+const char* get_color(const char *word) {
+    if (is_number(word)) return COLOR_YELLOW;
+    if (is_in_list(word, data_mov)) return COLOR_RED;
+    if (is_in_list(word, arithmetic)) return COLOR_GREEN;
+    if (is_in_list(word, logic_ops)) return COLOR_YELLOW;
+    if (is_in_list(word, jumps)) return COLOR_CYAN;
+    if (is_in_list(word, string_ops)) return COLOR_MAGENTA;
+    if (is_in_list(word, system_ops)) return COLOR_BLUE;
+    if (is_in_list(word, asm_registers)) return COLOR_CYAN;
+    return COLOR_RESET;
+}
+
+
+
+
+
+
+// ================ Printing ===================
+void print_highlight_asm(const char *line) {
+    if (!line) return;
+
+    const char *p = line;
+    char word[64];
+
+    while (*p) {
+        if (isspace(*p) || *p==':' || *p==',' || *p=='[' || *p==']') {
+            putchar(*p);
+            p++;
+            continue;
+        }
+
+        int i=0;
+        while (*p && !isspace(*p) && *p!=':' && *p!=',' && *p!='[' && *p!=']') {
+            word[i++] = *p;
+            p++;
+        }
+        word[i] = '\0';
+
+        const char *color = get_color(word);
+        if (color != COLOR_RESET)
+            printf("%s%s%s", color, word, COLOR_RESET);
+        else
+            printf("%s", word);
+    }
+    printf("\n");
+}
+
+// static int is_word(const char *p, const char *word) {
+//     size_t len = strlen(word);
+//     return strncmp(p, word, len) == 0 &&
+//            !isalnum((unsigned char)p[len]) && p[len] != '_';
+// }
+
+// static int is_punctuation(char c) { 
+//     return c == '{' || c == '}' || c == '(' || c == ')' || c == ';' || c == ',' || c == '=' || c == '*' || c == '&' || c == '[' || c == ']'; 
+// }
+
+// int is_asm_keyword(const char *word) {
+//     for (int i = 0; asm_keywords[i] != NULL; i++) {
+//         if (strcmp(word, asm_keywords[i]) == 0) return 1;
+//     }
+//     return 0;
+// }
+
+// void print_highlight_asm(const char *line) {
+//     if (!line) return;
+
+//     const char *p = line;
+//     char word[64];
+
+//     while (*p) {
+//         if (isspace(*p) || is_punctuation(*p)) {
+//             putchar(*p);
+//             p++;
+//             continue;
+//         }
+
+//         // extract word
+//         int i = 0;
+//         while (*p && !isspace(*p) && !is_punctuation(*p)) {
+//             word[i++] = *p;
+//             p++;
+//         }
+//         word[i] = '\0';
+
+//         if (is_asm_keyword(word)) {
+//             printf(COLOR_RED "%s" COLOR_RESET, word);
+//         } else {
+//             printf("%s", word);
+//         }
+//     }
+//     printf("\n");
+// }
+
+
+// // void print_highlight_asm(const char *asm_instructions) {
+// //     if (!asm_instructions) return;
+// //     printf("%s\n", asm_instructions);
+// // }
+
+
 
 

@@ -348,7 +348,6 @@ static inline void print_hex_header(unsigned long long offset) {
         printf("%c", c);
         printf((c & 1)?" ":"  ");
     }
-
     
     // Ascii Dump
     printf("%-2s", "");
@@ -359,8 +358,6 @@ static inline void print_hex_header(unsigned long long offset) {
 
     printf(COLOR_RESET);
     printf("\n");
-    // printf(COLOR_GREEN "|----0x%08llx: " COLOR_RESET, offset);
-    // printf(" ");
 }
 
 
@@ -426,6 +423,8 @@ static inline void print_program_header_metadata_64bit(unsigned int id, const ch
     printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%lx\n", META_LABEL_WIDTH, "Align:", phdr[id].p_align);
 }
 
+
+
 void print_body_bytes(unsigned char *ptr, size_t size, unsigned long long offset, int disasm, unsigned char bit_type) {
     printf(COLOR_GREEN "|" COLOR_RESET  );
     print_hex_header(offset);
@@ -467,14 +466,15 @@ void print_body_bytes(unsigned char *ptr, size_t size, unsigned long long offset
         ud_set_pc(&ud_obj, offset);
         // printf(COLOR_YELLOW "\nDisassembly:\n" COLOR_RESET);
         while (ud_disassemble(&ud_obj)) {
-            printf(COLOR_YELLOW "|----0x%08llx:  " COLOR_RESET " %s\n",
-                    (unsigned long long)ud_insn_off(&ud_obj),
-                    ud_insn_asm(&ud_obj));
+            printf(COLOR_YELLOW "|----0x%08llx:  " COLOR_RESET, (unsigned long long)ud_insn_off(&ud_obj));
+            print_highlight_asm(ud_insn_asm(&ud_obj));
         }
     }
 
 
 }
+
+
 
 /**
  * @brief Dump the section header table of a 32-bit ELF file.

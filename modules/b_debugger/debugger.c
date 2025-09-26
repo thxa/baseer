@@ -538,7 +538,6 @@ void restore_all_BP(context *ctx,int opt){
  * @param ctx Pointer to debugger context.
  */
 void dis_ctx(context *ctx){
-	linenoiseClearScreen();
 	ptrace(PTRACE_GETREGS, ctx->pid, NULL, &ctx->regs);
 	ud_t ud_obj;
 	uint8_t data[160];

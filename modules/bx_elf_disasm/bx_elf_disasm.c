@@ -5,32 +5,32 @@
 #include "bx_elf_disasm.h"
 #include "../b_hashmap/b_hashmap.h"
 
-// List of metadata sections
-const char* metadata_sections[] = {
-    ".rela.dyn",
-    ".rela.plt",
-    ".dynsym",
-    ".dynstr",
-    ".eh_frame",
-    ".eh_frame_hdr",
-    ".note.gnu.property",
-    ".note.gnu.build-id",
-    ".comment",
-    ".gnu.version",
-    ".interp",
-    ".gnu.hash",
-    ".gnu.version_r",
-    NULL
-};
+// // List of metadata sections
+// const char* metadata_sections[] = {
+//     ".rela.dyn",
+//     ".rela.plt",
+//     ".dynsym",
+//     ".dynstr",
+//     ".eh_frame",
+//     ".eh_frame_hdr",
+//     ".note.gnu.property",
+//     ".note.gnu.build-id",
+//     ".comment",
+//     ".gnu.version",
+//     ".interp",
+//     ".gnu.hash",
+//     ".gnu.version_r",
+//     NULL
+// };
 
-bool is_metadata_section(const char* name) 
-{
-    for (int i = 0; metadata_sections[i] != NULL; i++) {
-        if (strcmp(name, metadata_sections[i]) == 0)
-            return true;
-    }
-    return false;
-}
+// bool is_metadata_section(const char* name) 
+// {
+//     for (int i = 0; metadata_sections[i] != NULL; i++) {
+//         if (strcmp(name, metadata_sections[i]) == 0)
+//             return true;
+//     }
+//     return false;
+// }
 
 // ========================= BEGIN SECTION HEADER ==================================
 /**
@@ -129,8 +129,6 @@ void dump_disasm_elf64_shdr(Elf64_Ehdr* elf , Elf64_Shdr* shdrs, bparser* parser
     hashmap_t *map = create_map();
     
     for (int i = 0; i < elf->e_shnum; i++) {
-
-
         // ============================ BEGIN SECTION METADATA =============================
         // Section name
         const char* name = &shstrtab[shdrs[i].sh_name];
@@ -174,14 +172,9 @@ void dump_disasm_elf64_shdr(Elf64_Ehdr* elf , Elf64_Shdr* shdrs, bparser* parser
         print_symbols_with_disasm_64bit(parser, elf, shdrs, symtab, strtab);
     }
 
-
-
     free_map(map);
 }
 // ========================= END SECTION HEADER ==================================
-
-
-
 
 // ========================= BEGIN PROGRAM HEADER ==================================
 /**
@@ -317,8 +310,6 @@ void dump_disasm_elf64_phdr(Elf64_Ehdr *elf, Elf64_Phdr* phdr, bparser*parser)
 }
 // ========================= END PROGRAM HEADER ==================================
 
-
-
 /**
  * @brief Print ELF file disassembly and metadata.
  *
@@ -386,15 +377,15 @@ bool print_elf_disasm(bparser* parser, void* args) {
         Elf64_Phdr* phdr = (Elf64_Phdr*) (data + elf->e_phoff);
         Elf64_Shdr* shdrs = (Elf64_Shdr*)(data + elf->e_shoff);
 
-        printf(COLOR_GREEN "Entry point: " COLOR_RESET "0x%x\n", elf->e_entry);
-        printf(COLOR_GREEN "Section headers: " COLOR_RESET "%d (offset: 0x%x)\n", elf->e_shnum, elf->e_shoff);
+        printf(COLOR_GREEN "Entry point: " COLOR_RESET "0x%lx\n", elf->e_entry);
+        printf(COLOR_GREEN "Section headers: " COLOR_RESET "%d (offset: 0x%lx)\n", elf->e_shnum, elf->e_shoff);
         printf(COLOR_GREEN "Section header string table index: " COLOR_RESET "%d\n", elf->e_shstrndx);
         printf(COLOR_GREEN "File Type: " COLOR_RESET "%s (%d)\n",
                 elf_type_to_str(elf->e_type), elf->e_type);
         printf(COLOR_GREEN "Machine: " COLOR_RESET "%s (%d)\n",
                 elf_machine_to_str(elf->e_machine), elf->e_machine);
 
-        printf(COLOR_GREEN "Entry point: " COLOR_RESET "0x%x\n", elf->e_entry);
+        printf(COLOR_GREEN "Entry point: " COLOR_RESET "0x%lx\n", elf->e_entry);
 
         if(elf->e_machine != EM_X86_64 && elf->e_machine !=  EM_386) {
             printf(COLOR_RED "Not Supported machine: %s\n" COLOR_RESET, elf_machine_to_str(elf->e_machine));

@@ -1,7 +1,58 @@
 #include "bx_elf_utils.h"
+/**
+ * @file bx_elf_utils.c
+ * @brief Implementation of ELF parsing and display utilities.
+ *
+ * This file provides functions for:
+ * - Converting ELF machine, file, section, and program header types to strings
+ * - Formatting ELF program header flags for display
+ * - Printing metadata for ELF section headers and program headers (32-bit and 64-bit)
+ * - Displaying section or segment bytes in hex and ASCII
+ * - Disassembling executable sections using the UDis86 library
+ * - Printing legends for ELF section and program header types and flags
+ *
+ * It supports both 32-bit and 64-bit ELF binaries and uses ANSI color codes
+ * to enhance terminal output readability.
+ */
 
-
-
+/**
+ * @brief Print legends for ELF section header types and flags with color highlighting.
+ *
+ * This function prints two tables to the console:
+ * 1. Section Header Types Legend: Describes common `sh_type` values with colors.
+ * 2. Section Header Flags Legend: Describes common `sh_flags` values with colors.
+ *
+ * Each entry is highlighted using ANSI color codes for better readability.
+ *
+ * @note Uses the `legend_entry` struct:
+ * @code
+ * typedef struct {
+ *     const char *name;   // Short name or flag
+ *     const char *desc;   // Description of the type or flag
+ *     const char *color;  // ANSI color code
+ * } legend_entry;
+ * @endcode
+ *
+ * Example output (truncated):
+ * @code
+ * === Section Header Types Legend ===
+ * +---------------------+------------------------------------+
+ * | Type                | Description                        |
+ * +---------------------+------------------------------------+
+ * | NULL                | SHT_NULL: Unused section           |
+ * | PROGBITS            | SHT_PROGBITS: Program-defined data|
+ * ...
+ * === Section Header Flags Legend ===
+ * +------+-------------------------------------------+
+ * | Flag | Description                               |
+ * +------+-------------------------------------------+
+ * | W    | SHF_WRITE: Writable                        |
+ * | A    | SHF_ALLOC: Occupies memory                 |
+ * ...
+ * @endcode
+ *
+ * @note Uses ANSI color codes (COLOR_RED, COLOR_GREEN, COLOR_YELLOW, COLOR_CYAN, COLOR_MAGENTA, COLOR_WHITE, COLOR_GRAY, COLOR_RESET).
+ */
 void print_section_header_legend(void)
 {
     legend_entry types[] = {
@@ -64,6 +115,45 @@ void print_section_header_legend(void)
     printf(COLOR_WHITE "+------+-------------------------------------------+\n\n" COLOR_RESET);
 }
 
+/**
+ * @brief Print legends for ELF program header types and flags with color highlighting.
+ *
+ * This function prints two tables to the console:
+ * 1. Program Header Types Legend: Describes common `p_type` values with colors.
+ * 2. Program Header Flags Legend: Describes common `p_flags` values with colors.
+ *
+ * Each entry is highlighted using ANSI color codes for better readability.
+ *
+ * @note Uses the `legend_entry` struct:
+ * @code
+ * typedef struct {
+ *     const char *name;   // Short name or flag
+ *     const char *desc;   // Description of the type or flag
+ *     const char *color;  // ANSI color code
+ * } legend_entry;
+ * @endcode
+ *
+ * Example output (truncated):
+ * @code
+ * === Program Header Types Legend ===
+ * +------------+------------------------------------------+
+ * | Type       | Description                              |
+ * +------------+------------------------------------------+
+ * | NULL       | PT_NULL: Unused entry                     |
+ * | LOAD       | PT_LOAD: Loadable segment                 |
+ * ...
+ * === Program Header Flags Legend ===
+ * +-----+-----------------------------------+
+ * | Flag| Description                       |
+ * +-----+-----------------------------------+
+ * | R   | PF_R: Readable                     |
+ * | W   | PF_W: Writable                     |
+ * | X   | PF_X: Executable                   |
+ * ...
+ * @endcode
+ *
+ * @note Uses ANSI color codes (COLOR_RED, COLOR_GREEN, COLOR_YELLOW, COLOR_CYAN, COLOR_MAGENTA, COLOR_WHITE, COLOR_RESET).
+ */
 void print_program_header_legend(void)
 {
     legend_entry types[] = {
@@ -107,6 +197,23 @@ void print_program_header_legend(void)
     printf(COLOR_WHITE "+-----+-----------------------------------+\n\n" COLOR_RESET);
 }
 
+/**
+ * @brief Convert ELF e_machine value to human-readable string.
+ *
+ * This function takes an ELF machine type (e_machine) from the ELF header
+ * and returns a descriptive string representing the target architecture.
+ *
+ * @param machine The e_machine field from the ELF header.
+ * @return const char* Human-readable string describing the architecture.
+ *
+ * @note Returns "Unknown/Unsupported machine" for unrecognized values.
+ *
+ * Example:
+ * @code
+ * const char* arch = elf_machine_to_str(EM_X86_64);
+ * printf("Architecture: %s\n", arch); // Output: Architecture: AMD x86-64
+ * @endcode
+ */
 const char* elf_machine_to_str(unsigned int machine)
 {
     char* name;
@@ -160,6 +267,20 @@ const char* elf_machine_to_str(unsigned int machine)
     return name;
 }
 
+/**
+ * @brief Converts an ELF section header type to a human-readable string with color.
+ *
+ * This function maps ELF section header type constants (SHT_*) to
+ * descriptive strings. ANSI color codes are added for colored output
+ * in terminal.
+ *
+ * @param sh_type The section header type (e.g., SHT_PROGBITS, SHT_SYMTAB, ...).
+ * @return const char* A pointer to a static string representing the type.
+ *         The string includes ANSI color codes for terminal output.
+ *
+ * @note The returned string should not be freed, as it points to static memory.
+ * @note Supports standard, GNU, and SUNW section types, as well as OS/Processor/Application-specific ranges.
+ */
 const char* sh_type_to_str(unsigned int sh_type)
 {
     char* result;
@@ -209,6 +330,18 @@ const char* sh_type_to_str(unsigned int sh_type)
     return result;
 }
 
+/**
+ * @brief Converts an ELF file type to a human-readable string.
+ *
+ * This function maps ELF file type constants (ET_*) to descriptive strings.
+ * Examples include relocatable files, executables, shared objects, and core files.
+ *
+ * @param type The ELF file type (e.g., ET_REL, ET_EXEC, ET_DYN, etc.).
+ * @return const char* A pointer to a string describing the ELF file type.
+ *
+ * @note The returned string points to static memory and must not be freed.
+ * @note Supports standard ELF types, OS-specific, and processor-specific ranges.
+ */
 const char* elf_type_to_str(unsigned int type)
 {
     char *result;
@@ -229,6 +362,19 @@ const char* elf_type_to_str(unsigned int type)
     return result;
 }
 
+/**
+ * @brief Converts a program header type (p_type) to a human-readable string with color.
+ *
+ * This function maps ELF program header type constants (PT_*) to descriptive strings,
+ * optionally including ANSI color codes for terminal highlighting.
+ *
+ * @param p_type The program header type (e.g., PT_LOAD, PT_DYNAMIC, PT_INTERP, etc.).
+ * @return const char* A pointer to a string describing the program header type.
+ *
+ * @note The returned string points to static memory and must not be freed.
+ * @note Supports standard ELF program header types, OS-specific, and processor-specific ranges.
+ * @note Some types include ANSI color codes for terminal output.
+ */
 const char *type_p_to_str(unsigned int p_type)
 {
     const char *type_str;
@@ -319,39 +465,6 @@ void display_byte_char(const unsigned char *byte)
         printf("%s.%s", color, COLOR_RESET); // non-printable
     }
 }
-
-
-
-
-
-
-// // List of metadata sections
-// const char* metadata_sections[] = {
-//     ".rela.dyn",
-//     ".rela.plt",
-//     ".dynsym",
-//     ".dynstr",
-//     ".eh_frame",
-//     ".eh_frame_hdr",
-//     ".note.gnu.property",
-//     ".note.gnu.build-id",
-//     ".comment",
-//     NULL
-// };
-
-// bool is_metadata_section(const char* name) 
-// {
-//     for (int i = 0; metadata_sections[i] != NULL; i++) {
-//         if (strcmp(name, metadata_sections[i]) == 0)
-//             return true;
-//     }
-//     return false;
-// }
-
-#define COLOR_STRING  "\033[0;32m"  // green
-#define COLOR_LINENO "\033[0;35m"  // magenta
-#define COLOR_COMMENT  "\033[0;90m"  // gray
-#define COLOR_PUNCTUATION "\033[0;37m" // Light gray for punctuation (braces, etc.)
                                        
 // ================= Categories =================
 static const char *data_mov[] = {
@@ -478,13 +591,41 @@ static const char *asm_registers[] = {
     NULL
 };
 
-// ================ Helper =====================
+/**
+ * @brief Check if a word exists in a null-terminated string list.
+ *
+ * This function searches for an exact match of the given word
+ * in the provided list of strings. The list must be null-terminated.
+ *
+ * @param word The null-terminated string to search for.
+ * @param list A null-terminated array of strings.
+ * @return Returns 1 if the word is found in the list, 0 otherwise.
+ *
+ * @note Comparison is case-sensitive and uses strcmp().
+ *       Typically used to check if a token belongs to categories
+ *       like registers, opcodes, instruction types, etc.
+ */
 int is_in_list(const char *word, const char *list[]) {
     for (int i=0; list[i]; i++)
         if (strcmp(word, list[i]) == 0) return 1;
     return 0;
 }
 
+/**
+ * @brief Check if a string represents a numeric value.
+ *
+ * This function determines whether the given string `word` is a number.
+ * It supports:
+ *   - Hexadecimal numbers starting with "0x" or "0X"
+ *   - Decimal numbers (only digits)
+ *
+ * @param word A null-terminated string to check.
+ * @return Returns 1 if the string is a valid number (hex or decimal), 0 otherwise.
+ *
+ * @note Hexadecimal detection only checks the "0x" prefix; it does not
+ *       validate that the remaining characters are valid hex digits.
+ *       Decimal numbers are checked using isdigit().
+ */
 int is_number(const char *word) {
     // Hexadecimal like 0x123
     if (strlen(word) > 2 && word[0]=='0' && (word[1]=='x' || word[1]=='X'))
@@ -495,6 +636,35 @@ int is_number(const char *word) {
     }
     return (word[0] != '\0'); // not empty
 }
+
+/**
+ * @brief Get the ANSI color code for a given assembly token.
+ *
+ * This function determines the color that should be used to print
+ * a single word/token from an assembly instruction or line.
+ * It checks the token against several categories such as numbers,
+ * registers, opcodes, instruction types, and invalid/unknown tokens.
+ *
+ * The color codes are defined by macros like COLOR_RED, COLOR_GREEN, etc.
+ *
+ * @param word A null-terminated string representing the token to check.
+ * @return A string containing the ANSI color code to use for this token.
+ *         Returns COLOR_RESET if the token does not match any known category.
+ *
+ * @note The helper functions used include:
+ *       - ::is_number() : returns true if the token is a numeric value.
+ *       - ::is_in_list() : checks if the token exists in a given list of strings.
+ *       - Token lists used:
+ *           - data_mov     : data movement instructions (mov, lea, etc.)
+ *           - arithmetic  : add, sub, mul, etc.
+ *           - logic_ops   : and, or, xor, etc.
+ *           - jumps       : jmp, je, jne, call, ret, etc.
+ *           - string_ops  : rep movsb, stosb, etc.
+ *           - system_ops  : syscall, int, etc.
+ *           - asm_registers : all CPU registers (rax, rbx, r8d, al, etc.)
+ *           - asm_types   : db, dw, qword ptr, o16, etc.
+ *           - invalid     : invalid/unknown tokens
+ */
 const char* get_color(const char *word) {
     if (is_number(word)) return COLOR_YELLOW;
     if (is_in_list(word, data_mov)) return COLOR_RED;
@@ -509,12 +679,49 @@ const char* get_color(const char *word) {
     return COLOR_RESET;
 }
 
+/**
+ * @brief Check if a character is considered punctuation in ASM parsing.
+ *
+ * This function determines whether the given character `c` is a punctuation
+ * character commonly used in assembly code. Punctuation includes braces,
+ * parentheses, commas, semicolons, arithmetic operators, brackets, and colon.
+ *
+ * @param c The character to check.
+ * @return Non-zero (true) if the character is punctuation, zero (false) otherwise.
+ *
+ * @note This function is used by tokenizers like ::print_highlight_asm
+ *       to split words while preserving punctuation for output.
+ */
 static int is_punctuation(char c) { 
     return c == '{' || c == '}' || c == '(' || c == ')' || c == ';' || c == ',' || 
            c == '=' || c == '*' || c == '&' || c == '[' || c == ']' || c == '-' || c == '+' || c == ':'; 
 }
 
-// ================ Printing ===================
+/**
+ * @brief Print an assembly instruction line with syntax highlighting.
+ *
+ * This function scans through a single line of assembly code
+ * and applies syntax highlighting (using ANSI color codes)
+ * to recognized tokens such as opcodes, registers, numbers, etc.
+ * Highlighting is determined by the helper function ::get_color().
+ *
+ * Tokens are split based on whitespace and punctuation characters,
+ * but punctuation itself (commas, brackets, colons, etc.) is preserved
+ * and printed without coloring.
+ *
+ * Example:
+ * @code
+ * Input : "mov rax, [rbx+0x10]"
+ * Output: mov (red) rax (cyan) , [ rbx (cyan) + 0x10 (yellow) ]
+ * @endcode
+ *
+ * @param line A null-terminated string containing the assembly
+ *             instruction line to highlight. If NULL, the function
+ *             returns immediately.
+ *
+ * @note Requires that COLOR_* macros and get_color() are defined.
+ *       The word buffer is currently fixed at 64 bytes.
+ */
 void print_highlight_asm(const char *line) {
     if (!line) return;
 
@@ -731,7 +938,33 @@ void print_symbols_64bit(bparser* parser, Elf64_Ehdr* elf, Elf64_Shdr* shdrs, El
     }
 }
 
-
+/**
+ * @brief Print ELF32 symbols along with disassembly for functions.
+ *
+ * This function iterates over the symbol table of a 32-bit ELF file,
+ * printing information about each symbol and disassembling function symbols.
+ * It highlights the type of each symbol using ANSI color codes.
+ *
+ * @param parser Pointer to a bparser structure containing the loaded ELF data.
+ * @param elf Pointer to the ELF32 file header (Elf32_Ehdr).
+ * @param shdrs Pointer to the section header array (Elf32_Shdr[]).
+ * @param symtab Pointer to the section header of the symbol table (Elf32_Shdr).
+ * @param strtab Pointer to the section header of the associated string table (Elf32_Shdr).
+ *
+ * @note The function assumes:
+ *       - ANSI color macros (COLOR_RESET, COLOR_YELLOW, COLOR_BLUE, etc.) are defined.
+ *       - Helper function `print_disasm` exists to disassemble memory regions.
+ *       - ELF macros like `ELF32_ST_TYPE`, and constants like `STT_FUNC`, `STT_OBJECT` are defined.
+ *       - Only symbols with st_size > 0 are disassembled.
+ *
+ * Example output:
+ * @code
+ * === Symbols (symtab + strtab) ===
+ * |-- main:
+ *   0x08001000:  mov eax, ebx
+ *   ...
+ * @endcode
+ */
 void print_symbols_with_disasm_32bit(bparser* parser, Elf32_Ehdr* elf, Elf32_Shdr* shdrs, Elf32_Shdr *symtab, Elf32_Shdr *strtab) 
 {
     Elf32_Shdr shstr = shdrs[elf->e_shstrndx];
@@ -751,20 +984,7 @@ void print_symbols_with_disasm_32bit(bparser* parser, Elf32_Ehdr* elf, Elf32_Shd
 
     for (int i = 0; i < count; i++) {
         const char *name = strs + syms[i].st_name;
-
-        // Decode type
         unsigned char type = ELF32_ST_TYPE(syms[i].st_info);
-        const char *type_str = "UNKNOWN";
-        const char *color    = COLOR_GRAY; // default
-
-        switch (type) {
-            case STT_NOTYPE:   type_str = "NOTYPE";  color = COLOR_GRAY;    break;
-            case STT_OBJECT:   type_str = "OBJECT";  color = COLOR_GREEN;   break;
-            case STT_FUNC:     type_str = "FUNC";    color = COLOR_YELLOW;  break;
-            case STT_SECTION:  type_str = "SECTION"; color = COLOR_BLUE;    break;
-            case STT_FILE:     type_str = "FILE";    color = COLOR_CYAN;    break;
-        }
-
         if(syms[i].st_size > 0){
             if(type == STT_FUNC) {
                 unsigned char* ptr = (unsigned char*)parser->block + syms[i].st_value;
@@ -776,6 +996,33 @@ void print_symbols_with_disasm_32bit(bparser* parser, Elf32_Ehdr* elf, Elf32_Shd
     }
 }
 
+/**
+ * @brief Print ELF64 symbols along with disassembly for functions.
+ *
+ * This function iterates over the symbol table of a 64-bit ELF file,
+ * printing information about each symbol and disassembling function symbols.
+ * It highlights the type of each symbol using ANSI color codes.
+ *
+ * @param parser Pointer to a bparser structure containing the loaded ELF data.
+ * @param elf Pointer to the ELF64 file header (Elf64_Ehdr).
+ * @param shdrs Pointer to the section header array (Elf64_Shdr[]).
+ * @param symtab Pointer to the section header of the symbol table (Elf64_Shdr).
+ * @param strtab Pointer to the section header of the associated string table (Elf64_Shdr).
+ *
+ * @note The function assumes:
+ *       - ANSI color macros (COLOR_RESET, COLOR_YELLOW, COLOR_BLUE, etc.) are defined.
+ *       - Helper function `print_disasm` exists to disassemble memory regions.
+ *       - ELF macros like `ELF64_ST_TYPE`, and constants like `STT_FUNC`, `STT_OBJECT` are defined.
+ *       - Only symbols with st_size > 0 are disassembled.
+ *
+ * Example output:
+ * @code
+ * === Symbols (symtab + strtab) ===
+ * |-- main:
+ *   0x00401000:  mov rax, rbx
+ *   ...
+ * @endcode
+ */
 void print_symbols_with_disasm_64bit(bparser* parser, Elf64_Ehdr* elf, Elf64_Shdr* shdrs, Elf64_Shdr *symtab, Elf64_Shdr *strtab) 
 {
     Elf64_Shdr shstr = shdrs[elf->e_shstrndx];
@@ -795,20 +1042,7 @@ void print_symbols_with_disasm_64bit(bparser* parser, Elf64_Ehdr* elf, Elf64_Shd
 
     for (int i = 0; i < count; i++) {
         const char *name = strs + syms[i].st_name;
-
-        // Decode type
         unsigned char type = ELF64_ST_TYPE(syms[i].st_info);
-        const char *type_str = "UNKNOWN";
-        const char *color    = COLOR_GRAY; // default
-
-        switch (type) {
-            case STT_NOTYPE:   type_str = "NOTYPE";  color = COLOR_GRAY;    break;
-            case STT_OBJECT:   type_str = "OBJECT";  color = COLOR_GREEN;   break;
-            case STT_FUNC:     type_str = "FUNC";    color = COLOR_YELLOW;  break;
-            case STT_SECTION:  type_str = "SECTION"; color = COLOR_BLUE;    break;
-            case STT_FILE:     type_str = "FILE";    color = COLOR_CYAN;    break;
-        }
-
         if(syms[i].st_size > 0){
             if(type == STT_FUNC) {
                 unsigned char* ptr = (unsigned char*)parser->block + syms[i].st_value;
@@ -820,7 +1054,26 @@ void print_symbols_with_disasm_64bit(bparser* parser, Elf64_Ehdr* elf, Elf64_Shd
     }
 }
 
-// inline function to print hex header row
+/**
+ * @brief Print the hex dump header row.
+ *
+ * This function prints the header line used in a hex dump,
+ * showing both the hexadecimal column labels (00–0F) and
+ * the ASCII column labels. It also highlights the header
+ * with green color using ANSI escape codes.
+ *
+ * Example output (simplified):
+ * @code
+ * |
+ * |    --Offset--   0 1 2 3 4 5 6 7 8 9 A B C D E F    0123456789ABCDEF
+ * @endcode
+ *
+ * @param offset Starting offset for the hex dump (not currently used
+ *               in the header itself, but included for consistency).
+ *
+ * @note The function assumes ANSI color macros like COLOR_GREEN
+ *       and COLOR_RESET are defined.
+ */
 void print_hex_header(unsigned long long offset)
 {
     printf(COLOR_GREEN "\n|\n" COLOR_GREEN);
@@ -848,6 +1101,36 @@ void print_hex_header(unsigned long long offset)
     printf("\n");
 }
 
+/**
+ * @brief Print metadata of a 32-bit ELF section header.
+ *
+ * This function prints detailed information about a single ELF32 section,
+ * including type, flags, address, offset, size, link, info, alignment, and entry size.
+ * It uses ANSI color codes for visual distinction.
+ *
+ * @param id The index of the section in the section header table.
+ * @param name The name of the section.
+ * @param type_str A string representing the section type (e.g., "SHT_PROGBITS").
+ * @param flags A string representing the section flags (e.g., "AX" for alloc+execute).
+ * @param shdrs Pointer to the array of ELF32 section headers (Elf32_Shdr[]).
+ *
+ * @note Assumes that the macros for ANSI colors (COLOR_CYAN, COLOR_BLUE, COLOR_BG_WHITE, COLOR_BCYAN, COLOR_RESET)
+ *       and META_LABEL_WIDTH are defined.
+ *
+ * Example output:
+ * @code
+ * |--Section [1] .text:
+ * |---Type:        PROGBITS
+ * |---Flags:       AX
+ * |---Addr:        0x08048000
+ * |---Offset:      0x00001000
+ * |---Size:        0x00002000
+ * |---Link:        0
+ * |---Info:        0
+ * |---Align:       0x10
+ * |---EntSize:     0
+ * @endcode
+ */
 void print_section_header_metadata_32bit(unsigned int id, const char* name, const char*type_str, const char* flags, Elf32_Shdr* shdrs) 
 {
     printf(COLOR_BG_WHITE COLOR_BCYAN "|--Section [%d]"  COLOR_RESET COLOR_BLUE " %s" COLOR_CYAN ":\n" COLOR_RESET, id, name);
@@ -864,6 +1147,36 @@ void print_section_header_metadata_32bit(unsigned int id, const char* name, cons
     printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%x\n", META_LABEL_WIDTH, "EntSize:", shdrs[id].sh_entsize);
 }
 
+/**
+ * @brief Print metadata of a 64-bit ELF section header.
+ *
+ * This function prints detailed information about a single ELF64 section,
+ * including type, flags, address, offset, size, link, info, alignment, and entry size.
+ * It uses ANSI color codes for visual distinction.
+ *
+ * @param id The index of the section in the section header table.
+ * @param name The name of the section.
+ * @param type_str A string representing the section type (e.g., "SHT_PROGBITS").
+ * @param flags A string representing the section flags (e.g., "AX" for alloc+execute).
+ * @param shdrs Pointer to the array of ELF64 section headers (Elf64_Shdr[]).
+ *
+ * @note Assumes that the macros for ANSI colors (COLOR_CYAN, COLOR_BLUE, COLOR_BG_WHITE, COLOR_BCYAN, COLOR_RESET)
+ *       and META_LABEL_WIDTH are defined.
+ *
+ * Example output:
+ * @code
+ * |--Section [1] .text:
+ * |---Type:        PROGBITS
+ * |---Flags:       AX
+ * |---Addr:        0x00401000
+ * |---Offset:      0x00001000
+ * |---Size:        0x00002000
+ * |---Link:        0
+ * |---Info:        0
+ * |---Align:       0x10
+ * |---EntSize:     0
+ * @endcode
+ */
 void print_section_header_metadata_64bit(unsigned int id, const char* name, const char*type_str, const char* flags, Elf64_Shdr* shdrs) 
 {
     printf(COLOR_BG_WHITE COLOR_BCYAN "|--Section [%d]"  COLOR_RESET COLOR_BLUE " %s" COLOR_CYAN ":\n" COLOR_RESET, id, name);
@@ -878,9 +1191,36 @@ void print_section_header_metadata_64bit(unsigned int id, const char* name, cons
     printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%x\n", META_LABEL_WIDTH, "Info:", shdrs[id].sh_info);
     printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%lx\n", META_LABEL_WIDTH, "Align:", shdrs[id].sh_addralign);
     printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%lx\n", META_LABEL_WIDTH, "EntSize:", shdrs[id].sh_entsize);
-
 }
 
+/**
+ * @brief Print metadata of a 32-bit ELF program header (segment).
+ *
+ * This function prints detailed information about a single ELF32 program segment,
+ * including type, flags, offset, virtual/physical addresses, file/memory size, and alignment.
+ * It uses ANSI color codes for visual distinction.
+ *
+ * @param id The index of the program header in the program header table.
+ * @param type_str A string representing the segment type (e.g., "PT_LOAD").
+ * @param flags A string representing the segment flags (e.g., "R E" for readable + executable).
+ * @param phdr Pointer to the array of ELF32 program headers (Elf32_Phdr[]).
+ *
+ * @note Assumes that the macros for ANSI colors (COLOR_CYAN, COLOR_BG_WHITE, COLOR_BCYAN, COLOR_RESET)
+ *       and META_LABEL_WIDTH are defined.
+ *
+ * Example output:
+ * @code
+ * |--Program Segment [0]:
+ * |---Type:       PT_LOAD
+ * |---Flags:      R E
+ * |---Offset:     0x00001000
+ * |---VirtAddr:   0x08048000
+ * |---PhysAddr:   0x08048000
+ * |---FileSz:     0x00002000
+ * |---MemSz:      0x00002000
+ * |---Align:      0x1000
+ * @endcode
+ */
 void print_program_header_metadata_32bit(unsigned int id, const char*type_str, const char* flags, Elf32_Phdr* phdr) 
 {
     printf(COLOR_BG_WHITE COLOR_BCYAN "|--Program Segment [%d]:" COLOR_RESET "\n", id);
@@ -895,6 +1235,34 @@ void print_program_header_metadata_32bit(unsigned int id, const char*type_str, c
     printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%x\n", META_LABEL_WIDTH, "Align:", phdr[id].p_align);
 }
 
+/**
+ * @brief Print metadata of a 64-bit ELF program header (segment).
+ *
+ * This function prints detailed information about a single ELF64 program segment,
+ * including type, flags, offset, virtual/physical addresses, file/memory size, and alignment.
+ * It uses ANSI color codes for visual distinction.
+ *
+ * @param id The index of the program header in the program header table.
+ * @param type_str A string representing the segment type (e.g., "PT_LOAD").
+ * @param flags A string representing the segment flags (e.g., "R E" for readable + executable).
+ * @param phdr Pointer to the array of ELF64 program headers (Elf64_Phdr[]).
+ *
+ * @note Assumes that the macros for ANSI colors (COLOR_CYAN, COLOR_BG_WHITE, COLOR_BCYAN, COLOR_RESET)
+ *       and META_LABEL_WIDTH are defined.
+ *
+ * Example output:
+ * @code
+ * |--Program Segment [0]:
+ * |---Type:       PT_LOAD
+ * |---Flags:      R E
+ * |---Offset:     0x00001000
+ * |---VirtAddr:   0x00401000
+ * |---PhysAddr:   0x00401000
+ * |---FileSz:     0x00002000
+ * |---MemSz:      0x00002000
+ * |---Align:      0x1000
+ * @endcode
+ */
 void print_program_header_metadata_64bit(unsigned int id, const char*type_str, const char* flags, Elf64_Phdr* phdr) 
 {
     // printf(COLOR_CYAN "|--Program Segment [%d]:\n" COLOR_RESET, id);
@@ -910,8 +1278,41 @@ void print_program_header_metadata_64bit(unsigned int id, const char*type_str, c
     printf(COLOR_CYAN "|---%-*s" COLOR_RESET "0x%lx\n", META_LABEL_WIDTH, "Align:", phdr[id].p_align);
 }
 
-
-
+/**
+ * @brief Print a block of bytes in hex and ASCII format, optionally disassembling executable instructions.
+ *
+ * This function prints the content of a memory block in a traditional hex dump format,
+ * showing the offset, hexadecimal bytes, and ASCII representation. If the block contains
+ * executable instructions (SHF_EXECINSTR flag is set), it also disassembles the instructions
+ * using the Udis86 library and highlights the assembly.
+ *
+ * @param ptr Pointer to the memory block to print.
+ * @param size Number of bytes to print from the memory block.
+ * @param offset Starting offset to display in the hex dump.
+ * @param disasm If non-zero and contains SHF_EXECINSTR, the function disassembles the bytes.
+ * @param bit_type ELF class: ELFCLASS32 for 32-bit, ELFCLASS64 for 64-bit.
+ *
+ * @note Uses ANSI color codes for highlighting offsets, hex bytes, and disassembly.
+ *       Assumes the following helper functions exist:
+ *         - print_hex_header(offset)
+ *         - display_byte(unsigned char *ptr)
+ *         - display_byte_char(unsigned char *ptr)
+ *         - print_highlight_asm(const char* line)
+ *
+ * @note BLOCK_LENGTH macro defines how many bytes per line (commonly 16).
+ *
+ * Example output:
+ * @code
+ * | 
+ * |    --Offset--   0 1  2 3  4 5  6 7  8 9  A B  C D  E F    0123456789ABCDEF
+ * |----0x00001000:  4865 6C6C 6F20 576F 726C 6421 0000 0000  |Hello World!....|
+ * |----0x00001010:  ... (next 16 bytes)
+ * 
+ * Disassembly (if executable):
+ * |----0x00001000:  mov eax, 1
+ * |----0x00001005:  ret
+ * @endcode
+ */
 void print_body_bytes(unsigned char *ptr, size_t size, unsigned long long offset, int disasm, unsigned char bit_type)
 {
     printf(COLOR_GREEN "|" COLOR_RESET  );
@@ -960,8 +1361,28 @@ void print_body_bytes(unsigned char *ptr, size_t size, unsigned long long offset
     }
 }
 
-
-// Convert block of bytes to asm instructions 32 or 64
+/**
+ * @brief Disassemble a block of machine code and print the assembly with highlighting.
+ *
+ * This function uses the Udis86 library to disassemble a memory block and prints
+ * each instruction in Intel syntax. The output includes offsets and color highlighting
+ * for opcodes, registers, and addresses.
+ *
+ * @param ptr Pointer to the memory block containing machine code.
+ * @param size Number of bytes to disassemble.
+ * @param offset Starting address to display in the disassembly output.
+ * @param bit_type ELF class: ELFCLASS32 for 32-bit instructions, ELFCLASS64 for 64-bit instructions.
+ *
+ * @note Uses the helper function `print_highlight_asm()` to colorize the instructions.
+ * @note ANSI color codes (COLOR_YELLOW, COLOR_RESET) are used for highlighting.
+ *
+ * Example output:
+ * @code
+ * |----0x00001000:  mov eax, 1
+ * |----0x00001005:  add ebx, eax
+ * |----0x00001007:  ret
+ * @endcode
+ */
 void print_disasm(unsigned char *ptr, size_t size, unsigned long long offset, unsigned char bit_type)
 {
     ud_t ud_obj;
@@ -977,7 +1398,29 @@ void print_disasm(unsigned char *ptr, size_t size, unsigned long long offset, un
     }
 }
 
-
+/**
+ * @brief Format ELF program header flags into a colored string.
+ *
+ * This function converts the `p_flags` field of an ELF program header into
+ * a human-readable string with color highlighting for readability:
+ * - Readable (R) → green
+ * - Writable (W) → red
+ * - Executable (X) → yellow
+ *
+ * @param p_flags The flags from the ELF program header (p_flags field of Elf32_Phdr or Elf64_Phdr).
+ * @param buf Output buffer to store the formatted string. Must be preallocated.
+ * @param size Size of the output buffer.
+ *
+ * @note Uses ANSI color codes: COLOR_GREEN, COLOR_RED, COLOR_YELLOW, COLOR_CYAN, COLOR_RESET.
+ * @note Adds 5 spaces after the flags for alignment.
+ *
+ * Example usage:
+ * @code
+ * char flags_buf[32];
+ * format_p_flags(phdr[i].p_flags, flags_buf, sizeof(flags_buf));
+ * printf("|---Flags: %s\n", flags_buf);
+ * @endcode
+ */
 void format_p_flags(uint32_t p_flags, char *buf, size_t size)
 {
     buf[0] = '\0';
@@ -988,5 +1431,4 @@ void format_p_flags(uint32_t p_flags, char *buf, size_t size)
         strncat(buf, " ", size - strlen(buf) - 1);
     strncat(buf, COLOR_CYAN , size - strlen(buf) - 1);
 }
-
 

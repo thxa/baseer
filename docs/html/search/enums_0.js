@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['bparser_5ftype_0',['bparser_type',['../bparser_8h.html#ab6dd2e85297154293eb82e312ab9554a',1,'bparser.h']]]
+  ['baseer_5fmode_5ft_0',['baseer_mode_t',['../baseer_8h.html#a5aad457b39f3d63c1c661eb12e1b6f3e',1,'baseer.h']]]
 ];

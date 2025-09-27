@@ -1,11 +1,14 @@
-.TH "sym_list" 3 "Version 0.1.0" "Baseer" \" -*- nroff -*-
+.TH "sym_list" 3 "Version 0.2.0" "Baseer" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-sym_list
+sym_list \- Represents a symbol entry (function name and address)\&.  
+
 .SH SYNOPSIS
 .br
 .PP
+.PP
+\fR#include <debugger\&.h>\fP
 .SS "Public Attributes"
 
 .in +1c
@@ -19,6 +22,17 @@ sym_list
 .RI "\fBsym_list\fP * \fBnext\fP"
 .br
 .in -1c
+.SH "Detailed Description"
+.PP 
+Represents a symbol entry (function name and address)\&. 
+.SH "Member Data Documentation"
+.PP 
+.SS "uint64_t sym_list::addr"
+Symbol address 
+.SS "char* sym_list::name"
+Symbol name 
+.SS "\fBsym_list\fP* sym_list::next"
+Pointer to next symbol 
 
 .SH "Author"
 .PP 

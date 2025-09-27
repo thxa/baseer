@@ -25,9 +25,11 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
+  <td id="projectlogo"><img alt="Logo" src="logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">Baseer<span id="projectnumber">&#160;0.1.0</span>
+   <div id="projectname">Baseer<span id="projectnumber">&#160;0.2.0</span>
    </div>
+   <div id="projectbrief">Baseer is an advanced binary analysis tool designed to provide deep insights into any file.</div>
   </td>
  </tr>
  </tbody>
@@ -91,30 +93,210 @@ $(function(){initNavTree('structcontext.html','','structcontext-members'); });
   <div class="headertitle"><div class="title">context Struct Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Holds debugger state and process information.  
+ <a href="#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="debugger_8h_source.html">debugger.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a0cf1e61e2ea53790251e74f0905ea593" id="r_a0cf1e61e2ea53790251e74f0905ea593"><td class="memItemLeft" align="right" valign="top"><a id="a0cf1e61e2ea53790251e74f0905ea593" name="a0cf1e61e2ea53790251e74f0905ea593"></a>
-char *&#160;</td><td class="memItemRight" valign="bottom"><b>mmaps</b></td></tr>
-<tr class="memitem:a6b6702660a4808f93aed1e54f15484da" id="r_a6b6702660a4808f93aed1e54f15484da"><td class="memItemLeft" align="right" valign="top"><a id="a6b6702660a4808f93aed1e54f15484da" name="a6b6702660a4808f93aed1e54f15484da"></a>
-uint64_t&#160;</td><td class="memItemRight" valign="bottom"><b>base</b></td></tr>
-<tr class="memitem:ab2bbe59d24fe12facbf0f3d743b51641" id="r_ab2bbe59d24fe12facbf0f3d743b51641"><td class="memItemLeft" align="right" valign="top"><a id="ab2bbe59d24fe12facbf0f3d743b51641" name="ab2bbe59d24fe12facbf0f3d743b51641"></a>
-unsigned long&#160;</td><td class="memItemRight" valign="bottom"><b>entry</b></td></tr>
-<tr class="memitem:ad3154b14f149bbcb5f4efa1ad7daccb3" id="r_ad3154b14f149bbcb5f4efa1ad7daccb3"><td class="memItemLeft" align="right" valign="top"><a id="ad3154b14f149bbcb5f4efa1ad7daccb3" name="ad3154b14f149bbcb5f4efa1ad7daccb3"></a>
-struct user_regs_struct&#160;</td><td class="memItemRight" valign="bottom"><b>regs</b></td></tr>
-<tr class="memitem:ad9e6445998e50178fbf49945a01391b2" id="r_ad9e6445998e50178fbf49945a01391b2"><td class="memItemLeft" align="right" valign="top"><a id="ad9e6445998e50178fbf49945a01391b2" name="ad9e6445998e50178fbf49945a01391b2"></a>
-<a class="el" href="structbp__list.html">bp_list</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>list</b></td></tr>
-<tr class="memitem:a5afc55ccd9d3c95948d7585f5f47e0d7" id="r_a5afc55ccd9d3c95948d7585f5f47e0d7"><td class="memItemLeft" align="right" valign="top"><a id="a5afc55ccd9d3c95948d7585f5f47e0d7" name="a5afc55ccd9d3c95948d7585f5f47e0d7"></a>
-<a class="el" href="structsym__list.html">sym_list</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>sym</b></td></tr>
-<tr class="memitem:a2ac41f1dbcaf092cfcf6c15020f6f31b" id="r_a2ac41f1dbcaf092cfcf6c15020f6f31b"><td class="memItemLeft" align="right" valign="top"><a id="a2ac41f1dbcaf092cfcf6c15020f6f31b" name="a2ac41f1dbcaf092cfcf6c15020f6f31b"></a>
-<a class="el" href="structCmd.html">Cmd</a>&#160;</td><td class="memItemRight" valign="bottom"><b>cmd</b></td></tr>
-<tr class="memitem:a45e738986116c26b5b4e6233ccbd508a" id="r_a45e738986116c26b5b4e6233ccbd508a"><td class="memItemLeft" align="right" valign="top"><a id="a45e738986116c26b5b4e6233ccbd508a" name="a45e738986116c26b5b4e6233ccbd508a"></a>
-unsigned int&#160;</td><td class="memItemRight" valign="bottom"><b>pid</b></td></tr>
-<tr class="memitem:a15f66109ff8f1f8c5a5037d275273bca" id="r_a15f66109ff8f1f8c5a5037d275273bca"><td class="memItemLeft" align="right" valign="top"><a id="a15f66109ff8f1f8c5a5037d275273bca" name="a15f66109ff8f1f8c5a5037d275273bca"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>do_wait</b></td></tr>
-<tr class="memitem:ad4042bb3498baa4ffb4962724ba6dff4" id="r_ad4042bb3498baa4ffb4962724ba6dff4"><td class="memItemLeft" align="right" valign="top"><a id="ad4042bb3498baa4ffb4962724ba6dff4" name="ad4042bb3498baa4ffb4962724ba6dff4"></a>
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>arch</b></td></tr>
+<tr class="memitem:a0cf1e61e2ea53790251e74f0905ea593" id="r_a0cf1e61e2ea53790251e74f0905ea593"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0cf1e61e2ea53790251e74f0905ea593">mmaps</a></td></tr>
+<tr class="memitem:a6b6702660a4808f93aed1e54f15484da" id="r_a6b6702660a4808f93aed1e54f15484da"><td class="memItemLeft" align="right" valign="top">uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6b6702660a4808f93aed1e54f15484da">base</a></td></tr>
+<tr class="memitem:a78f8154d3a790726dfffa66911866d63" id="r_a78f8154d3a790726dfffa66911866d63"><td class="memItemLeft" align="right" valign="top">uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a78f8154d3a790726dfffa66911866d63">entry</a></td></tr>
+<tr class="memitem:ad3154b14f149bbcb5f4efa1ad7daccb3" id="r_ad3154b14f149bbcb5f4efa1ad7daccb3"><td class="memItemLeft" align="right" valign="top">struct user_regs_struct&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad3154b14f149bbcb5f4efa1ad7daccb3">regs</a></td></tr>
+<tr class="memitem:ad9e6445998e50178fbf49945a01391b2" id="r_ad9e6445998e50178fbf49945a01391b2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structbp__list.html">bp_list</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad9e6445998e50178fbf49945a01391b2">list</a></td></tr>
+<tr class="memitem:a5afc55ccd9d3c95948d7585f5f47e0d7" id="r_a5afc55ccd9d3c95948d7585f5f47e0d7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structsym__list.html">sym_list</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5afc55ccd9d3c95948d7585f5f47e0d7">sym</a></td></tr>
+<tr class="memitem:a2ac41f1dbcaf092cfcf6c15020f6f31b" id="r_a2ac41f1dbcaf092cfcf6c15020f6f31b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structCmd.html">Cmd</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2ac41f1dbcaf092cfcf6c15020f6f31b">cmd</a></td></tr>
+<tr class="memitem:a45e738986116c26b5b4e6233ccbd508a" id="r_a45e738986116c26b5b4e6233ccbd508a"><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a45e738986116c26b5b4e6233ccbd508a">pid</a></td></tr>
+<tr class="memitem:ad4042bb3498baa4ffb4962724ba6dff4" id="r_ad4042bb3498baa4ffb4962724ba6dff4"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad4042bb3498baa4ffb4962724ba6dff4">arch</a></td></tr>
+<tr class="memitem:a15f66109ff8f1f8c5a5037d275273bca" id="r_a15f66109ff8f1f8c5a5037d275273bca"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a15f66109ff8f1f8c5a5037d275273bca">do_wait</a></td></tr>
+<tr class="memitem:aa2f6f9b30c9fc9d0c1524ed1fdf05472" id="r_aa2f6f9b30c9fc9d0c1524ed1fdf05472"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa2f6f9b30c9fc9d0c1524ed1fdf05472">pie</a></td></tr>
+<tr class="memitem:a82a1acbecd5f3025dcd2b08cb704b779" id="r_a82a1acbecd5f3025dcd2b08cb704b779"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a82a1acbecd5f3025dcd2b08cb704b779">do_exit</a></td></tr>
 </table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Holds debugger state and process information. </p>
+</div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
+<a id="ad4042bb3498baa4ffb4962724ba6dff4" name="ad4042bb3498baa4ffb4962724ba6dff4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad4042bb3498baa4ffb4962724ba6dff4">&#9670;&#160;</a></span>arch</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t context::arch</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Architecture (32 or 64 bit) </p>
+
+</div>
+</div>
+<a id="a6b6702660a4808f93aed1e54f15484da" name="a6b6702660a4808f93aed1e54f15484da"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6b6702660a4808f93aed1e54f15484da">&#9670;&#160;</a></span>base</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint64_t context::base</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Base address of the binary (PIE flag in LSB) </p>
+
+</div>
+</div>
+<a id="a2ac41f1dbcaf092cfcf6c15020f6f31b" name="a2ac41f1dbcaf092cfcf6c15020f6f31b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2ac41f1dbcaf092cfcf6c15020f6f31b">&#9670;&#160;</a></span>cmd</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structCmd.html">Cmd</a> context::cmd</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Current user command </p>
+
+</div>
+</div>
+<a id="a82a1acbecd5f3025dcd2b08cb704b779" name="a82a1acbecd5f3025dcd2b08cb704b779"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a82a1acbecd5f3025dcd2b08cb704b779">&#9670;&#160;</a></span>do_exit</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool context::do_exit</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Set when the debugger should terminate </p>
+
+</div>
+</div>
+<a id="a15f66109ff8f1f8c5a5037d275273bca" name="a15f66109ff8f1f8c5a5037d275273bca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a15f66109ff8f1f8c5a5037d275273bca">&#9670;&#160;</a></span>do_wait</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool context::do_wait</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Whether to wait for process stop </p>
+
+</div>
+</div>
+<a id="a78f8154d3a790726dfffa66911866d63" name="a78f8154d3a790726dfffa66911866d63"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a78f8154d3a790726dfffa66911866d63">&#9670;&#160;</a></span>entry</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint64_t context::entry</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Entry point address </p>
+
+</div>
+</div>
+<a id="ad9e6445998e50178fbf49945a01391b2" name="ad9e6445998e50178fbf49945a01391b2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad9e6445998e50178fbf49945a01391b2">&#9670;&#160;</a></span>list</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structbp__list.html">bp_list</a>* context::list</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>List of breakpoints </p>
+
+</div>
+</div>
+<a id="a0cf1e61e2ea53790251e74f0905ea593" name="a0cf1e61e2ea53790251e74f0905ea593"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0cf1e61e2ea53790251e74f0905ea593">&#9670;&#160;</a></span>mmaps</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char* context::mmaps</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Process memory mappings (/proc/pid/maps) </p>
+
+</div>
+</div>
+<a id="a45e738986116c26b5b4e6233ccbd508a" name="a45e738986116c26b5b4e6233ccbd508a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a45e738986116c26b5b4e6233ccbd508a">&#9670;&#160;</a></span>pid</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned int context::pid</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Debugged process PID </p>
+
+</div>
+</div>
+<a id="aa2f6f9b30c9fc9d0c1524ed1fdf05472" name="aa2f6f9b30c9fc9d0c1524ed1fdf05472"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa2f6f9b30c9fc9d0c1524ed1fdf05472">&#9670;&#160;</a></span>pie</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool context::pie</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>True if the target binary is Position Independent Executable (PIE) </p>
+
+</div>
+</div>
+<a id="ad3154b14f149bbcb5f4efa1ad7daccb3" name="ad3154b14f149bbcb5f4efa1ad7daccb3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad3154b14f149bbcb5f4efa1ad7daccb3">&#9670;&#160;</a></span>regs</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct user_regs_struct context::regs</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>CPU register state </p>
+
+</div>
+</div>
+<a id="a5afc55ccd9d3c95948d7585f5f47e0d7" name="a5afc55ccd9d3c95948d7585f5f47e0d7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5afc55ccd9d3c95948d7585f5f47e0d7">&#9670;&#160;</a></span>sym</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structsym__list.html">sym_list</a>* context::sym</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>List of symbols </p>
+
+</div>
+</div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
 <li>modules/b_debugger/<a class="el" href="debugger_8h_source.html">debugger.h</a></li>
 </ul>

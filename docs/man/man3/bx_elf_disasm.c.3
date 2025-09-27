@@ -1,4 +1,4 @@
-.TH "modules/bx_elf_disasm/bx_elf_disasm.c" 3 "Version 0.1.0" "Baseer" \" -*- nroff -*-
+.TH "modules/bx_elf_disasm/bx_elf_disasm.c" 3 "Version 0.2.0" "Baseer" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -9,21 +9,12 @@ modules/bx_elf_disasm/bx_elf_disasm.c \- Functions for disassembling ELF files a
 .PP
 \fR#include 'bx_elf_disasm\&.h'\fP
 .br
+\fR#include '\&.\&./b_hashmap/b_hashmap\&.h'\fP
+.br
 
 .SS "Functions"
 
 .in +1c
-.ti -1c
-.RI "bool \fBis_metadata_section\fP (const char *name)"
-.br
-.ti -1c
-.RI "void \fBdump_disasm_elf32_phdr\fP (Elf32_Ehdr *elf, Elf32_Phdr *phdr, \fBbparser\fP *parser)"
-.br
-.RI "Disassembles and prints the program headers of a 32-bit ELF file\&. "
-.ti -1c
-.RI "void \fBdump_disasm_elf64_phdr\fP (Elf64_Ehdr *elf, Elf64_Phdr *phdr, \fBbparser\fP *parser)"
-.br
-.RI "Disassembles and prints the program headers of a 64-bit ELF file\&. "
 .ti -1c
 .RI "void \fBdump_disasm_elf32_shdr\fP (Elf32_Ehdr *elf, Elf32_Shdr *shdrs, \fBbparser\fP *parser)"
 .br
@@ -33,16 +24,17 @@ modules/bx_elf_disasm/bx_elf_disasm.c \- Functions for disassembling ELF files a
 .br
 .RI "Disassemble and print the ELF64 section headers\&. "
 .ti -1c
+.RI "void \fBdump_disasm_elf32_phdr\fP (Elf32_Ehdr *elf, Elf32_Phdr *phdr, \fBbparser\fP *parser)"
+.br
+.RI "Disassembles and prints the program headers of a 32-bit ELF file\&. "
+.ti -1c
+.RI "void \fBdump_disasm_elf64_phdr\fP (Elf64_Ehdr *elf, Elf64_Phdr *phdr, \fBbparser\fP *parser)"
+.br
+.RI "Disassembles and prints the program headers of a 64-bit ELF file\&. "
+.ti -1c
 .RI "bool \fBprint_elf_disasm\fP (\fBbparser\fP *parser, void *args)"
 .br
 .RI "Print ELF file disassembly and metadata\&. "
-.in -1c
-.SS "Variables"
-
-.in +1c
-.ti -1c
-.RI "const char * \fBmetadata_sections\fP []"
-.br
 .in -1c
 .SH "Detailed Description"
 .PP 
@@ -183,30 +175,6 @@ Print ELF file disassembly and metadata\&. This function analyzes an ELF file in
 true if the ELF file was successfully analyzed and disassembled; false if the ELF class or machine type is unsupported or unknown\&. 
 .RE
 .PP
-
-.SH "Variable Documentation"
-.PP 
-.SS "const char* metadata_sections[]"
-\fBInitial value:\fP
-.nf
-= {
-    "\&.rela\&.dyn",
-    "\&.rela\&.plt",
-    "\&.dynsym",
-    "\&.dynstr",
-    "\&.eh_frame",
-    "\&.eh_frame_hdr",
-    "\&.note\&.gnu\&.property",
-    "\&.note\&.gnu\&.build\-id",
-    "\&.comment",
-    "\&.gnu\&.version",
-    "\&.interp",
-    "\&.gnu\&.hash",
-    "\&.gnu\&.version_r",
-    NULL
-}
-.PP
-.fi
 
 .SH "Author"
 .PP 

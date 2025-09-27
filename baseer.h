@@ -6,7 +6,7 @@
  * of analysis tools using a unified callback interface.
  */
 
-/* Baseer 0.1.0a */
+/* Baseer 0.2.0 */
 #ifndef BASEER_H
 #define BASEER_H
 
@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include "linenoise.h"
 #define BASEER_VERSION_MAJOR 0  
-#define BASEER_VERSION_MINOR 1   
+#define BASEER_VERSION_MINOR 2
 #define BASEER_VERSION_MICRO 0  
 
 #define STRINGIFY(x) #x

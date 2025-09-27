@@ -25,9 +25,11 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
+  <td id="projectlogo"><img alt="Logo" src="logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">Baseer<span id="projectnumber">&#160;0.1.0</span>
+   <div id="projectname">Baseer<span id="projectnumber">&#160;0.2.0</span>
    </div>
+   <div id="projectbrief">Baseer is an advanced binary analysis tool designed to provide deep insights into any file.</div>
   </td>
  </tr>
  </tbody>
@@ -93,7 +95,7 @@ $(function(){initNavTree('baseer_8h_source.html','',''); });
 <div class="contents">
 <a href="baseer_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span></div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment">/* Baseer 0.1.0a */</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment">/* Baseer 0.2.0 */</span></div>
 <div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#ifndef BASEER_H</span></div>
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#define BASEER_H</span></div>
 <div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
@@ -105,9 +107,9 @@ $(function(){initNavTree('baseer_8h_source.html','',''); });
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &lt;string.h&gt;</span></div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &lt;ctype.h&gt;</span></div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;stdlib.h&gt;</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &quot;linenoise.h&quot;</span></div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#define BASEER_VERSION_MAJOR 0  </span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#define BASEER_VERSION_MINOR 1   </span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#define BASEER_VERSION_MINOR 2</span></div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#define BASEER_VERSION_MICRO 0  </span></div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#define STRINGIFY(x) #x</span></div>
@@ -128,58 +130,103 @@ $(function(){initNavTree('baseer_8h_source.html','',''); });
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="preprocessor">#define BASEER_BASE_OFFSET(b, i, sf) (b) + ((i) * (sf))</span></div>
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
 <div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="preprocessor">#define COLOR_RESET      &quot;\033[0m&quot;</span></div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">#define COLOR_GREEN      &quot;\033[1;32m&quot;</span></div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">#define COLOR_BLUE       &quot;\033[1;34m&quot;</span></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="preprocessor">#define COLOR_YELLOW     &quot;\033[1;33m&quot;</span></div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="preprocessor">#define COLOR_RED        &quot;\033[1;31m&quot;</span></div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">#define COLOR_MAGENTA    &quot;\033[35m&quot;</span></div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="preprocessor">#define COLOR_CYAN       &quot;\033[36m&quot;</span></div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="preprocessor">#define COLOR_RAND(i, c1, c2) (i &amp; 1)?c1:c2;</span></div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="preprocessor">#define BLOCK_LENGTH 40</span></div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span></div>
-<div class="foldopen" id="foldopen00057" data-start="{" data-end="};">
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno"><a class="line" href="structinputs.html">   57</a></span><span class="keyword">typedef</span> <span class="keyword">struct </span>{</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="keywordtype">int</span>* argc;</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    <span class="keywordtype">char</span>**args;</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>} <a class="code hl_struct" href="structinputs.html">inputs</a>;</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="comment">// Regular colors</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">#define COLOR_BLACK      &quot;\033[30m&quot;</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="preprocessor">#define COLOR_GRAY       &quot;\033[90m&quot;</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="preprocessor">#define COLOR_RED        &quot;\033[31m&quot;</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">#define COLOR_GREEN      &quot;\033[32m&quot;</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="preprocessor">#define COLOR_YELLOW     &quot;\033[33m&quot;</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="preprocessor">#define COLOR_BLUE       &quot;\033[34m&quot;</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="preprocessor">#define COLOR_MAGENTA    &quot;\033[35m&quot;</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="preprocessor">#define COLOR_CYAN       &quot;\033[36m&quot;</span></div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="preprocessor">#define COLOR_WHITE      &quot;\033[37m&quot;</span></div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="comment">// Bold (bright) colors</span></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="preprocessor">#define COLOR_BBLACK     &quot;\033[1;30m&quot;</span></div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="preprocessor">#define COLOR_BRED       &quot;\033[1;31m&quot;</span></div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="preprocessor">#define COLOR_BGREEN     &quot;\033[1;32m&quot;</span></div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="preprocessor">#define COLOR_BYELLOW    &quot;\033[1;33m&quot;</span></div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="preprocessor">#define COLOR_BBLUE      &quot;\033[1;34m&quot;</span></div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="preprocessor">#define COLOR_BMAGENTA   &quot;\033[1;35m&quot;</span></div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="preprocessor">#define COLOR_BCYAN      &quot;\033[1;36m&quot;</span></div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="preprocessor">#define COLOR_BWHITE     &quot;\033[1;37m&quot;</span></div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="comment">// Background colors</span></div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span><span class="preprocessor">#define COLOR_BG_BLACK   &quot;\033[40m&quot;</span></div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span><span class="preprocessor">#define COLOR_BG_RED     &quot;\033[41m&quot;</span></div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span><span class="preprocessor">#define COLOR_BG_GREEN   &quot;\033[42m&quot;</span></div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="preprocessor">#define COLOR_BG_YELLOW  &quot;\033[43m&quot;</span></div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span><span class="preprocessor">#define COLOR_BG_BLUE    &quot;\033[44m&quot;</span></div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="preprocessor">#define COLOR_BG_MAGENTA &quot;\033[45m&quot;</span></div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span><span class="preprocessor">#define COLOR_BG_CYAN    &quot;\033[46m&quot;</span></div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="preprocessor">#define COLOR_BG_WHITE   &quot;\033[47m&quot;</span></div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span><span class="preprocessor">#define MAX_INPUT_ARGS 20</span></div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span><span class="preprocessor">#define DEFAULT_BLOCK_LENGTH 16</span></div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="comment">// #define BLOCK_LENGTH 40</span></div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span> </div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span><span class="preprocessor">#define BLOCK_LENGTH (get_block_length())</span></div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span> </div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span><span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">int</span> get_block_length(<span class="keywordtype">void</span>)</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>{</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    <span class="keywordtype">char</span> *env = getenv(<span class="stringliteral">&quot;BLOCK_LENGTH&quot;</span>);</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    <span class="keywordflow">if</span> (env != NULL) {</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>        <span class="keywordtype">int</span> val = atoi(env);</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>        <span class="keywordflow">if</span> (val &gt; 0) <span class="keywordflow">return</span> val;</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    }</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    <span class="keywordflow">return</span> DEFAULT_BLOCK_LENGTH;</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>}</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span> </div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span></div>
+<div class="foldopen" id="foldopen00094" data-start="{" data-end="};">
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno"><a class="line" href="structinputs.html">   94</a></span><span class="keyword">typedef</span> <span class="keyword">struct </span>{</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    <span class="keywordtype">int</span> *argc;</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    <span class="keywordtype">char</span>** args;</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    <span class="keywordtype">int</span> input_argc;</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>    <span class="keywordtype">char</span>* input_args[MAX_INPUT_ARGS];</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>} <a class="code hl_struct" href="structinputs.html">inputs</a>;</div>
 </div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="keyword">typedef</span> <span class="keyword">enum</span> {</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    STREAM,</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    MEMORY</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>} file_mode;</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span></div>
-<div class="foldopen" id="foldopen00070" data-start="{" data-end="};">
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno"><a class="line" href="structbaseer__target__t.html">   70</a></span><span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structbaseer__target__t.html">baseer_target_t</a> {</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno"><a class="line" href="structbaseer__target__t.html#a6e0834aa134f59e0c304bf1279d55672">   71</a></span>    <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code hl_variable" href="structbaseer__target__t.html#a6e0834aa134f59e0c304bf1279d55672">size</a>; </div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno"><a class="line" href="structbaseer__target__t.html#a544e39d249d14b40e1f24041f77757d7">   72</a></span>    <span class="keywordtype">void</span> *<a class="code hl_variable" href="structbaseer__target__t.html#a544e39d249d14b40e1f24041f77757d7">block</a>;       </div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno"><a class="line" href="baseer_8h.html#af06fab8270684c79b21df5f35f7b6ed0">   73</a></span>} <a class="code hl_struct" href="structbaseer__target__t.html">baseer_target_t</a>;</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span></div>
+<div class="foldopen" id="foldopen00104" data-start="{" data-end="};">
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno"><a class="line" href="baseer_8h.html#a5aad457b39f3d63c1c661eb12e1b6f3e">  104</a></span><span class="keyword">typedef</span> <span class="keyword">enum</span> {</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>    BASEER_MODE_MEMORY,</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    BASEER_MODE_STREAM,</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    BASEER_MODE_BOTH</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>} <a class="code hl_enumeration" href="baseer_8h.html#a5aad457b39f3d63c1c661eb12e1b6f3e">baseer_mode_t</a>;</div>
 </div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span></div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno"><a class="line" href="baseer_8h.html#a026a9e012e9e6b67149c1b8dd7ef6438">   82</a></span><span class="keyword">typedef</span> bool (*<a class="code hl_typedef" href="baseer_8h.html#a026a9e012e9e6b67149c1b8dd7ef6438">baseer_callback_t</a>)(<a class="code hl_struct" href="structbaseer__target__t.html">baseer_target_t</a> *, <span class="keywordtype">void</span> *arg);</div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span></div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span><a class="code hl_struct" href="structbaseer__target__t.html">baseer_target_t</a> *<a class="code hl_function" href="baseer_8h.html#a44d67d593f18c21c6f81bec443a1522c">baseer_open_memory</a>(<span class="keywordtype">char</span> *file_path);</div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span></div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span><a class="code hl_struct" href="structbaseer__target__t.html">baseer_target_t</a> *<a class="code hl_function" href="baseer_8h.html#a239229cb1937549ec6dd31fe189e33aa">baseer_open_file</a>(<span class="keywordtype">char</span> *file_path);</div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span></div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span><span class="keywordtype">void</span> <a class="code hl_function" href="baseer_8h.html#a4f7d25d89526392b9d90bb5b0bc5f4d4">baseer_close</a>(<a class="code hl_struct" href="structbaseer__target__t.html">baseer_target_t</a> *target, <span class="keywordtype">int</span> mode);</div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span></div>
-<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span><span class="keywordtype">void</span> <a class="code hl_function" href="baseer_8h.html#ab32e495d6af677e7772ccc0d19ad8d5d">baseer_print</a>(<a class="code hl_struct" href="structbaseer__target__t.html">baseer_target_t</a> *target);</div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span></div>
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span><span class="keywordtype">bool</span> <a class="code hl_function" href="baseer_8h.html#a5df3250b6207c6c70e9e743556d1b5a8">baseer_execute</a>(<a class="code hl_struct" href="structbaseer__target__t.html">baseer_target_t</a> *target, <a class="code hl_typedef" href="baseer_8h.html#a026a9e012e9e6b67149c1b8dd7ef6438">baseer_callback_t</a> callback, <span class="keywordtype">void</span> *arg);</div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span> </div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span><span class="preprocessor">#endif</span></div>
-<div class="ttc" id="abaseer_8h_html_a026a9e012e9e6b67149c1b8dd7ef6438"><div class="ttname"><a href="baseer_8h.html#a026a9e012e9e6b67149c1b8dd7ef6438">baseer_callback_t</a></div><div class="ttdeci">bool(* baseer_callback_t)(baseer_target_t *, void *arg)</div><div class="ttdoc">Callback function type for file analysis.</div><div class="ttdef"><b>Definition</b> baseer.h:82</div></div>
-<div class="ttc" id="abaseer_8h_html_a239229cb1937549ec6dd31fe189e33aa"><div class="ttname"><a href="baseer_8h.html#a239229cb1937549ec6dd31fe189e33aa">baseer_open_file</a></div><div class="ttdeci">baseer_target_t * baseer_open_file(char *file_path)</div><div class="ttdoc">Open a file in streaming mode (FILE*) without full memory load.</div><div class="ttdef"><b>Definition</b> baseer.c:63</div></div>
-<div class="ttc" id="abaseer_8h_html_a44d67d593f18c21c6f81bec443a1522c"><div class="ttname"><a href="baseer_8h.html#a44d67d593f18c21c6f81bec443a1522c">baseer_open_memory</a></div><div class="ttdeci">baseer_target_t * baseer_open_memory(char *file_path)</div><div class="ttdoc">Open a file fully loaded into memory.</div><div class="ttdef"><b>Definition</b> baseer.c:15</div></div>
-<div class="ttc" id="abaseer_8h_html_a4f7d25d89526392b9d90bb5b0bc5f4d4"><div class="ttname"><a href="baseer_8h.html#a4f7d25d89526392b9d90bb5b0bc5f4d4">baseer_close</a></div><div class="ttdeci">void baseer_close(baseer_target_t *target, int mode)</div><div class="ttdoc">Close a file target and free associated resources.</div><div class="ttdef"><b>Definition</b> baseer.c:81</div></div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span></div>
+<div class="foldopen" id="foldopen00113" data-start="{" data-end="};">
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno"><a class="line" href="structbaseer__target__t.html">  113</a></span><span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code hl_struct" href="structbaseer__target__t.html">baseer_target_t</a> {</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno"><a class="line" href="structbaseer__target__t.html#a2d3b63aa76a250debf74b98b3abe2d0c">  114</a></span>    FILE* <a class="code hl_variable" href="structbaseer__target__t.html#a2d3b63aa76a250debf74b98b3abe2d0c">fp</a>;           </div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno"><a class="line" href="structbaseer__target__t.html#a2233e8e231d6a22dbc9116e5666f77f7">  115</a></span>    <a class="code hl_enumeration" href="baseer_8h.html#a5aad457b39f3d63c1c661eb12e1b6f3e">baseer_mode_t</a> <a class="code hl_variable" href="structbaseer__target__t.html#a2233e8e231d6a22dbc9116e5666f77f7">mode</a>; </div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno"><a class="line" href="structbaseer__target__t.html#a6e0834aa134f59e0c304bf1279d55672">  116</a></span>    <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code hl_variable" href="structbaseer__target__t.html#a6e0834aa134f59e0c304bf1279d55672">size</a>;  </div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno"><a class="line" href="structbaseer__target__t.html#a544e39d249d14b40e1f24041f77757d7">  117</a></span>    <span class="keywordtype">void</span> *<a class="code hl_variable" href="structbaseer__target__t.html#a544e39d249d14b40e1f24041f77757d7">block</a>;        </div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno"><a class="line" href="baseer_8h.html#af06fab8270684c79b21df5f35f7b6ed0">  118</a></span>} <a class="code hl_struct" href="structbaseer__target__t.html">baseer_target_t</a>;</div>
+</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span></div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno"><a class="line" href="baseer_8h.html#a026a9e012e9e6b67149c1b8dd7ef6438">  127</a></span><span class="keyword">typedef</span> bool (*<a class="code hl_typedef" href="baseer_8h.html#a026a9e012e9e6b67149c1b8dd7ef6438">baseer_callback_t</a>)(<a class="code hl_struct" href="structbaseer__target__t.html">baseer_target_t</a> *, <span class="keywordtype">void</span> *arg);</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span></div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span><span class="comment">// baseer_target_t *baseer_open_memory(char *file_path);</span></div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span><a class="code hl_struct" href="structbaseer__target__t.html">baseer_target_t</a> *<a class="code hl_function" href="baseer_8h.html#a168eb06e7ffce76bc540cc61c058c04a">baseer_open</a>(<span class="keywordtype">char</span> *file_path, <a class="code hl_enumeration" href="baseer_8h.html#a5aad457b39f3d63c1c661eb12e1b6f3e">baseer_mode_t</a> mode);</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span></div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span><span class="keywordtype">void</span> <a class="code hl_function" href="baseer_8h.html#a6c7d20aa4157fb69030fc25171cdc916">baseer_close</a>(<a class="code hl_struct" href="structbaseer__target__t.html">baseer_target_t</a> *target);</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span></div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span><span class="keywordtype">void</span> <a class="code hl_function" href="baseer_8h.html#ab32e495d6af677e7772ccc0d19ad8d5d">baseer_print</a>(<a class="code hl_struct" href="structbaseer__target__t.html">baseer_target_t</a> *target);</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span></div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span><span class="keywordtype">bool</span> <a class="code hl_function" href="baseer_8h.html#a5df3250b6207c6c70e9e743556d1b5a8">baseer_execute</a>(<a class="code hl_struct" href="structbaseer__target__t.html">baseer_target_t</a> *target, <a class="code hl_typedef" href="baseer_8h.html#a026a9e012e9e6b67149c1b8dd7ef6438">baseer_callback_t</a> callback, <span class="keywordtype">void</span> *arg);</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span> </div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="abaseer_8h_html_a026a9e012e9e6b67149c1b8dd7ef6438"><div class="ttname"><a href="baseer_8h.html#a026a9e012e9e6b67149c1b8dd7ef6438">baseer_callback_t</a></div><div class="ttdeci">bool(* baseer_callback_t)(baseer_target_t *, void *arg)</div><div class="ttdoc">Callback function type for file analysis.</div><div class="ttdef"><b>Definition</b> baseer.h:127</div></div>
+<div class="ttc" id="abaseer_8h_html_a168eb06e7ffce76bc540cc61c058c04a"><div class="ttname"><a href="baseer_8h.html#a168eb06e7ffce76bc540cc61c058c04a">baseer_open</a></div><div class="ttdeci">baseer_target_t * baseer_open(char *file_path, baseer_mode_t mode)</div><div class="ttdoc">Open a file in specified mode (memory, streaming, or both)</div><div class="ttdef"><b>Definition</b> baseer.c:15</div></div>
+<div class="ttc" id="abaseer_8h_html_a5aad457b39f3d63c1c661eb12e1b6f3e"><div class="ttname"><a href="baseer_8h.html#a5aad457b39f3d63c1c661eb12e1b6f3e">baseer_mode_t</a></div><div class="ttdeci">baseer_mode_t</div><div class="ttdoc">Enum representing file access modes.</div><div class="ttdef"><b>Definition</b> baseer.h:104</div></div>
 <div class="ttc" id="abaseer_8h_html_a5df3250b6207c6c70e9e743556d1b5a8"><div class="ttname"><a href="baseer_8h.html#a5df3250b6207c6c70e9e743556d1b5a8">baseer_execute</a></div><div class="ttdeci">bool baseer_execute(baseer_target_t *target, baseer_callback_t callback, void *arg)</div><div class="ttdoc">Execute a callback on a file target.</div><div class="ttdef"><b>Definition</b> baseer.c:118</div></div>
+<div class="ttc" id="abaseer_8h_html_a6c7d20aa4157fb69030fc25171cdc916"><div class="ttname"><a href="baseer_8h.html#a6c7d20aa4157fb69030fc25171cdc916">baseer_close</a></div><div class="ttdeci">void baseer_close(baseer_target_t *target)</div><div class="ttdoc">Close a file target and free associated resources.</div><div class="ttdef"><b>Definition</b> baseer.c:67</div></div>
 <div class="ttc" id="abaseer_8h_html_ab32e495d6af677e7772ccc0d19ad8d5d"><div class="ttname"><a href="baseer_8h.html#ab32e495d6af677e7772ccc0d19ad8d5d">baseer_print</a></div><div class="ttdeci">void baseer_print(baseer_target_t *target)</div><div class="ttdoc">Print a hex dump of the file target.</div><div class="ttdef"><b>Definition</b> baseer.c:102</div></div>
-<div class="ttc" id="astructbaseer__target__t_html"><div class="ttname"><a href="structbaseer__target__t.html">baseer_target_t</a></div><div class="ttdoc">Struct representing a file target in memory or streaming mode.</div><div class="ttdef"><b>Definition</b> baseer.h:70</div></div>
-<div class="ttc" id="astructbaseer__target__t_html_a544e39d249d14b40e1f24041f77757d7"><div class="ttname"><a href="structbaseer__target__t.html#a544e39d249d14b40e1f24041f77757d7">baseer_target_t::block</a></div><div class="ttdeci">void * block</div><div class="ttdef"><b>Definition</b> baseer.h:72</div></div>
-<div class="ttc" id="astructbaseer__target__t_html_a6e0834aa134f59e0c304bf1279d55672"><div class="ttname"><a href="structbaseer__target__t.html#a6e0834aa134f59e0c304bf1279d55672">baseer_target_t::size</a></div><div class="ttdeci">unsigned int size</div><div class="ttdef"><b>Definition</b> baseer.h:71</div></div>
-<div class="ttc" id="astructinputs_html"><div class="ttname"><a href="structinputs.html">inputs</a></div><div class="ttdoc">Struct representing command-line inputs.</div><div class="ttdef"><b>Definition</b> baseer.h:57</div></div>
+<div class="ttc" id="astructbaseer__target__t_html"><div class="ttname"><a href="structbaseer__target__t.html">baseer_target_t</a></div><div class="ttdoc">Struct representing a file target in memory or streaming mode.</div><div class="ttdef"><b>Definition</b> baseer.h:113</div></div>
+<div class="ttc" id="astructbaseer__target__t_html_a2233e8e231d6a22dbc9116e5666f77f7"><div class="ttname"><a href="structbaseer__target__t.html#a2233e8e231d6a22dbc9116e5666f77f7">baseer_target_t::mode</a></div><div class="ttdeci">baseer_mode_t mode</div><div class="ttdef"><b>Definition</b> baseer.h:115</div></div>
+<div class="ttc" id="astructbaseer__target__t_html_a2d3b63aa76a250debf74b98b3abe2d0c"><div class="ttname"><a href="structbaseer__target__t.html#a2d3b63aa76a250debf74b98b3abe2d0c">baseer_target_t::fp</a></div><div class="ttdeci">FILE * fp</div><div class="ttdef"><b>Definition</b> baseer.h:114</div></div>
+<div class="ttc" id="astructbaseer__target__t_html_a544e39d249d14b40e1f24041f77757d7"><div class="ttname"><a href="structbaseer__target__t.html#a544e39d249d14b40e1f24041f77757d7">baseer_target_t::block</a></div><div class="ttdeci">void * block</div><div class="ttdef"><b>Definition</b> baseer.h:117</div></div>
+<div class="ttc" id="astructbaseer__target__t_html_a6e0834aa134f59e0c304bf1279d55672"><div class="ttname"><a href="structbaseer__target__t.html#a6e0834aa134f59e0c304bf1279d55672">baseer_target_t::size</a></div><div class="ttdeci">unsigned int size</div><div class="ttdef"><b>Definition</b> baseer.h:116</div></div>
+<div class="ttc" id="astructinputs_html"><div class="ttname"><a href="structinputs.html">inputs</a></div><div class="ttdoc">Struct representing command-line inputs.</div><div class="ttdef"><b>Definition</b> baseer.h:94</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->

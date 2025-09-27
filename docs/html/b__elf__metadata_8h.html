@@ -25,9 +25,11 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
+  <td id="projectlogo"><img alt="Logo" src="logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">Baseer<span id="projectnumber">&#160;0.1.0</span>
+   <div id="projectname">Baseer<span id="projectnumber">&#160;0.2.0</span>
    </div>
+   <div id="projectbrief">Baseer is an advanced binary analysis tool designed to provide deep insights into any file.</div>
   </td>
  </tr>
  </tbody>
@@ -99,11 +101,24 @@ $(function(){initNavTree('b__elf__metadata_8h.html','',''); });
 <code>#include &lt;elf.h&gt;</code><br />
 <code>#include &lt;string.h&gt;</code><br />
 <code>#include &quot;../bx_elf_utils/bx_elf_utils.h&quot;</code><br />
+<code>#include &quot;udis86.h&quot;</code><br />
 </div>
 <p><a href="b__elf__metadata_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:abac21b24c9b06f5a7c3b125fc6d064d4" id="r_abac21b24c9b06f5a7c3b125fc6d064d4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abac21b24c9b06f5a7c3b125fc6d064d4">dump_elf32hdr</a> (Elf32_Ehdr *elf)</td></tr>
+<tr class="memdesc:abac21b24c9b06f5a7c3b125fc6d064d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dump the ELF header information for a 32-bit ELF file.  <br /></td></tr>
+<tr class="memitem:aea9ac97425b847247f2201076e3a5218" id="r_aea9ac97425b847247f2201076e3a5218"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aea9ac97425b847247f2201076e3a5218">dump_elf64hdr</a> (Elf64_Ehdr *elf)</td></tr>
+<tr class="memdesc:aea9ac97425b847247f2201076e3a5218"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dump the ELF header information for a 64-bit ELF file.  <br /></td></tr>
+<tr class="memitem:ab107f9ea83fd309ee156c11613c90387" id="r_ab107f9ea83fd309ee156c11613c90387"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab107f9ea83fd309ee156c11613c90387">dump_elf32_shdr</a> (Elf32_Ehdr *elf, Elf32_Shdr *shdrs, <a class="el" href="structbparser.html">bparser</a> *parser)</td></tr>
+<tr class="memdesc:ab107f9ea83fd309ee156c11613c90387"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dump the section header table of a 32-bit ELF file.  <br /></td></tr>
+<tr class="memitem:a85b70058d8ea0cfab31375ca5304500f" id="r_a85b70058d8ea0cfab31375ca5304500f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a85b70058d8ea0cfab31375ca5304500f">dump_elf64_shdr</a> (Elf64_Ehdr *elf, Elf64_Shdr *shdrs, <a class="el" href="structbparser.html">bparser</a> *parser)</td></tr>
+<tr class="memdesc:a85b70058d8ea0cfab31375ca5304500f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dump the section header table of a 64-bit ELF file.  <br /></td></tr>
+<tr class="memitem:a8c374b3a79a0f30c68d70cbe812a9b78" id="r_a8c374b3a79a0f30c68d70cbe812a9b78"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8c374b3a79a0f30c68d70cbe812a9b78">dump_elf32_phdr</a> (Elf32_Ehdr *elf, Elf32_Phdr *phdr, <a class="el" href="structbparser.html">bparser</a> *parser)</td></tr>
+<tr class="memdesc:a8c374b3a79a0f30c68d70cbe812a9b78"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dump the program header table of a 32-bit ELF file.  <br /></td></tr>
+<tr class="memitem:a7b408ec187779bcf22476ae7827ef245" id="r_a7b408ec187779bcf22476ae7827ef245"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7b408ec187779bcf22476ae7827ef245">dump_elf64_phdr</a> (Elf64_Ehdr *elf, Elf64_Phdr *phdr, <a class="el" href="structbparser.html">bparser</a> *parser)</td></tr>
+<tr class="memdesc:a7b408ec187779bcf22476ae7827ef245"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dump the program header table of a 64-bit ELF file.  <br /></td></tr>
 <tr class="memitem:a49a27835c4a42cd5c23112034bc91ce0" id="r_a49a27835c4a42cd5c23112034bc91ce0"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a49a27835c4a42cd5c23112034bc91ce0">print_meta_data</a> (<a class="el" href="structbparser.html">bparser</a> *parser, void *args)</td></tr>
 <tr class="memdesc:a49a27835c4a42cd5c23112034bc91ce0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Print high-level metadata of an ELF file and dispatch detailed dump functions.  <br /></td></tr>
 </table>
@@ -118,6 +133,286 @@ Supports both 32bit and 64bit binaries.</dd></dl>
 <dd>
 <a class="el" href="bparser_8h.html" title="Binary parser abstraction supporting memory and streaming files.">bparser.h</a> </dd></dl>
 </div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="a8c374b3a79a0f30c68d70cbe812a9b78" name="a8c374b3a79a0f30c68d70cbe812a9b78"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8c374b3a79a0f30c68d70cbe812a9b78">&#9670;&#160;</a></span>dump_elf32_phdr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void dump_elf32_phdr </td>
+          <td>(</td>
+          <td class="paramtype">Elf32_Ehdr *</td>          <td class="paramname"><span class="paramname"><em>elf</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Elf32_Phdr *</td>          <td class="paramname"><span class="paramname"><em>phdr</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structbparser.html">bparser</a> *</td>          <td class="paramname"><span class="paramname"><em>parser</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Dump the program header table of a 32-bit ELF file. </p>
+<p>This function iterates over the program headers of a 32-bit ELF file and prints metadata and raw contents for each segment. <br  />
+</p>
+<p>Printed metadata includes:</p><ul>
+<li>Program header type (human-readable and numeric)</li>
+<li>Flags (R/W/X)</li>
+<li>Offset</li>
+<li>Virtual and physical addresses</li>
+<li>File size, memory size, and alignment</li>
+</ul>
+<p>Special cases:</p><ul>
+<li>If the segment type is PT_INTERP, the interpreter path is printed.</li>
+<li>If the segment type is PT_DYNAMIC, it indicates the binary is dynamically linked.</li>
+</ul>
+<p>Raw segment bytes:</p><ul>
+<li>If a segment has file size &gt; 0, its raw bytes are read from the ELF file using <a class="el" href="bparser_8c.html#a0682ca10a47d85281aff4bc3348cdd14">bparser_read</a> and printed in hexadecimal format.</li>
+</ul>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">elf</td><td>Pointer to the ELF header (Elf32_Ehdr). </td></tr>
+    <tr><td class="paramname">phdr</td><td>Pointer to the program header table (array of Elf32_Phdr). </td></tr>
+    <tr><td class="paramname">parser</td><td>Pointer to a bparser structure that provides access to the file data.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>Output is color formatted and written to standard output. </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="b__elf__metadata_8c.html#a7b408ec187779bcf22476ae7827ef245" title="Dump the program header table of a 64-bit ELF file.">dump_elf64_phdr()</a> </dd></dl>
+
+</div>
+</div>
+<a id="ab107f9ea83fd309ee156c11613c90387" name="ab107f9ea83fd309ee156c11613c90387"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab107f9ea83fd309ee156c11613c90387">&#9670;&#160;</a></span>dump_elf32_shdr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void dump_elf32_shdr </td>
+          <td>(</td>
+          <td class="paramtype">Elf32_Ehdr *</td>          <td class="paramname"><span class="paramname"><em>elf</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Elf32_Shdr *</td>          <td class="paramname"><span class="paramname"><em>shdrs</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structbparser.html">bparser</a> *</td>          <td class="paramname"><span class="paramname"><em>parser</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Dump the section header table of a 32-bit ELF file. </p>
+<p>This function iterates over the section headers of a 32-bit ELF file and prints human-readable information for each section. <br  />
+</p>
+<p>Printed metadata includes:</p><ul>
+<li>Section index (ID)</li>
+<li>Section name (resolved from the section string table)</li>
+<li>Section type (as string and numeric)</li>
+<li>Flags (W/A/X)</li>
+<li>Virtual address, file offset, and section size</li>
+<li>Link, Info, Alignment, and Entry size</li>
+</ul>
+<p>Raw section bytes:</p><ul>
+<li>If a section has size &gt; 0, its contents are read from the ELF file using <a class="el" href="bparser_8c.html#a0682ca10a47d85281aff4bc3348cdd14">bparser_read</a> and printed in hexadecimal format.</li>
+</ul>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">elf</td><td>Pointer to the ELF header (Elf32_Ehdr). </td></tr>
+    <tr><td class="paramname">shdrs</td><td>Pointer to the section header table (array of Elf32_Shdr). </td></tr>
+    <tr><td class="paramname">parser</td><td>Pointer to a bparser structure that provides access to the file data.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>Output is color formatted and written to standard output. </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="b__elf__metadata_8c.html#a85b70058d8ea0cfab31375ca5304500f" title="Dump the section header table of a 64-bit ELF file.">dump_elf64_shdr()</a> </dd></dl>
+
+</div>
+</div>
+<a id="abac21b24c9b06f5a7c3b125fc6d064d4" name="abac21b24c9b06f5a7c3b125fc6d064d4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abac21b24c9b06f5a7c3b125fc6d064d4">&#9670;&#160;</a></span>dump_elf32hdr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void dump_elf32hdr </td>
+          <td>(</td>
+          <td class="paramtype">Elf32_Ehdr *</td>          <td class="paramname"><span class="paramname"><em>elf</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Dump the ELF header information for a 32-bit ELF file. </p>
+<p>This function prints human-readable information about the provided 32-bit ELF header, including:</p><ul>
+<li>The ELF class (32-bit)</li>
+<li>Entry point address</li>
+<li>Program header count and offset</li>
+<li>Section header count and offset</li>
+<li>Section header string table index</li>
+<li>File type and machine type (both as strings and raw values)</li>
+</ul>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">elf</td><td>Pointer to an Elf32_Ehdr structure representing the ELF header.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>The output is printed to standard output with color formatting. </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="b__elf__metadata_8c.html#aea9ac97425b847247f2201076e3a5218" title="Dump the ELF header information for a 64-bit ELF file.">dump_elf64hdr()</a> </dd></dl>
+
+</div>
+</div>
+<a id="a7b408ec187779bcf22476ae7827ef245" name="a7b408ec187779bcf22476ae7827ef245"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7b408ec187779bcf22476ae7827ef245">&#9670;&#160;</a></span>dump_elf64_phdr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void dump_elf64_phdr </td>
+          <td>(</td>
+          <td class="paramtype">Elf64_Ehdr *</td>          <td class="paramname"><span class="paramname"><em>elf</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Elf64_Phdr *</td>          <td class="paramname"><span class="paramname"><em>phdr</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structbparser.html">bparser</a> *</td>          <td class="paramname"><span class="paramname"><em>parser</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Dump the program header table of a 64-bit ELF file. </p>
+<p>This function iterates over the program headers of a 64-bit ELF file and prints metadata and raw contents for each segment. <br  />
+</p>
+<p>Printed metadata includes:</p><ul>
+<li>Program header type (human-readable and numeric)</li>
+<li>Flags (R/W/X)</li>
+<li>Offset</li>
+<li>Virtual and physical addresses</li>
+<li>File size, memory size, and alignment</li>
+</ul>
+<p>Special cases:</p><ul>
+<li>If the segment type is PT_INTERP, the interpreter path is printed.</li>
+<li>If the segment type is PT_DYNAMIC, it indicates the binary is dynamically linked.</li>
+</ul>
+<p>Raw segment bytes:</p><ul>
+<li>If a segment has file size &gt; 0, its raw bytes are read from the ELF file using <a class="el" href="bparser_8c.html#a0682ca10a47d85281aff4bc3348cdd14">bparser_read</a> and printed in hexadecimal format.</li>
+</ul>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">elf</td><td>Pointer to the ELF header (Elf64_Ehdr). </td></tr>
+    <tr><td class="paramname">phdr</td><td>Pointer to the program header table (array of Elf64_Phdr). </td></tr>
+    <tr><td class="paramname">parser</td><td>Pointer to a bparser structure that provides access to the file data.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>Output is color formatted and written to standard output. </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="b__elf__metadata_8c.html#a8c374b3a79a0f30c68d70cbe812a9b78" title="Dump the program header table of a 32-bit ELF file.">dump_elf32_phdr()</a> </dd></dl>
+
+</div>
+</div>
+<a id="a85b70058d8ea0cfab31375ca5304500f" name="a85b70058d8ea0cfab31375ca5304500f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a85b70058d8ea0cfab31375ca5304500f">&#9670;&#160;</a></span>dump_elf64_shdr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void dump_elf64_shdr </td>
+          <td>(</td>
+          <td class="paramtype">Elf64_Ehdr *</td>          <td class="paramname"><span class="paramname"><em>elf</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Elf64_Shdr *</td>          <td class="paramname"><span class="paramname"><em>shdrs</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structbparser.html">bparser</a> *</td>          <td class="paramname"><span class="paramname"><em>parser</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Dump the section header table of a 64-bit ELF file. </p>
+<p>This function iterates over the section headers of a 64-bit ELF file and prints human-readable information for each section. <br  />
+</p>
+<p>Printed metadata includes:</p><ul>
+<li>Section index (ID)</li>
+<li>Section name (resolved from the section string table)</li>
+<li>Section type (as string and numeric)</li>
+<li>Flags (W/A/X)</li>
+<li>Virtual address, file offset, and section size</li>
+<li>Link, Info, Alignment, and Entry size</li>
+</ul>
+<p>Raw section bytes:</p><ul>
+<li>If a section has size &gt; 0, its contents are read from the ELF file using <a class="el" href="bparser_8c.html#a0682ca10a47d85281aff4bc3348cdd14">bparser_read</a> and printed in hexadecimal format.</li>
+</ul>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">elf</td><td>Pointer to the ELF header (Elf64_Ehdr). </td></tr>
+    <tr><td class="paramname">shdrs</td><td>Pointer to the section header table (array of Elf64_Shdr). </td></tr>
+    <tr><td class="paramname">parser</td><td>Pointer to a bparser structure that provides access to the file data.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>Output is color formatted and written to standard output. </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="b__elf__metadata_8c.html#ab107f9ea83fd309ee156c11613c90387" title="Dump the section header table of a 32-bit ELF file.">dump_elf32_shdr()</a> </dd></dl>
+
+</div>
+</div>
+<a id="aea9ac97425b847247f2201076e3a5218" name="aea9ac97425b847247f2201076e3a5218"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aea9ac97425b847247f2201076e3a5218">&#9670;&#160;</a></span>dump_elf64hdr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void dump_elf64hdr </td>
+          <td>(</td>
+          <td class="paramtype">Elf64_Ehdr *</td>          <td class="paramname"><span class="paramname"><em>elf</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Dump the ELF header information for a 64-bit ELF file. </p>
+<p>This function prints human-readable information about the provided 64-bit ELF header, including:</p><ul>
+<li>The ELF class (64-bit)</li>
+<li>Entry point address</li>
+<li>Program header count and offset</li>
+<li>Section header count and offset</li>
+<li>Section header string table index</li>
+<li>File type and machine type (both as strings and raw values)</li>
+</ul>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">elf</td><td>Pointer to an Elf64_Ehdr structure representing the ELF header.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>The output is printed to standard output with color formatting. </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="b__elf__metadata_8c.html#abac21b24c9b06f5a7c3b125fc6d064d4" title="Dump the ELF header information for a 32-bit ELF file.">dump_elf32hdr()</a> </dd></dl>
+
+</div>
+</div>
 <a id="a49a27835c4a42cd5c23112034bc91ce0" name="a49a27835c4a42cd5c23112034bc91ce0"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a49a27835c4a42cd5c23112034bc91ce0">&#9670;&#160;</a></span>print_meta_data()</h2>
 

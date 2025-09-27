@@ -25,9 +25,11 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
+  <td id="projectlogo"><img alt="Logo" src="logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">Baseer<span id="projectnumber">&#160;0.1.0</span>
+   <div id="projectname">Baseer<span id="projectnumber">&#160;0.2.0</span>
    </div>
+   <div id="projectbrief">Baseer is an advanced binary analysis tool designed to provide deep insights into any file.</div>
   </td>
  </tr>
  </tbody>
@@ -95,6 +97,9 @@ $(function(){initNavTree('b__elf__metadata_8c.html','',''); });
 <p>Functions for parsing and printing ELF file metadata.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &quot;<a class="el" href="b__elf__metadata_8h_source.html">b_elf_metadata.h</a>&quot;</code><br />
+<code>#include &quot;../b_hashmap/b_hashmap.h&quot;</code><br />
+<code>#include &lt;elf.h&gt;</code><br />
+<code>#include &lt;string.h&gt;</code><br />
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
@@ -102,14 +107,14 @@ Functions</h2></td></tr>
 <tr class="memdesc:abac21b24c9b06f5a7c3b125fc6d064d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dump the ELF header information for a 32-bit ELF file.  <br /></td></tr>
 <tr class="memitem:aea9ac97425b847247f2201076e3a5218" id="r_aea9ac97425b847247f2201076e3a5218"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aea9ac97425b847247f2201076e3a5218">dump_elf64hdr</a> (Elf64_Ehdr *elf)</td></tr>
 <tr class="memdesc:aea9ac97425b847247f2201076e3a5218"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dump the ELF header information for a 64-bit ELF file.  <br /></td></tr>
-<tr class="memitem:a8c374b3a79a0f30c68d70cbe812a9b78" id="r_a8c374b3a79a0f30c68d70cbe812a9b78"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8c374b3a79a0f30c68d70cbe812a9b78">dump_elf32_phdr</a> (Elf32_Ehdr *elf, Elf32_Phdr *phdr, <a class="el" href="structbparser.html">bparser</a> *parser)</td></tr>
-<tr class="memdesc:a8c374b3a79a0f30c68d70cbe812a9b78"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dump the program header table of a 32-bit ELF file.  <br /></td></tr>
-<tr class="memitem:a7b408ec187779bcf22476ae7827ef245" id="r_a7b408ec187779bcf22476ae7827ef245"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7b408ec187779bcf22476ae7827ef245">dump_elf64_phdr</a> (Elf64_Ehdr *elf, Elf64_Phdr *phdr, <a class="el" href="structbparser.html">bparser</a> *parser)</td></tr>
-<tr class="memdesc:a7b408ec187779bcf22476ae7827ef245"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dump the program header table of a 64-bit ELF file.  <br /></td></tr>
 <tr class="memitem:ab107f9ea83fd309ee156c11613c90387" id="r_ab107f9ea83fd309ee156c11613c90387"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab107f9ea83fd309ee156c11613c90387">dump_elf32_shdr</a> (Elf32_Ehdr *elf, Elf32_Shdr *shdrs, <a class="el" href="structbparser.html">bparser</a> *parser)</td></tr>
 <tr class="memdesc:ab107f9ea83fd309ee156c11613c90387"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dump the section header table of a 32-bit ELF file.  <br /></td></tr>
 <tr class="memitem:a85b70058d8ea0cfab31375ca5304500f" id="r_a85b70058d8ea0cfab31375ca5304500f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a85b70058d8ea0cfab31375ca5304500f">dump_elf64_shdr</a> (Elf64_Ehdr *elf, Elf64_Shdr *shdrs, <a class="el" href="structbparser.html">bparser</a> *parser)</td></tr>
 <tr class="memdesc:a85b70058d8ea0cfab31375ca5304500f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dump the section header table of a 64-bit ELF file.  <br /></td></tr>
+<tr class="memitem:a8c374b3a79a0f30c68d70cbe812a9b78" id="r_a8c374b3a79a0f30c68d70cbe812a9b78"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8c374b3a79a0f30c68d70cbe812a9b78">dump_elf32_phdr</a> (Elf32_Ehdr *elf, Elf32_Phdr *phdr, <a class="el" href="structbparser.html">bparser</a> *parser)</td></tr>
+<tr class="memdesc:a8c374b3a79a0f30c68d70cbe812a9b78"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dump the program header table of a 32-bit ELF file.  <br /></td></tr>
+<tr class="memitem:a7b408ec187779bcf22476ae7827ef245" id="r_a7b408ec187779bcf22476ae7827ef245"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7b408ec187779bcf22476ae7827ef245">dump_elf64_phdr</a> (Elf64_Ehdr *elf, Elf64_Phdr *phdr, <a class="el" href="structbparser.html">bparser</a> *parser)</td></tr>
+<tr class="memdesc:a7b408ec187779bcf22476ae7827ef245"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dump the program header table of a 64-bit ELF file.  <br /></td></tr>
 <tr class="memitem:a49a27835c4a42cd5c23112034bc91ce0" id="r_a49a27835c4a42cd5c23112034bc91ce0"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a49a27835c4a42cd5c23112034bc91ce0">print_meta_data</a> (<a class="el" href="structbparser.html">bparser</a> *parser, void *args)</td></tr>
 <tr class="memdesc:a49a27835c4a42cd5c23112034bc91ce0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Print high-level metadata of an ELF file and dispatch detailed dump functions.  <br /></td></tr>
 </table>
@@ -124,11 +129,9 @@ Functions</h2></td></tr>
 <dl class="section note"><dt>Note</dt><dd>This file depends on:<ul>
 <li><a class="el" href="structbparser.html">bparser</a> for memory access</li>
 <li>ELF structures (Elf32_Ehdr, Elf32_Phdr, Elf32_Shdr, etc.)</li>
-<li>Helper functions like <a class="el" href="#abac21b24c9b06f5a7c3b125fc6d064d4">dump_elf32hdr()</a>, <a class="el" href="#aea9ac97425b847247f2201076e3a5218">dump_elf64hdr()</a>, <a class="el" href="#ab107f9ea83fd309ee156c11613c90387">dump_elf32_shdr()</a>, <a class="el" href="#a85b70058d8ea0cfab31375ca5304500f">dump_elf64_shdr()</a>, <a class="el" href="#a8c374b3a79a0f30c68d70cbe812a9b78">dump_elf32_phdr()</a>, <a class="el" href="#a7b408ec187779bcf22476ae7827ef245">dump_elf64_phdr()</a></li>
+<li>Helper functions like <a class="el" href="#abac21b24c9b06f5a7c3b125fc6d064d4">dump_elf32hdr()</a>, <a class="el" href="#aea9ac97425b847247f2201076e3a5218">dump_elf64hdr()</a>, <a class="el" href="#ab107f9ea83fd309ee156c11613c90387">dump_elf32_shdr()</a>, <a class="el" href="#a85b70058d8ea0cfab31375ca5304500f">dump_elf64_shdr()</a>, <a class="el" href="#a8c374b3a79a0f30c68d70cbe812a9b78">dump_elf32_phdr()</a>, <a class="el" href="#a7b408ec187779bcf22476ae7827ef245">dump_elf64_phdr()</a> </li>
 </ul>
 </dd></dl>
-<dl class="section author"><dt>Author</dt><dd>Thamer </dd></dl>
-<dl class="section date"><dt>Date</dt><dd>2025 </dd></dl>
 </div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
 <a id="a8c374b3a79a0f30c68d70cbe812a9b78" name="a8c374b3a79a0f30c68d70cbe812a9b78"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a8c374b3a79a0f30c68d70cbe812a9b78">&#9670;&#160;</a></span>dump_elf32_phdr()</h2>

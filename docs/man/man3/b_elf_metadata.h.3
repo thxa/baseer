@@ -1,4 +1,4 @@
-.TH "modules/b_elf_metadata/b_elf_metadata.h" 3 "Version 0.1.0" "Baseer" \" -*- nroff -*-
+.TH "modules/b_elf_metadata/b_elf_metadata.h" 3 "Version 0.2.0" "Baseer" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -17,10 +17,36 @@ modules/b_elf_metadata/b_elf_metadata.h \- ELF metadata extraction and printing 
 .br
 \fR#include '\&.\&./bx_elf_utils/bx_elf_utils\&.h'\fP
 .br
+\fR#include 'udis86\&.h'\fP
+.br
 
 .SS "Functions"
 
 .in +1c
+.ti -1c
+.RI "void \fBdump_elf32hdr\fP (Elf32_Ehdr *elf)"
+.br
+.RI "Dump the ELF header information for a 32-bit ELF file\&. "
+.ti -1c
+.RI "void \fBdump_elf64hdr\fP (Elf64_Ehdr *elf)"
+.br
+.RI "Dump the ELF header information for a 64-bit ELF file\&. "
+.ti -1c
+.RI "void \fBdump_elf32_shdr\fP (Elf32_Ehdr *elf, Elf32_Shdr *shdrs, \fBbparser\fP *parser)"
+.br
+.RI "Dump the section header table of a 32-bit ELF file\&. "
+.ti -1c
+.RI "void \fBdump_elf64_shdr\fP (Elf64_Ehdr *elf, Elf64_Shdr *shdrs, \fBbparser\fP *parser)"
+.br
+.RI "Dump the section header table of a 64-bit ELF file\&. "
+.ti -1c
+.RI "void \fBdump_elf32_phdr\fP (Elf32_Ehdr *elf, Elf32_Phdr *phdr, \fBbparser\fP *parser)"
+.br
+.RI "Dump the program header table of a 32-bit ELF file\&. "
+.ti -1c
+.RI "void \fBdump_elf64_phdr\fP (Elf64_Ehdr *elf, Elf64_Phdr *phdr, \fBbparser\fP *parser)"
+.br
+.RI "Dump the program header table of a 64-bit ELF file\&. "
 .ti -1c
 .RI "bool \fBprint_meta_data\fP (\fBbparser\fP *parser, void *args)"
 .br
@@ -55,6 +81,284 @@ Supports both 32bit and 64bit binaries\&.
 
 .SH "Function Documentation"
 .PP 
+.SS "void dump_elf32_phdr (Elf32_Ehdr * elf, Elf32_Phdr * phdr, \fBbparser\fP * parser)"
+
+.PP
+Dump the program header table of a 32-bit ELF file\&. This function iterates over the program headers of a 32-bit ELF file and prints metadata and raw contents for each segment\&. 
+.br
+
+.PP
+Printed metadata includes:
+.IP "\(bu" 2
+Program header type (human-readable and numeric)
+.IP "\(bu" 2
+Flags (R/W/X)
+.IP "\(bu" 2
+Offset
+.IP "\(bu" 2
+Virtual and physical addresses
+.IP "\(bu" 2
+File size, memory size, and alignment
+.PP
+
+.PP
+Special cases:
+.IP "\(bu" 2
+If the segment type is PT_INTERP, the interpreter path is printed\&.
+.IP "\(bu" 2
+If the segment type is PT_DYNAMIC, it indicates the binary is dynamically linked\&.
+.PP
+
+.PP
+Raw segment bytes:
+.IP "\(bu" 2
+If a segment has file size > 0, its raw bytes are read from the ELF file using \fBbparser_read\fP and printed in hexadecimal format\&.
+.PP
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIelf\fP Pointer to the ELF header (Elf32_Ehdr)\&. 
+.br
+\fIphdr\fP Pointer to the program header table (array of Elf32_Phdr)\&. 
+.br
+\fIparser\fP Pointer to a bparser structure that provides access to the file data\&.
+.RE
+.PP
+\fBNote\fP
+.RS 4
+Output is color formatted and written to standard output\&. 
+.RE
+.PP
+\fBSee also\fP
+.RS 4
+\fBdump_elf64_phdr()\fP 
+.RE
+.PP
+
+.SS "void dump_elf32_shdr (Elf32_Ehdr * elf, Elf32_Shdr * shdrs, \fBbparser\fP * parser)"
+
+.PP
+Dump the section header table of a 32-bit ELF file\&. This function iterates over the section headers of a 32-bit ELF file and prints human-readable information for each section\&. 
+.br
+
+.PP
+Printed metadata includes:
+.IP "\(bu" 2
+Section index (ID)
+.IP "\(bu" 2
+Section name (resolved from the section string table)
+.IP "\(bu" 2
+Section type (as string and numeric)
+.IP "\(bu" 2
+Flags (W/A/X)
+.IP "\(bu" 2
+Virtual address, file offset, and section size
+.IP "\(bu" 2
+Link, Info, Alignment, and Entry size
+.PP
+
+.PP
+Raw section bytes:
+.IP "\(bu" 2
+If a section has size > 0, its contents are read from the ELF file using \fBbparser_read\fP and printed in hexadecimal format\&.
+.PP
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIelf\fP Pointer to the ELF header (Elf32_Ehdr)\&. 
+.br
+\fIshdrs\fP Pointer to the section header table (array of Elf32_Shdr)\&. 
+.br
+\fIparser\fP Pointer to a bparser structure that provides access to the file data\&.
+.RE
+.PP
+\fBNote\fP
+.RS 4
+Output is color formatted and written to standard output\&. 
+.RE
+.PP
+\fBSee also\fP
+.RS 4
+\fBdump_elf64_shdr()\fP 
+.RE
+.PP
+
+.SS "void dump_elf32hdr (Elf32_Ehdr * elf)"
+
+.PP
+Dump the ELF header information for a 32-bit ELF file\&. This function prints human-readable information about the provided 32-bit ELF header, including:
+.IP "\(bu" 2
+The ELF class (32-bit)
+.IP "\(bu" 2
+Entry point address
+.IP "\(bu" 2
+Program header count and offset
+.IP "\(bu" 2
+Section header count and offset
+.IP "\(bu" 2
+Section header string table index
+.IP "\(bu" 2
+File type and machine type (both as strings and raw values)
+.PP
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIelf\fP Pointer to an Elf32_Ehdr structure representing the ELF header\&.
+.RE
+.PP
+\fBNote\fP
+.RS 4
+The output is printed to standard output with color formatting\&. 
+.RE
+.PP
+\fBSee also\fP
+.RS 4
+\fBdump_elf64hdr()\fP 
+.RE
+.PP
+
+.SS "void dump_elf64_phdr (Elf64_Ehdr * elf, Elf64_Phdr * phdr, \fBbparser\fP * parser)"
+
+.PP
+Dump the program header table of a 64-bit ELF file\&. This function iterates over the program headers of a 64-bit ELF file and prints metadata and raw contents for each segment\&. 
+.br
+
+.PP
+Printed metadata includes:
+.IP "\(bu" 2
+Program header type (human-readable and numeric)
+.IP "\(bu" 2
+Flags (R/W/X)
+.IP "\(bu" 2
+Offset
+.IP "\(bu" 2
+Virtual and physical addresses
+.IP "\(bu" 2
+File size, memory size, and alignment
+.PP
+
+.PP
+Special cases:
+.IP "\(bu" 2
+If the segment type is PT_INTERP, the interpreter path is printed\&.
+.IP "\(bu" 2
+If the segment type is PT_DYNAMIC, it indicates the binary is dynamically linked\&.
+.PP
+
+.PP
+Raw segment bytes:
+.IP "\(bu" 2
+If a segment has file size > 0, its raw bytes are read from the ELF file using \fBbparser_read\fP and printed in hexadecimal format\&.
+.PP
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIelf\fP Pointer to the ELF header (Elf64_Ehdr)\&. 
+.br
+\fIphdr\fP Pointer to the program header table (array of Elf64_Phdr)\&. 
+.br
+\fIparser\fP Pointer to a bparser structure that provides access to the file data\&.
+.RE
+.PP
+\fBNote\fP
+.RS 4
+Output is color formatted and written to standard output\&. 
+.RE
+.PP
+\fBSee also\fP
+.RS 4
+\fBdump_elf32_phdr()\fP 
+.RE
+.PP
+
+.SS "void dump_elf64_shdr (Elf64_Ehdr * elf, Elf64_Shdr * shdrs, \fBbparser\fP * parser)"
+
+.PP
+Dump the section header table of a 64-bit ELF file\&. This function iterates over the section headers of a 64-bit ELF file and prints human-readable information for each section\&. 
+.br
+
+.PP
+Printed metadata includes:
+.IP "\(bu" 2
+Section index (ID)
+.IP "\(bu" 2
+Section name (resolved from the section string table)
+.IP "\(bu" 2
+Section type (as string and numeric)
+.IP "\(bu" 2
+Flags (W/A/X)
+.IP "\(bu" 2
+Virtual address, file offset, and section size
+.IP "\(bu" 2
+Link, Info, Alignment, and Entry size
+.PP
+
+.PP
+Raw section bytes:
+.IP "\(bu" 2
+If a section has size > 0, its contents are read from the ELF file using \fBbparser_read\fP and printed in hexadecimal format\&.
+.PP
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIelf\fP Pointer to the ELF header (Elf64_Ehdr)\&. 
+.br
+\fIshdrs\fP Pointer to the section header table (array of Elf64_Shdr)\&. 
+.br
+\fIparser\fP Pointer to a bparser structure that provides access to the file data\&.
+.RE
+.PP
+\fBNote\fP
+.RS 4
+Output is color formatted and written to standard output\&. 
+.RE
+.PP
+\fBSee also\fP
+.RS 4
+\fBdump_elf32_shdr()\fP 
+.RE
+.PP
+
+.SS "void dump_elf64hdr (Elf64_Ehdr * elf)"
+
+.PP
+Dump the ELF header information for a 64-bit ELF file\&. This function prints human-readable information about the provided 64-bit ELF header, including:
+.IP "\(bu" 2
+The ELF class (64-bit)
+.IP "\(bu" 2
+Entry point address
+.IP "\(bu" 2
+Program header count and offset
+.IP "\(bu" 2
+Section header count and offset
+.IP "\(bu" 2
+Section header string table index
+.IP "\(bu" 2
+File type and machine type (both as strings and raw values)
+.PP
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIelf\fP Pointer to an Elf64_Ehdr structure representing the ELF header\&.
+.RE
+.PP
+\fBNote\fP
+.RS 4
+The output is printed to standard output with color formatting\&. 
+.RE
+.PP
+\fBSee also\fP
+.RS 4
+\fBdump_elf32hdr()\fP 
+.RE
+.PP
+
 .SS "bool print_meta_data (\fBbparser\fP * parser, void * args)"
 
 .PP

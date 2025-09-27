@@ -1,0 +1,122 @@
+.TH "modules/b_hashmap/b_hashmap.c" 3 "Version 0.2.0" "Baseer" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+modules/b_hashmap/b_hashmap.c \- Simple string-keyed hashmap implementation\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fR#include 'b_hashmap\&.h'\fP
+.br
+
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "unsigned int \fBhash\fP (const char *key)"
+.br
+.RI "Compute hash value of a string key\&. "
+.ti -1c
+.RI "\fBhashmap_t\fP * \fBcreate_map\fP (void)"
+.br
+.RI "Allocate and initialize a new hashmap\&. "
+.ti -1c
+.RI "void \fBinsert\fP (\fBhashmap_t\fP *map, const char *name, void *bht_node_p)"
+.br
+.RI "Insert a key-value pair into the hashmap\&. "
+.ti -1c
+.RI "void * \fBget\fP (\fBhashmap_t\fP *map, const char *name)"
+.br
+.RI "Retrieve a value from the hashmap by key\&. "
+.ti -1c
+.RI "void \fBfree_map\fP (\fBhashmap_t\fP *map)"
+.br
+.RI "Free all memory used by the hashmap\&. "
+.in -1c
+.SH "Detailed Description"
+.PP 
+Simple string-keyed hashmap implementation\&. 
+
+This file provides a basic hash table implementation that maps string keys to generic pointer values (\fRvoid*\fP)\&. It uses separate chaining (linked lists) for collision handling\&. 
+.SH "Function Documentation"
+.PP 
+.SS "\fBhashmap_t\fP * create_map (void )"
+
+.PP
+Allocate and initialize a new hashmap\&. Creates a hashmap with all buckets initialized to NULL\&.
+
+.PP
+\fBReturns\fP
+.RS 4
+hashmap_t* Pointer to newly allocated hashmap\&. 
+.RE
+.PP
+
+.SS "void free_map (\fBhashmap_t\fP * map)"
+
+.PP
+Free all memory used by the hashmap\&. Releases all keys, nodes, and the hashmap structure itself\&. The caller is responsible for freeing values stored inside if they were dynamically allocated\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fImap\fP Pointer to hashmap\&. 
+.RE
+.PP
+
+.SS "void * get (\fBhashmap_t\fP * map, const char * name)"
+
+.PP
+Retrieve a value from the hashmap by key\&. Performs a lookup in the hashmap and returns the pointer associated with the key, if found\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fImap\fP Pointer to hashmap\&. 
+.br
+\fIname\fP Null-terminated string key\&. 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+void* Pointer to stored value, or NULL if not found\&. 
+.RE
+.PP
+
+.SS "unsigned int hash (const char * key)"
+
+.PP
+Compute hash value of a string key\&. Uses the djb2 algorithm by Dan Bernstein to generate an unsigned integer hash for the given key\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIkey\fP Null-terminated string key\&. 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+unsigned int Hash value within the range [0, TABLE_SIZE)\&. 
+.RE
+.PP
+
+.SS "void insert (\fBhashmap_t\fP * map, const char * name, void * bht_node_p)"
+
+.PP
+Insert a key-value pair into the hashmap\&. The key is duplicated internally, so the caller does not need to maintain the lifetime of the original string\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fImap\fP Pointer to hashmap\&. 
+.br
+\fIname\fP Null-terminated string key\&. 
+.br
+\fIbht_node_p\fP Pointer to the value to store\&. 
+.RE
+.PP
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Baseer from the source code\&.

@@ -25,9 +25,11 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
+  <td id="projectlogo"><img alt="Logo" src="logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">Baseer<span id="projectnumber">&#160;0.1.0</span>
+   <div id="projectname">Baseer<span id="projectnumber">&#160;0.2.0</span>
    </div>
+   <div id="projectbrief">Baseer is an advanced binary analysis tool designed to provide deep insights into any file.</div>
   </td>
  </tr>
  </tbody>
@@ -91,16 +93,50 @@ $(function(){initNavTree('structCmd.html','','structCmd-members'); });
   <div class="headertitle"><div class="title">Cmd Struct Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Represents a parsed user command.  
+ <a href="#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="debugger_8h_source.html">debugger.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:ad5a870a255e4c3205eb7422188ee2efc" id="r_ad5a870a255e4c3205eb7422188ee2efc"><td class="memItemLeft" align="right" valign="top"><a id="ad5a870a255e4c3205eb7422188ee2efc" name="ad5a870a255e4c3205eb7422188ee2efc"></a>
-char *&#160;</td><td class="memItemRight" valign="bottom"><b>op</b></td></tr>
-<tr class="memitem:ad207e0e1d7b8168ba5ec44fc61aa1a02" id="r_ad207e0e1d7b8168ba5ec44fc61aa1a02"><td class="memItemLeft" align="right" valign="top"><a id="ad207e0e1d7b8168ba5ec44fc61aa1a02" name="ad207e0e1d7b8168ba5ec44fc61aa1a02"></a>
-uint64_t&#160;</td><td class="memItemRight" valign="bottom"><b>addr</b></td></tr>
-<tr class="memitem:aea7d67bc01099bcaf98fb42143bad003" id="r_aea7d67bc01099bcaf98fb42143bad003"><td class="memItemLeft" align="right" valign="top"><a id="aea7d67bc01099bcaf98fb42143bad003" name="aea7d67bc01099bcaf98fb42143bad003"></a>
-uint64_t&#160;</td><td class="memItemRight" valign="bottom"><b>extra</b></td></tr>
+<tr class="memitem:ad5a870a255e4c3205eb7422188ee2efc" id="r_ad5a870a255e4c3205eb7422188ee2efc"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad5a870a255e4c3205eb7422188ee2efc">op</a></td></tr>
+<tr class="memitem:ad207e0e1d7b8168ba5ec44fc61aa1a02" id="r_ad207e0e1d7b8168ba5ec44fc61aa1a02"><td class="memItemLeft" align="right" valign="top">uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad207e0e1d7b8168ba5ec44fc61aa1a02">addr</a></td></tr>
 </table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Represents a parsed user command. </p>
+</div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
+<a id="ad207e0e1d7b8168ba5ec44fc61aa1a02" name="ad207e0e1d7b8168ba5ec44fc61aa1a02"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad207e0e1d7b8168ba5ec44fc61aa1a02">&#9670;&#160;</a></span>addr</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint64_t Cmd::addr</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Optional command address argument </p>
+
+</div>
+</div>
+<a id="ad5a870a255e4c3205eb7422188ee2efc" name="ad5a870a255e4c3205eb7422188ee2efc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad5a870a255e4c3205eb7422188ee2efc">&#9670;&#160;</a></span>op</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char* Cmd::op</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Command operation string </p>
+
+</div>
+</div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
 <li>modules/b_debugger/<a class="el" href="debugger_8h_source.html">debugger.h</a></li>
 </ul>

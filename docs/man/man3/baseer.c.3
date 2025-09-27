@@ -1,4 +1,4 @@
-.TH "baseer.c" 3 "Version 0.1.0" "Baseer" \" -*- nroff -*-
+.TH "baseer.c" 3 "Version 0.2.0" "Baseer" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -14,15 +14,11 @@ baseer.c \- Core file operations for Baseer\&.
 
 .in +1c
 .ti -1c
-.RI "\fBbaseer_target_t\fP * \fBbaseer_open_memory\fP (char *file_path)"
+.RI "\fBbaseer_target_t\fP * \fBbaseer_open\fP (char *file_path, \fBbaseer_mode_t\fP mode)"
 .br
-.RI "Open a file fully loaded into memory\&. "
+.RI "Open a file in specified mode (memory, streaming, or both) "
 .ti -1c
-.RI "\fBbaseer_target_t\fP * \fBbaseer_open_file\fP (char *file_path)"
-.br
-.RI "Open a file in streaming mode (FILE*) without full memory load\&. "
-.ti -1c
-.RI "void \fBbaseer_close\fP (\fBbaseer_target_t\fP *target, int mode)"
+.RI "void \fBbaseer_close\fP (\fBbaseer_target_t\fP *target)"
 .br
 .RI "Close a file target and free associated resources\&. "
 .ti -1c
@@ -41,7 +37,7 @@ Core file operations for Baseer\&.
 Supports memory and streaming modes, execution of analysis tools, 
 .SH "Function Documentation"
 .PP 
-.SS "void baseer_close (\fBbaseer_target_t\fP * target, int mode)"
+.SS "void baseer_close (\fBbaseer_target_t\fP * target)"
 
 .PP
 Close a file target and free associated resources\&. 
@@ -72,30 +68,16 @@ true on success, false on failure
 .RE
 .PP
 
-.SS "\fBbaseer_target_t\fP * baseer_open_file (char * file_path)"
+.SS "\fBbaseer_target_t\fP * baseer_open (char * file_path, \fBbaseer_mode_t\fP mode)"
 
 .PP
-Open a file in streaming mode (FILE*) without full memory load\&. 
+Open a file in specified mode (memory, streaming, or both) 
 .PP
 \fBParameters\fP
 .RS 4
 \fIfile_path\fP Path to the file 
-.RE
-.PP
-\fBReturns\fP
-.RS 4
-Pointer to \fBbaseer_target_t\fP on success, NULL on failure 
-.RE
-.PP
-
-.SS "\fBbaseer_target_t\fP * baseer_open_memory (char * file_path)"
-
-.PP
-Open a file fully loaded into memory\&. 
-.PP
-\fBParameters\fP
-.RS 4
-\fIfile_path\fP Path to the file 
+.br
+\fImode\fP Access mode (MEMORY, STREAM, BOTH) 
 .RE
 .PP
 \fBReturns\fP

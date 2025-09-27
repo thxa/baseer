@@ -1,0 +1,1053 @@
+.TH "modules/bx_elf_utils/bx_elf_utils.c" 3 "Version 0.2.0" "Baseer" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+modules/bx_elf_utils/bx_elf_utils.c \- Implementation of ELF parsing and display utilities\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fR#include 'bx_elf_utils\&.h'\fP
+.br
+
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "void \fBprint_section_header_legend\fP (void)"
+.br
+.RI "Print legends for ELF section header types and flags with color highlighting\&. "
+.ti -1c
+.RI "void \fBprint_program_header_legend\fP (void)"
+.br
+.RI "Print legends for ELF program header types and flags with color highlighting\&. "
+.ti -1c
+.RI "const char * \fBelf_machine_to_str\fP (unsigned int machine)"
+.br
+.RI "Convert ELF e_machine value to human-readable string\&. "
+.ti -1c
+.RI "const char * \fBsh_type_to_str\fP (unsigned int sh_type)"
+.br
+.RI "Converts an ELF section header type to a human-readable string with color\&. "
+.ti -1c
+.RI "const char * \fBelf_type_to_str\fP (unsigned int type)"
+.br
+.RI "Converts an ELF file type to a human-readable string\&. "
+.ti -1c
+.RI "const char * \fBtype_p_to_str\fP (unsigned int p_type)"
+.br
+.RI "Converts a program header type (p_type) to a human-readable string with color\&. "
+.ti -1c
+.RI "void \fBdisplay_byte\fP (const unsigned char *byte)"
+.br
+.RI "Display a single byte in hexadecimal with color coding\&. "
+.ti -1c
+.RI "void \fBdisplay_byte_char\fP (const unsigned char *byte)"
+.br
+.RI "Display a single byte as a printable character with color coding\&. "
+.ti -1c
+.RI "int \fBis_in_list\fP (const char *word, const char *list[])"
+.br
+.RI "Check if a word exists in a null-terminated string list\&. "
+.ti -1c
+.RI "int \fBis_number\fP (const char *word)"
+.br
+.RI "Check if a string represents a numeric value\&. "
+.ti -1c
+.RI "const char * \fBget_color\fP (const char *word)"
+.br
+.RI "Get the ANSI color code for a given assembly token\&. "
+.ti -1c
+.RI "void \fBprint_highlight_asm\fP (const char *line)"
+.br
+.RI "Print an assembly instruction line with syntax highlighting\&. "
+.ti -1c
+.RI "void \fBformat_sh_flags\fP (uint64_t sh_flags, char *buf, size_t size)"
+.br
+.RI "Format ELF section header flags into a colored string\&. "
+.ti -1c
+.RI "void \fBprint_symbols_32bit\fP (\fBbparser\fP *parser, Elf32_Ehdr *elf, Elf32_Shdr *shdrs, Elf32_Shdr *symtab, Elf32_Shdr *strtab)"
+.br
+.RI "Print all symbols from a 32-bit ELF file (with colors)\&. "
+.ti -1c
+.RI "void \fBprint_symbols_64bit\fP (\fBbparser\fP *parser, Elf64_Ehdr *elf, Elf64_Shdr *shdrs, Elf64_Shdr *symtab, Elf64_Shdr *strtab)"
+.br
+.RI "Print all symbols from a 64-bit ELF file (with colors)\&. "
+.ti -1c
+.RI "void \fBprint_symbols_with_disasm_32bit\fP (\fBbparser\fP *parser, Elf32_Ehdr *elf, Elf32_Shdr *shdrs, Elf32_Shdr *symtab, Elf32_Shdr *strtab)"
+.br
+.RI "Print ELF32 symbols along with disassembly for functions\&. "
+.ti -1c
+.RI "void \fBprint_symbols_with_disasm_64bit\fP (\fBbparser\fP *parser, Elf64_Ehdr *elf, Elf64_Shdr *shdrs, Elf64_Shdr *symtab, Elf64_Shdr *strtab)"
+.br
+.RI "Print ELF64 symbols along with disassembly for functions\&. "
+.ti -1c
+.RI "void \fBprint_hex_header\fP (unsigned long long offset)"
+.br
+.RI "Print the hex dump header row\&. "
+.ti -1c
+.RI "void \fBprint_section_header_metadata_32bit\fP (unsigned int id, const char *name, const char *type_str, const char *flags, Elf32_Shdr *shdrs)"
+.br
+.RI "Print metadata of a 32-bit ELF section header\&. "
+.ti -1c
+.RI "void \fBprint_section_header_metadata_64bit\fP (unsigned int id, const char *name, const char *type_str, const char *flags, Elf64_Shdr *shdrs)"
+.br
+.RI "Print metadata of a 64-bit ELF section header\&. "
+.ti -1c
+.RI "void \fBprint_program_header_metadata_32bit\fP (unsigned int id, const char *type_str, const char *flags, Elf32_Phdr *phdr)"
+.br
+.RI "Print metadata of a 32-bit ELF program header (segment)\&. "
+.ti -1c
+.RI "void \fBprint_program_header_metadata_64bit\fP (unsigned int id, const char *type_str, const char *flags, Elf64_Phdr *phdr)"
+.br
+.RI "Print metadata of a 64-bit ELF program header (segment)\&. "
+.ti -1c
+.RI "void \fBprint_body_bytes\fP (unsigned char *ptr, size_t size, unsigned long long offset, int disasm, unsigned char bit_type)"
+.br
+.RI "Print a block of bytes in hex and ASCII format, optionally disassembling executable instructions\&. "
+.ti -1c
+.RI "void \fBprint_disasm\fP (unsigned char *ptr, size_t size, unsigned long long offset, unsigned char bit_type)"
+.br
+.RI "Disassemble a block of machine code and print the assembly with highlighting\&. "
+.ti -1c
+.RI "void \fBformat_p_flags\fP (uint32_t p_flags, char *buf, size_t size)"
+.br
+.RI "Format ELF program header flags into a colored string\&. "
+.in -1c
+.SH "Detailed Description"
+.PP 
+Implementation of ELF parsing and display utilities\&. 
+
+This file provides functions for:
+.IP "\(bu" 2
+Converting ELF machine, file, section, and program header types to strings
+.IP "\(bu" 2
+Formatting ELF program header flags for display
+.IP "\(bu" 2
+Printing metadata for ELF section headers and program headers (32-bit and 64-bit)
+.IP "\(bu" 2
+Displaying section or segment bytes in hex and ASCII
+.IP "\(bu" 2
+Disassembling executable sections using the UDis86 library
+.IP "\(bu" 2
+Printing legends for ELF section and program header types and flags
+.PP
+
+.PP
+It supports both 32-bit and 64-bit ELF binaries and uses ANSI color codes to enhance terminal output readability\&. 
+.SH "Function Documentation"
+.PP 
+.SS "void display_byte (const unsigned char * byte)"
+
+.PP
+Display a single byte in hexadecimal with color coding\&. This function prints the value of a byte in hex format (two digits) and applies a color depending on its meaning:
+.IP "\(bu" 2
+Default (COLOR_YELLOW) for active instructions\&.
+.IP "\(bu" 2
+COLOR_RED for NOP (0x90), INT3 (0xCC), or filler bytes (0xFF)\&.
+.IP "\(bu" 2
+COLOR_GRAY for padding or null bytes (0x00)\&.
+.PP
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIbyte\fP Pointer to the byte to display\&.
+.RE
+.PP
+\fBNote\fP
+.RS 4
+The color codes are ANSI escape sequences\&. The color is reset after printing each byte using COLOR_RESET\&. 
+.RE
+.PP
+
+.SS "void display_byte_char (const unsigned char * byte)"
+
+.PP
+Display a single byte as a printable character with color coding\&. This function prints the ASCII representation of a byte\&. Non-printable bytes are shown as a '\&.' character\&. The output is color-coded based on the byte value:
+.IP "\(bu" 2
+0x90, 0xCC, 0xFF → COLOR_RED (low / unused bytes)
+.IP "\(bu" 2
+0x00 → COLOR_GRAY (padding or null bytes)
+.IP "\(bu" 2
+All other bytes → COLOR_YELLOW (default / active instruction)
+.PP
+
+.PP
+Printable ASCII characters (32-126) are displayed as-is, while non-printable bytes are represented with '\&.'\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIbyte\fP Pointer to the byte to display\&. 
+.RE
+.PP
+
+.SS "const char * elf_machine_to_str (unsigned int machine)"
+
+.PP
+Convert ELF e_machine value to human-readable string\&. This function takes an ELF machine type (e_machine) from the ELF header and returns a descriptive string representing the target architecture\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fImachine\fP The e_machine field from the ELF header\&. 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+const char* Human-readable string describing the architecture\&.
+.RE
+.PP
+\fBNote\fP
+.RS 4
+Returns "Unknown/Unsupported machine" for unrecognized values\&.
+.RE
+.PP
+Example: 
+.PP
+.nf
+const char* arch = elf_machine_to_str(EM_X86_64);
+printf("Architecture: %s\\n", arch); // Output: Architecture: AMD x86\-64
+
+.fi
+.PP
+ 
+.SS "const char * elf_type_to_str (unsigned int type)"
+
+.PP
+Converts an ELF file type to a human-readable string\&. This function maps ELF file type constants (ET_*) to descriptive strings\&. Examples include relocatable files, executables, shared objects, and core files\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fItype\fP The ELF file type (e\&.g\&., ET_REL, ET_EXEC, ET_DYN, etc\&.)\&. 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+const char* A pointer to a string describing the ELF file type\&.
+.RE
+.PP
+\fBNote\fP
+.RS 4
+The returned string points to static memory and must not be freed\&. 
+
+.PP
+Supports standard ELF types, OS-specific, and processor-specific ranges\&. 
+.RE
+.PP
+
+.SS "void format_p_flags (uint32_t p_flags, char * buf, size_t size)"
+
+.PP
+Format ELF program header flags into a colored string\&. This function converts the \fRp_flags\fP field of an ELF program header into a human-readable string with color highlighting for readability:
+.IP "\(bu" 2
+Readable (R) → green
+.IP "\(bu" 2
+Writable (W) → red
+.IP "\(bu" 2
+Executable (X) → yellow
+.PP
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIp_flags\fP The flags from the ELF program header (p_flags field of Elf32_Phdr or Elf64_Phdr)\&. 
+.br
+\fIbuf\fP Output buffer to store the formatted string\&. Must be preallocated\&. 
+.br
+\fIsize\fP Size of the output buffer\&.
+.RE
+.PP
+\fBNote\fP
+.RS 4
+Uses ANSI color codes: COLOR_GREEN, COLOR_RED, COLOR_YELLOW, COLOR_CYAN, COLOR_RESET\&. 
+
+.PP
+Adds 5 spaces after the flags for alignment\&.
+.RE
+.PP
+Example usage: 
+.PP
+.nf
+char flags_buf[32];
+format_p_flags(phdr[i]\&.p_flags, flags_buf, sizeof(flags_buf));
+printf("|\-\-\-Flags: %s\\n", flags_buf);
+
+.fi
+.PP
+ 
+.SS "void format_sh_flags (uint64_t sh_flags, char * buf, size_t size)"
+
+.PP
+Format ELF section header flags into a colored string\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIsh_flags\fP Section header flags (bitmask)\&. 
+.br
+\fIbuf\fP Buffer to write formatted flags into\&. 
+.br
+\fIsize\fP Size of the buffer\&. 
+.RE
+.PP
+
+.SS "const char * get_color (const char * word)"
+
+.PP
+Get the ANSI color code for a given assembly token\&. This function determines the color that should be used to print a single word/token from an assembly instruction or line\&. It checks the token against several categories such as numbers, registers, opcodes, instruction types, and invalid/unknown tokens\&.
+
+.PP
+The color codes are defined by macros like COLOR_RED, COLOR_GREEN, etc\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIword\fP A null-terminated string representing the token to check\&. 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+A string containing the ANSI color code to use for this token\&. Returns COLOR_RESET if the token does not match any known category\&.
+.RE
+.PP
+\fBNote\fP
+.RS 4
+The helper functions used include:
+.IP "\(bu" 2
+\fBis_number()\fP : returns true if the token is a numeric value\&.
+.IP "\(bu" 2
+\fBis_in_list()\fP : checks if the token exists in a given list of strings\&.
+.IP "\(bu" 2
+Token lists used:
+.IP "  \(bu" 4
+data_mov : data movement instructions (mov, lea, etc\&.)
+.IP "  \(bu" 4
+arithmetic : add, sub, mul, etc\&.
+.IP "  \(bu" 4
+logic_ops : and, or, xor, etc\&.
+.IP "  \(bu" 4
+jumps : jmp, je, jne, call, ret, etc\&.
+.IP "  \(bu" 4
+string_ops : rep movsb, stosb, etc\&.
+.IP "  \(bu" 4
+system_ops : syscall, int, etc\&.
+.IP "  \(bu" 4
+asm_registers : all CPU registers (rax, rbx, r8d, al, etc\&.)
+.IP "  \(bu" 4
+asm_types : db, dw, qword ptr, o16, etc\&.
+.IP "  \(bu" 4
+invalid : invalid/unknown tokens 
+.PP
+
+.PP
+.RE
+.PP
+
+.SS "int is_in_list (const char * word, const char * list[])"
+
+.PP
+Check if a word exists in a null-terminated string list\&. This function searches for an exact match of the given word in the provided list of strings\&. The list must be null-terminated\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIword\fP The null-terminated string to search for\&. 
+.br
+\fIlist\fP A null-terminated array of strings\&. 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+Returns 1 if the word is found in the list, 0 otherwise\&.
+.RE
+.PP
+\fBNote\fP
+.RS 4
+Comparison is case-sensitive and uses strcmp()\&. Typically used to check if a token belongs to categories like registers, opcodes, instruction types, etc\&. 
+.RE
+.PP
+
+.SS "int is_number (const char * word)"
+
+.PP
+Check if a string represents a numeric value\&. This function determines whether the given string \fRword\fP is a number\&. It supports:
+.IP "\(bu" 2
+Hexadecimal numbers starting with "0x" or "0X"
+.IP "\(bu" 2
+Decimal numbers (only digits)
+.PP
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIword\fP A null-terminated string to check\&. 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+Returns 1 if the string is a valid number (hex or decimal), 0 otherwise\&.
+.RE
+.PP
+\fBNote\fP
+.RS 4
+Hexadecimal detection only checks the "0x" prefix; it does not validate that the remaining characters are valid hex digits\&. Decimal numbers are checked using isdigit()\&. 
+.RE
+.PP
+
+.SS "void print_body_bytes (unsigned char * ptr, size_t size, unsigned long long offset, int disasm, unsigned char bit_type)"
+
+.PP
+Print a block of bytes in hex and ASCII format, optionally disassembling executable instructions\&. This function prints the content of a memory block in a traditional hex dump format, showing the offset, hexadecimal bytes, and ASCII representation\&. If the block contains executable instructions (SHF_EXECINSTR flag is set), it also disassembles the instructions using the Udis86 library and highlights the assembly\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIptr\fP Pointer to the memory block to print\&. 
+.br
+\fIsize\fP Number of bytes to print from the memory block\&. 
+.br
+\fIoffset\fP Starting offset to display in the hex dump\&. 
+.br
+\fIdisasm\fP If non-zero and contains SHF_EXECINSTR, the function disassembles the bytes\&. 
+.br
+\fIbit_type\fP ELF class: ELFCLASS32 for 32-bit, ELFCLASS64 for 64-bit\&.
+.RE
+.PP
+\fBNote\fP
+.RS 4
+Uses ANSI color codes for highlighting offsets, hex bytes, and disassembly\&. Assumes the following helper functions exist:
+.IP "\(bu" 2
+print_hex_header(offset)
+.IP "\(bu" 2
+display_byte(unsigned char <em>ptr)
+.IP "\(bu" 2
+display_byte_char(unsigned char *ptr)
+.IP "\(bu" 2
+print_highlight_asm(const char
+.PP
+line)
+
+.PP
+BLOCK_LENGTH macro defines how many bytes per line (commonly 16)\&.
+.RE
+.PP
+Example output: 
+.PP
+.nf
+| 
+|    \-\-Offset\-\-   0 1  2 3  4 5  6 7  8 9  A B  C D  E F    0123456789ABCDEF
+|\-\-\-\-0x00001000:  4865 6C6C 6F20 576F 726C 6421 0000 0000  |Hello World!\&.\&.\&.\&.|
+|\-\-\-\-0x00001010:  \&.\&.\&. (next 16 bytes)
+
+Disassembly (if executable):
+|\-\-\-\-0x00001000:  mov eax, 1
+|\-\-\-\-0x00001005:  ret
+
+.fi
+.PP
+ 
+.SS "void print_disasm (unsigned char * ptr, size_t size, unsigned long long offset, unsigned char bit_type)"
+
+.PP
+Disassemble a block of machine code and print the assembly with highlighting\&. This function uses the Udis86 library to disassemble a memory block and prints each instruction in Intel syntax\&. The output includes offsets and color highlighting for opcodes, registers, and addresses\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIptr\fP Pointer to the memory block containing machine code\&. 
+.br
+\fIsize\fP Number of bytes to disassemble\&. 
+.br
+\fIoffset\fP Starting address to display in the disassembly output\&. 
+.br
+\fIbit_type\fP ELF class: ELFCLASS32 for 32-bit instructions, ELFCLASS64 for 64-bit instructions\&.
+.RE
+.PP
+\fBNote\fP
+.RS 4
+Uses the helper function \fR\fBprint_highlight_asm()\fP\fP to colorize the instructions\&. 
+
+.PP
+ANSI color codes (COLOR_YELLOW, COLOR_RESET) are used for highlighting\&.
+.RE
+.PP
+Example output: 
+.PP
+.nf
+|\-\-\-\-0x00001000:  mov eax, 1
+|\-\-\-\-0x00001005:  add ebx, eax
+|\-\-\-\-0x00001007:  ret
+
+.fi
+.PP
+ 
+.SS "void print_hex_header (unsigned long long offset)"
+
+.PP
+Print the hex dump header row\&. This function prints the header line used in a hex dump, showing both the hexadecimal column labels (00–0F) and the ASCII column labels\&. It also highlights the header with green color using ANSI escape codes\&.
+
+.PP
+Example output (simplified): 
+.PP
+.nf
+|
+|    \-\-Offset\-\-   0 1 2 3 4 5 6 7 8 9 A B C D E F    0123456789ABCDEF
+
+.fi
+.PP
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIoffset\fP Starting offset for the hex dump (not currently used in the header itself, but included for consistency)\&.
+.RE
+.PP
+\fBNote\fP
+.RS 4
+The function assumes ANSI color macros like COLOR_GREEN and COLOR_RESET are defined\&. 
+.RE
+.PP
+
+.SS "void print_highlight_asm (const char * line)"
+
+.PP
+Print an assembly instruction line with syntax highlighting\&. This function scans through a single line of assembly code and applies syntax highlighting (using ANSI color codes) to recognized tokens such as opcodes, registers, numbers, etc\&. Highlighting is determined by the helper function \fBget_color()\fP\&.
+
+.PP
+Tokens are split based on whitespace and punctuation characters, but punctuation itself (commas, brackets, colons, etc\&.) is preserved and printed without coloring\&.
+
+.PP
+Example: 
+.PP
+.nf
+Input : "mov rax, [rbx+0x10]"
+Output: mov (red) rax (cyan) , [ rbx (cyan) + 0x10 (yellow) ]
+
+.fi
+.PP
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIline\fP A null-terminated string containing the assembly instruction line to highlight\&. If NULL, the function returns immediately\&.
+.RE
+.PP
+\fBNote\fP
+.RS 4
+Requires that COLOR_* macros and \fBget_color()\fP are defined\&. The word buffer is currently fixed at 64 bytes\&. 
+.RE
+.PP
+
+.SS "void print_program_header_legend (void )"
+
+.PP
+Print legends for ELF program header types and flags with color highlighting\&. This function prints two tables to the console:
+.IP "1." 4
+Program Header Types Legend: Describes common \fRp_type\fP values with colors\&.
+.IP "2." 4
+Program Header Flags Legend: Describes common \fRp_flags\fP values with colors\&.
+.PP
+
+.PP
+Each entry is highlighted using ANSI color codes for better readability\&.
+
+.PP
+\fBNote\fP
+.RS 4
+Uses the \fR\fBlegend_entry\fP\fP struct: 
+.PP
+.nf
+typedef struct {
+    const char *name;   // Short name or flag
+    const char *desc;   // Description of the type or flag
+    const char *color;  // ANSI color code
+} legend_entry;
+
+.fi
+.PP
+.RE
+.PP
+Example output (truncated): 
+.PP
+.nf
+=== Program Header Types Legend ===
++\-\-\-\-\-\-\-\-\-\-\-\-+\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-+
+| Type       | Description                              |
++\-\-\-\-\-\-\-\-\-\-\-\-+\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-+
+| NULL       | PT_NULL: Unused entry                     |
+| LOAD       | PT_LOAD: Loadable segment                 |
+\&.\&.\&.
+=== Program Header Flags Legend ===
++\-\-\-\-\-+\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-+
+| Flag| Description                       |
++\-\-\-\-\-+\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-+
+| R   | PF_R: Readable                     |
+| W   | PF_W: Writable                     |
+| X   | PF_X: Executable                   |
+\&.\&.\&.
+
+.fi
+.PP
+
+.PP
+\fBNote\fP
+.RS 4
+Uses ANSI color codes (COLOR_RED, COLOR_GREEN, COLOR_YELLOW, COLOR_CYAN, COLOR_MAGENTA, COLOR_WHITE, COLOR_RESET)\&. 
+.RE
+.PP
+
+.SS "void print_program_header_metadata_32bit (unsigned int id, const char * type_str, const char * flags, Elf32_Phdr * phdr)"
+
+.PP
+Print metadata of a 32-bit ELF program header (segment)\&. This function prints detailed information about a single ELF32 program segment, including type, flags, offset, virtual/physical addresses, file/memory size, and alignment\&. It uses ANSI color codes for visual distinction\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIid\fP The index of the program header in the program header table\&. 
+.br
+\fItype_str\fP A string representing the segment type (e\&.g\&., "PT_LOAD")\&. 
+.br
+\fIflags\fP A string representing the segment flags (e\&.g\&., "R E" for readable + executable)\&. 
+.br
+\fIphdr\fP Pointer to the array of ELF32 program headers (Elf32_Phdr[])\&.
+.RE
+.PP
+\fBNote\fP
+.RS 4
+Assumes that the macros for ANSI colors (COLOR_CYAN, COLOR_BG_WHITE, COLOR_BCYAN, COLOR_RESET) and META_LABEL_WIDTH are defined\&.
+.RE
+.PP
+Example output: 
+.PP
+.nf
+|\-\-Program Segment [0]:
+|\-\-\-Type:       PT_LOAD
+|\-\-\-Flags:      R E
+|\-\-\-Offset:     0x00001000
+|\-\-\-VirtAddr:   0x08048000
+|\-\-\-PhysAddr:   0x08048000
+|\-\-\-FileSz:     0x00002000
+|\-\-\-MemSz:      0x00002000
+|\-\-\-Align:      0x1000
+
+.fi
+.PP
+ 
+.SS "void print_program_header_metadata_64bit (unsigned int id, const char * type_str, const char * flags, Elf64_Phdr * phdr)"
+
+.PP
+Print metadata of a 64-bit ELF program header (segment)\&. This function prints detailed information about a single ELF64 program segment, including type, flags, offset, virtual/physical addresses, file/memory size, and alignment\&. It uses ANSI color codes for visual distinction\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIid\fP The index of the program header in the program header table\&. 
+.br
+\fItype_str\fP A string representing the segment type (e\&.g\&., "PT_LOAD")\&. 
+.br
+\fIflags\fP A string representing the segment flags (e\&.g\&., "R E" for readable + executable)\&. 
+.br
+\fIphdr\fP Pointer to the array of ELF64 program headers (Elf64_Phdr[])\&.
+.RE
+.PP
+\fBNote\fP
+.RS 4
+Assumes that the macros for ANSI colors (COLOR_CYAN, COLOR_BG_WHITE, COLOR_BCYAN, COLOR_RESET) and META_LABEL_WIDTH are defined\&.
+.RE
+.PP
+Example output: 
+.PP
+.nf
+|\-\-Program Segment [0]:
+|\-\-\-Type:       PT_LOAD
+|\-\-\-Flags:      R E
+|\-\-\-Offset:     0x00001000
+|\-\-\-VirtAddr:   0x00401000
+|\-\-\-PhysAddr:   0x00401000
+|\-\-\-FileSz:     0x00002000
+|\-\-\-MemSz:      0x00002000
+|\-\-\-Align:      0x1000
+
+.fi
+.PP
+ 
+.SS "void print_section_header_legend (void )"
+
+.PP
+Print legends for ELF section header types and flags with color highlighting\&. This function prints two tables to the console:
+.IP "1." 4
+Section Header Types Legend: Describes common \fRsh_type\fP values with colors\&.
+.IP "2." 4
+Section Header Flags Legend: Describes common \fRsh_flags\fP values with colors\&.
+.PP
+
+.PP
+Each entry is highlighted using ANSI color codes for better readability\&.
+
+.PP
+\fBNote\fP
+.RS 4
+Uses the \fR\fBlegend_entry\fP\fP struct: 
+.PP
+.nf
+typedef struct {
+    const char *name;   // Short name or flag
+    const char *desc;   // Description of the type or flag
+    const char *color;  // ANSI color code
+} legend_entry;
+
+.fi
+.PP
+.RE
+.PP
+Example output (truncated): 
+.PP
+.nf
+=== Section Header Types Legend ===
++\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-+\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-+
+| Type                | Description                        |
++\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-+\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-+
+| NULL                | SHT_NULL: Unused section           |
+| PROGBITS            | SHT_PROGBITS: Program\-defined data|
+\&.\&.\&.
+=== Section Header Flags Legend ===
++\-\-\-\-\-\-+\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-+
+| Flag | Description                               |
++\-\-\-\-\-\-+\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-+
+| W    | SHF_WRITE: Writable                        |
+| A    | SHF_ALLOC: Occupies memory                 |
+\&.\&.\&.
+
+.fi
+.PP
+
+.PP
+\fBNote\fP
+.RS 4
+Uses ANSI color codes (COLOR_RED, COLOR_GREEN, COLOR_YELLOW, COLOR_CYAN, COLOR_MAGENTA, COLOR_WHITE, COLOR_GRAY, COLOR_RESET)\&. 
+.RE
+.PP
+
+.SS "void print_section_header_metadata_32bit (unsigned int id, const char * name, const char * type_str, const char * flags, Elf32_Shdr * shdrs)"
+
+.PP
+Print metadata of a 32-bit ELF section header\&. This function prints detailed information about a single ELF32 section, including type, flags, address, offset, size, link, info, alignment, and entry size\&. It uses ANSI color codes for visual distinction\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIid\fP The index of the section in the section header table\&. 
+.br
+\fIname\fP The name of the section\&. 
+.br
+\fItype_str\fP A string representing the section type (e\&.g\&., "SHT_PROGBITS")\&. 
+.br
+\fIflags\fP A string representing the section flags (e\&.g\&., "AX" for alloc+execute)\&. 
+.br
+\fIshdrs\fP Pointer to the array of ELF32 section headers (Elf32_Shdr[])\&.
+.RE
+.PP
+\fBNote\fP
+.RS 4
+Assumes that the macros for ANSI colors (COLOR_CYAN, COLOR_BLUE, COLOR_BG_WHITE, COLOR_BCYAN, COLOR_RESET) and META_LABEL_WIDTH are defined\&.
+.RE
+.PP
+Example output: 
+.PP
+.nf
+|\-\-Section [1] \&.text:
+|\-\-\-Type:        PROGBITS
+|\-\-\-Flags:       AX
+|\-\-\-Addr:        0x08048000
+|\-\-\-Offset:      0x00001000
+|\-\-\-Size:        0x00002000
+|\-\-\-Link:        0
+|\-\-\-Info:        0
+|\-\-\-Align:       0x10
+|\-\-\-EntSize:     0
+
+.fi
+.PP
+ 
+.SS "void print_section_header_metadata_64bit (unsigned int id, const char * name, const char * type_str, const char * flags, Elf64_Shdr * shdrs)"
+
+.PP
+Print metadata of a 64-bit ELF section header\&. This function prints detailed information about a single ELF64 section, including type, flags, address, offset, size, link, info, alignment, and entry size\&. It uses ANSI color codes for visual distinction\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIid\fP The index of the section in the section header table\&. 
+.br
+\fIname\fP The name of the section\&. 
+.br
+\fItype_str\fP A string representing the section type (e\&.g\&., "SHT_PROGBITS")\&. 
+.br
+\fIflags\fP A string representing the section flags (e\&.g\&., "AX" for alloc+execute)\&. 
+.br
+\fIshdrs\fP Pointer to the array of ELF64 section headers (Elf64_Shdr[])\&.
+.RE
+.PP
+\fBNote\fP
+.RS 4
+Assumes that the macros for ANSI colors (COLOR_CYAN, COLOR_BLUE, COLOR_BG_WHITE, COLOR_BCYAN, COLOR_RESET) and META_LABEL_WIDTH are defined\&.
+.RE
+.PP
+Example output: 
+.PP
+.nf
+|\-\-Section [1] \&.text:
+|\-\-\-Type:        PROGBITS
+|\-\-\-Flags:       AX
+|\-\-\-Addr:        0x00401000
+|\-\-\-Offset:      0x00001000
+|\-\-\-Size:        0x00002000
+|\-\-\-Link:        0
+|\-\-\-Info:        0
+|\-\-\-Align:       0x10
+|\-\-\-EntSize:     0
+
+.fi
+.PP
+ 
+.SS "void print_symbols_32bit (\fBbparser\fP * parser, Elf32_Ehdr * elf, Elf32_Shdr * shdrs, Elf32_Shdr * symtab, Elf32_Shdr * strtab)"
+
+.PP
+Print all symbols from a 32-bit ELF file (with colors)\&. This function iterates over the ELF32 symbol table (\fRsymtab\fP) and its associated string table (\fRstrtab\fP) to display information about each symbol\&. It prints a nicely formatted and colorized table that includes:
+.IP "\(bu" 2
+\fBIndex\fP : The symbol index in the table\&.
+.IP "\(bu" 2
+\fBValue\fP : The symbol value (address in executables/shared objects, or section offset in relocatable files)\&.
+.IP "\(bu" 2
+\fBSize\fP : The size of the symbol in bytes\&.
+.IP "\(bu" 2
+\fBType\fP : The decoded symbol type (FUNC, OBJECT, SECTION, FILE, etc\&.)\&.
+.IP "\(bu" 2
+\fBName\fP : The symbol name resolved from the string table\&.
+.PP
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIparser\fP Pointer to the binary parser context (holds loaded ELF data in memory)\&. 
+.br
+\fIelf\fP Pointer to the ELF32 header structure\&. 
+.br
+\fIshdrs\fP Pointer to the array of section headers in the ELF file\&. 
+.br
+\fIsymtab\fP Pointer to the section header for the symbol table (\&.symtab)\&. 
+.br
+\fIstrtab\fP Pointer to the section header for the associated string table (\&.strtab)\&.
+.RE
+.PP
+\fBNote\fP
+.RS 4
+.IP "\(bu" 2
+For \fBrelocatable ELF (\&.o)\fP files: \fRValue\fP is the symbol’s offset relative to its section\&.
+.IP "\(bu" 2
+For \fBexecutables / shared objects\fP: \fRValue\fP is the virtual memory address of the symbol at runtime\&.
+.IP "\(bu" 2
+For \fBundefined symbols\fP: \fRValue = 0\fP since the address will be resolved later\&.
+.PP
+.RE
+.PP
+\fBWarning\fP
+.RS 4
+Output uses ANSI color codes, so results may look odd in non-color terminals\&. 
+.RE
+.PP
+
+.SS "void print_symbols_64bit (\fBbparser\fP * parser, Elf64_Ehdr * elf, Elf64_Shdr * shdrs, Elf64_Shdr * symtab, Elf64_Shdr * strtab)"
+
+.PP
+Print all symbols from a 64-bit ELF file (with colors)\&. This function iterates over the ELF64 symbol table (\fRsymtab\fP) and its associated string table (\fRstrtab\fP) to display information about each symbol\&. It prints a formatted and colorized table including:
+.IP "\(bu" 2
+\fBIndex\fP : The symbol index in the table\&.
+.IP "\(bu" 2
+\fBValue\fP : The symbol value (for executables/shared objects, this is the virtual address at runtime; for relocatable objects, this is the section-relative offset)\&.
+.IP "\(bu" 2
+\fBSize\fP : The size of the symbol in bytes\&.
+.IP "\(bu" 2
+\fBType\fP : The decoded symbol type (FUNC, OBJECT, SECTION, FILE, etc\&.)\&.
+.IP "\(bu" 2
+\fBName\fP : The symbol’s name resolved from the string table\&.
+.PP
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIparser\fP Pointer to the binary parser context (holds loaded ELF data in memory)\&. 
+.br
+\fIelf\fP Pointer to the ELF64 header structure\&. 
+.br
+\fIshdrs\fP Pointer to the array of section headers in the ELF file\&. 
+.br
+\fIsymtab\fP Pointer to the section header for the symbol table (\&.symtab)\&. 
+.br
+\fIstrtab\fP Pointer to the section header for the associated string table (\&.strtab)\&.
+.RE
+.PP
+\fBNote\fP
+.RS 4
+.IP "\(bu" 2
+For \fBrelocatable ELF (\&.o)\fP: \fRValue\fP is the offset relative to its section\&.
+.IP "\(bu" 2
+For \fBexecutables / shared objects\fP: \fRValue\fP is the virtual memory address of the symbol\&.
+.IP "\(bu" 2
+For \fBundefined symbols\fP: \fRValue = 0\fP since resolution is deferred to the linker/loader\&.
+.PP
+.RE
+.PP
+\fBWarning\fP
+.RS 4
+Output uses ANSI color codes, so results may appear incorrect in terminals without color support\&. 
+.RE
+.PP
+
+.SS "void print_symbols_with_disasm_32bit (\fBbparser\fP * parser, Elf32_Ehdr * elf, Elf32_Shdr * shdrs, Elf32_Shdr * symtab, Elf32_Shdr * strtab)"
+
+.PP
+Print ELF32 symbols along with disassembly for functions\&. This function iterates over the symbol table of a 32-bit ELF file, printing information about each symbol and disassembling function symbols\&. It highlights the type of each symbol using ANSI color codes\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIparser\fP Pointer to a bparser structure containing the loaded ELF data\&. 
+.br
+\fIelf\fP Pointer to the ELF32 file header (Elf32_Ehdr)\&. 
+.br
+\fIshdrs\fP Pointer to the section header array (Elf32_Shdr[])\&. 
+.br
+\fIsymtab\fP Pointer to the section header of the symbol table (Elf32_Shdr)\&. 
+.br
+\fIstrtab\fP Pointer to the section header of the associated string table (Elf32_Shdr)\&.
+.RE
+.PP
+\fBNote\fP
+.RS 4
+The function assumes:
+.IP "\(bu" 2
+ANSI color macros (COLOR_RESET, COLOR_YELLOW, COLOR_BLUE, etc\&.) are defined\&.
+.IP "\(bu" 2
+Helper function \fRprint_disasm\fP exists to disassemble memory regions\&.
+.IP "\(bu" 2
+ELF macros like \fRELF32_ST_TYPE\fP, and constants like \fRSTT_FUNC\fP, \fRSTT_OBJECT\fP are defined\&.
+.IP "\(bu" 2
+Only symbols with st_size > 0 are disassembled\&.
+.PP
+.RE
+.PP
+Example output: 
+.PP
+.nf
+=== Symbols (symtab + strtab) ===
+|\-\- main:
+  0x08001000:  mov eax, ebx
+  \&.\&.\&.
+
+.fi
+.PP
+ 
+.SS "void print_symbols_with_disasm_64bit (\fBbparser\fP * parser, Elf64_Ehdr * elf, Elf64_Shdr * shdrs, Elf64_Shdr * symtab, Elf64_Shdr * strtab)"
+
+.PP
+Print ELF64 symbols along with disassembly for functions\&. This function iterates over the symbol table of a 64-bit ELF file, printing information about each symbol and disassembling function symbols\&. It highlights the type of each symbol using ANSI color codes\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIparser\fP Pointer to a bparser structure containing the loaded ELF data\&. 
+.br
+\fIelf\fP Pointer to the ELF64 file header (Elf64_Ehdr)\&. 
+.br
+\fIshdrs\fP Pointer to the section header array (Elf64_Shdr[])\&. 
+.br
+\fIsymtab\fP Pointer to the section header of the symbol table (Elf64_Shdr)\&. 
+.br
+\fIstrtab\fP Pointer to the section header of the associated string table (Elf64_Shdr)\&.
+.RE
+.PP
+\fBNote\fP
+.RS 4
+The function assumes:
+.IP "\(bu" 2
+ANSI color macros (COLOR_RESET, COLOR_YELLOW, COLOR_BLUE, etc\&.) are defined\&.
+.IP "\(bu" 2
+Helper function \fRprint_disasm\fP exists to disassemble memory regions\&.
+.IP "\(bu" 2
+ELF macros like \fRELF64_ST_TYPE\fP, and constants like \fRSTT_FUNC\fP, \fRSTT_OBJECT\fP are defined\&.
+.IP "\(bu" 2
+Only symbols with st_size > 0 are disassembled\&.
+.PP
+.RE
+.PP
+Example output: 
+.PP
+.nf
+=== Symbols (symtab + strtab) ===
+|\-\- main:
+  0x00401000:  mov rax, rbx
+  \&.\&.\&.
+
+.fi
+.PP
+ 
+.SS "const char * sh_type_to_str (unsigned int sh_type)"
+
+.PP
+Converts an ELF section header type to a human-readable string with color\&. This function maps ELF section header type constants (SHT_*) to descriptive strings\&. ANSI color codes are added for colored output in terminal\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIsh_type\fP The section header type (e\&.g\&., SHT_PROGBITS, SHT_SYMTAB, \&.\&.\&.)\&. 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+const char* A pointer to a static string representing the type\&. The string includes ANSI color codes for terminal output\&.
+.RE
+.PP
+\fBNote\fP
+.RS 4
+The returned string should not be freed, as it points to static memory\&. 
+
+.PP
+Supports standard, GNU, and SUNW section types, as well as OS/Processor/Application-specific ranges\&. 
+.RE
+.PP
+
+.SS "const char * type_p_to_str (unsigned int p_type)"
+
+.PP
+Converts a program header type (p_type) to a human-readable string with color\&. This function maps ELF program header type constants (PT_*) to descriptive strings, optionally including ANSI color codes for terminal highlighting\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIp_type\fP The program header type (e\&.g\&., PT_LOAD, PT_DYNAMIC, PT_INTERP, etc\&.)\&. 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+const char* A pointer to a string describing the program header type\&.
+.RE
+.PP
+\fBNote\fP
+.RS 4
+The returned string points to static memory and must not be freed\&. 
+
+.PP
+Supports standard ELF program header types, OS-specific, and processor-specific ranges\&. 
+
+.PP
+Some types include ANSI color codes for terminal output\&. 
+.RE
+.PP
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Baseer from the source code\&.

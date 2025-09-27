@@ -25,9 +25,11 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
+  <td id="projectlogo"><img alt="Logo" src="logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">Baseer<span id="projectnumber">&#160;0.1.0</span>
+   <div id="projectname">Baseer<span id="projectnumber">&#160;0.2.0</span>
    </div>
+   <div id="projectbrief">Baseer is an advanced binary analysis tool designed to provide deep insights into any file.</div>
   </td>
  </tr>
  </tbody>
@@ -91,16 +93,66 @@ $(function(){initNavTree('structsym__list.html','','structsym__list-members'); }
   <div class="headertitle"><div class="title">sym_list Struct Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Represents a symbol entry (function name and address).  
+ <a href="#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="debugger_8h_source.html">debugger.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a362f68f0247f4920d10f6406d1ae7237" id="r_a362f68f0247f4920d10f6406d1ae7237"><td class="memItemLeft" align="right" valign="top"><a id="a362f68f0247f4920d10f6406d1ae7237" name="a362f68f0247f4920d10f6406d1ae7237"></a>
-char *&#160;</td><td class="memItemRight" valign="bottom"><b>name</b></td></tr>
-<tr class="memitem:aa6d2039185a2bac18d1e25f226796b71" id="r_aa6d2039185a2bac18d1e25f226796b71"><td class="memItemLeft" align="right" valign="top"><a id="aa6d2039185a2bac18d1e25f226796b71" name="aa6d2039185a2bac18d1e25f226796b71"></a>
-uint64_t&#160;</td><td class="memItemRight" valign="bottom"><b>addr</b></td></tr>
-<tr class="memitem:a855ebba82b4ac68081f6e9bc599c4e1b" id="r_a855ebba82b4ac68081f6e9bc599c4e1b"><td class="memItemLeft" align="right" valign="top"><a id="a855ebba82b4ac68081f6e9bc599c4e1b" name="a855ebba82b4ac68081f6e9bc599c4e1b"></a>
-<a class="el" href="structsym__list.html">sym_list</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>next</b></td></tr>
+<tr class="memitem:a362f68f0247f4920d10f6406d1ae7237" id="r_a362f68f0247f4920d10f6406d1ae7237"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a362f68f0247f4920d10f6406d1ae7237">name</a></td></tr>
+<tr class="memitem:aa6d2039185a2bac18d1e25f226796b71" id="r_aa6d2039185a2bac18d1e25f226796b71"><td class="memItemLeft" align="right" valign="top">uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa6d2039185a2bac18d1e25f226796b71">addr</a></td></tr>
+<tr class="memitem:a855ebba82b4ac68081f6e9bc599c4e1b" id="r_a855ebba82b4ac68081f6e9bc599c4e1b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structsym__list.html">sym_list</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a855ebba82b4ac68081f6e9bc599c4e1b">next</a></td></tr>
 </table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Represents a symbol entry (function name and address). </p>
+</div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
+<a id="aa6d2039185a2bac18d1e25f226796b71" name="aa6d2039185a2bac18d1e25f226796b71"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa6d2039185a2bac18d1e25f226796b71">&#9670;&#160;</a></span>addr</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint64_t sym_list::addr</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Symbol address </p>
+
+</div>
+</div>
+<a id="a362f68f0247f4920d10f6406d1ae7237" name="a362f68f0247f4920d10f6406d1ae7237"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a362f68f0247f4920d10f6406d1ae7237">&#9670;&#160;</a></span>name</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char* sym_list::name</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Symbol name </p>
+
+</div>
+</div>
+<a id="a855ebba82b4ac68081f6e9bc599c4e1b" name="a855ebba82b4ac68081f6e9bc599c4e1b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a855ebba82b4ac68081f6e9bc599c4e1b">&#9670;&#160;</a></span>next</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structsym__list.html">sym_list</a>* sym_list::next</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Pointer to next symbol </p>
+
+</div>
+</div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
 <li>modules/b_debugger/<a class="el" href="debugger_8h_source.html">debugger.h</a></li>
 </ul>

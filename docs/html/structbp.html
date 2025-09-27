@@ -25,9 +25,11 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
+  <td id="projectlogo"><img alt="Logo" src="logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">Baseer<span id="projectnumber">&#160;0.1.0</span>
+   <div id="projectname">Baseer<span id="projectnumber">&#160;0.2.0</span>
    </div>
+   <div id="projectbrief">Baseer is an advanced binary analysis tool designed to provide deep insights into any file.</div>
   </td>
  </tr>
  </tbody>
@@ -91,18 +93,82 @@ $(function(){initNavTree('structbp.html','','structbp-members'); });
   <div class="headertitle"><div class="title">bp Struct Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Represents a single breakpoint.  
+ <a href="#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="debugger_8h_source.html">debugger.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:adbb9601b8d775dd250e755cacc2b3148" id="r_adbb9601b8d775dd250e755cacc2b3148"><td class="memItemLeft" align="right" valign="top"><a id="adbb9601b8d775dd250e755cacc2b3148" name="adbb9601b8d775dd250e755cacc2b3148"></a>
-uint64_t&#160;</td><td class="memItemRight" valign="bottom"><b>orig</b></td></tr>
-<tr class="memitem:a3e32cb42a5a93d802c4865ee0410dd25" id="r_a3e32cb42a5a93d802c4865ee0410dd25"><td class="memItemLeft" align="right" valign="top"><a id="a3e32cb42a5a93d802c4865ee0410dd25" name="a3e32cb42a5a93d802c4865ee0410dd25"></a>
-uint64_t&#160;</td><td class="memItemRight" valign="bottom"><b>addr</b></td></tr>
-<tr class="memitem:acdd70c54de4aced7b212428fd64997c5" id="r_acdd70c54de4aced7b212428fd64997c5"><td class="memItemLeft" align="right" valign="top"><a id="acdd70c54de4aced7b212428fd64997c5" name="acdd70c54de4aced7b212428fd64997c5"></a>
-<a class="el" href="structbp.html">bp</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>next</b></td></tr>
-<tr class="memitem:aaea9938b28550439bc899299e7550295" id="r_aaea9938b28550439bc899299e7550295"><td class="memItemLeft" align="right" valign="top"><a id="aaea9938b28550439bc899299e7550295" name="aaea9938b28550439bc899299e7550295"></a>
-unsigned int&#160;</td><td class="memItemRight" valign="bottom"><b>id</b></td></tr>
+<tr class="memitem:adbb9601b8d775dd250e755cacc2b3148" id="r_adbb9601b8d775dd250e755cacc2b3148"><td class="memItemLeft" align="right" valign="top">uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adbb9601b8d775dd250e755cacc2b3148">orig</a></td></tr>
+<tr class="memitem:a3e32cb42a5a93d802c4865ee0410dd25" id="r_a3e32cb42a5a93d802c4865ee0410dd25"><td class="memItemLeft" align="right" valign="top">uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3e32cb42a5a93d802c4865ee0410dd25">addr</a></td></tr>
+<tr class="memitem:acdd70c54de4aced7b212428fd64997c5" id="r_acdd70c54de4aced7b212428fd64997c5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structbp.html">bp</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acdd70c54de4aced7b212428fd64997c5">next</a></td></tr>
+<tr class="memitem:aaea9938b28550439bc899299e7550295" id="r_aaea9938b28550439bc899299e7550295"><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aaea9938b28550439bc899299e7550295">id</a></td></tr>
 </table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Represents a single breakpoint. </p>
+</div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
+<a id="a3e32cb42a5a93d802c4865ee0410dd25" name="a3e32cb42a5a93d802c4865ee0410dd25"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3e32cb42a5a93d802c4865ee0410dd25">&#9670;&#160;</a></span>addr</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint64_t bp::addr</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Breakpoint address </p>
+
+</div>
+</div>
+<a id="aaea9938b28550439bc899299e7550295" name="aaea9938b28550439bc899299e7550295"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaea9938b28550439bc899299e7550295">&#9670;&#160;</a></span>id</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned int bp::id</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Breakpoint ID </p>
+
+</div>
+</div>
+<a id="acdd70c54de4aced7b212428fd64997c5" name="acdd70c54de4aced7b212428fd64997c5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acdd70c54de4aced7b212428fd64997c5">&#9670;&#160;</a></span>next</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structbp.html">bp</a>* bp::next</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Next breakpoint in list </p>
+
+</div>
+</div>
+<a id="adbb9601b8d775dd250e755cacc2b3148" name="adbb9601b8d775dd250e755cacc2b3148"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adbb9601b8d775dd250e755cacc2b3148">&#9670;&#160;</a></span>orig</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint64_t bp::orig</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Original instruction word </p>
+
+</div>
+</div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
 <li>modules/b_debugger/<a class="el" href="debugger_8h_source.html">debugger.h</a></li>
 </ul>

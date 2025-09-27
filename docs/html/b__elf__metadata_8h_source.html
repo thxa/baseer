@@ -25,9 +25,11 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
+  <td id="projectlogo"><img alt="Logo" src="logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">Baseer<span id="projectnumber">&#160;0.1.0</span>
+   <div id="projectname">Baseer<span id="projectnumber">&#160;0.2.0</span>
    </div>
+   <div id="projectbrief">Baseer is an advanced binary analysis tool designed to provide deep insights into any file.</div>
   </td>
  </tr>
  </tbody>
@@ -99,14 +101,27 @@ $(function(){initNavTree('b__elf__metadata_8h_source.html','',''); });
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;elf.h&gt;</span></div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include&lt;string.h&gt;</span></div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &quot;../bx_elf_utils/bx_elf_utils.h&quot;</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="keywordtype">bool</span> <a class="code hl_function" href="b__elf__metadata_8h.html#a49a27835c4a42cd5c23112034bc91ce0">print_meta_data</a>(<a class="code hl_struct" href="structbparser.html">bparser</a>* parser, <span class="keywordtype">void</span>* args);</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#endif</span></div>
-<div class="ttc" id="ab__elf__metadata_8h_html_a49a27835c4a42cd5c23112034bc91ce0"><div class="ttname"><a href="b__elf__metadata_8h.html#a49a27835c4a42cd5c23112034bc91ce0">print_meta_data</a></div><div class="ttdeci">bool print_meta_data(bparser *parser, void *args)</div><div class="ttdoc">Print high-level metadata of an ELF file and dispatch detailed dump functions.</div><div class="ttdef"><b>Definition</b> b_elf_metadata.c:450</div></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &quot;udis86.h&quot;</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="keywordtype">void</span> <a class="code hl_function" href="b__elf__metadata_8h.html#abac21b24c9b06f5a7c3b125fc6d064d4">dump_elf32hdr</a>(Elf32_Ehdr *elf);</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="keywordtype">void</span> <a class="code hl_function" href="b__elf__metadata_8h.html#aea9ac97425b847247f2201076e3a5218">dump_elf64hdr</a>(Elf64_Ehdr *elf);</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="keywordtype">void</span> <a class="code hl_function" href="b__elf__metadata_8h.html#ab107f9ea83fd309ee156c11613c90387">dump_elf32_shdr</a>(Elf32_Ehdr *elf , Elf32_Shdr *shdrs, <a class="code hl_struct" href="structbparser.html">bparser</a> *parser);</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="keywordtype">void</span> <a class="code hl_function" href="b__elf__metadata_8h.html#a85b70058d8ea0cfab31375ca5304500f">dump_elf64_shdr</a>(Elf64_Ehdr *elf , Elf64_Shdr *shdrs, <a class="code hl_struct" href="structbparser.html">bparser</a> *parser);</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="keywordtype">void</span> <a class="code hl_function" href="b__elf__metadata_8h.html#a8c374b3a79a0f30c68d70cbe812a9b78">dump_elf32_phdr</a>(Elf32_Ehdr *elf, Elf32_Phdr *phdr, <a class="code hl_struct" href="structbparser.html">bparser</a> *parser);</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="keywordtype">void</span> <a class="code hl_function" href="b__elf__metadata_8h.html#a7b408ec187779bcf22476ae7827ef245">dump_elf64_phdr</a>(Elf64_Ehdr *elf, Elf64_Phdr *phdr, <a class="code hl_struct" href="structbparser.html">bparser</a> *parser);</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="keywordtype">bool</span> <a class="code hl_function" href="b__elf__metadata_8h.html#a49a27835c4a42cd5c23112034bc91ce0">print_meta_data</a>(<a class="code hl_struct" href="structbparser.html">bparser</a> *parser, <span class="keywordtype">void</span> *args);</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="ab__elf__metadata_8h_html_a49a27835c4a42cd5c23112034bc91ce0"><div class="ttname"><a href="b__elf__metadata_8h.html#a49a27835c4a42cd5c23112034bc91ce0">print_meta_data</a></div><div class="ttdeci">bool print_meta_data(bparser *parser, void *args)</div><div class="ttdoc">Print high-level metadata of an ELF file and dispatch detailed dump functions.</div><div class="ttdef"><b>Definition</b> b_elf_metadata.c:420</div></div>
+<div class="ttc" id="ab__elf__metadata_8h_html_a7b408ec187779bcf22476ae7827ef245"><div class="ttname"><a href="b__elf__metadata_8h.html#a7b408ec187779bcf22476ae7827ef245">dump_elf64_phdr</a></div><div class="ttdeci">void dump_elf64_phdr(Elf64_Ehdr *elf, Elf64_Phdr *phdr, bparser *parser)</div><div class="ttdoc">Dump the program header table of a 64-bit ELF file.</div><div class="ttdef"><b>Definition</b> b_elf_metadata.c:355</div></div>
+<div class="ttc" id="ab__elf__metadata_8h_html_a85b70058d8ea0cfab31375ca5304500f"><div class="ttname"><a href="b__elf__metadata_8h.html#a85b70058d8ea0cfab31375ca5304500f">dump_elf64_shdr</a></div><div class="ttdeci">void dump_elf64_shdr(Elf64_Ehdr *elf, Elf64_Shdr *shdrs, bparser *parser)</div><div class="ttdoc">Dump the section header table of a 64-bit ELF file.</div><div class="ttdef"><b>Definition</b> b_elf_metadata.c:197</div></div>
+<div class="ttc" id="ab__elf__metadata_8h_html_a8c374b3a79a0f30c68d70cbe812a9b78"><div class="ttname"><a href="b__elf__metadata_8h.html#a8c374b3a79a0f30c68d70cbe812a9b78">dump_elf32_phdr</a></div><div class="ttdeci">void dump_elf32_phdr(Elf32_Ehdr *elf, Elf32_Phdr *phdr, bparser *parser)</div><div class="ttdoc">Dump the program header table of a 32-bit ELF file.</div><div class="ttdef"><b>Definition</b> b_elf_metadata.c:289</div></div>
+<div class="ttc" id="ab__elf__metadata_8h_html_ab107f9ea83fd309ee156c11613c90387"><div class="ttname"><a href="b__elf__metadata_8h.html#ab107f9ea83fd309ee156c11613c90387">dump_elf32_shdr</a></div><div class="ttdeci">void dump_elf32_shdr(Elf32_Ehdr *elf, Elf32_Shdr *shdrs, bparser *parser)</div><div class="ttdoc">Dump the section header table of a 32-bit ELF file.</div><div class="ttdef"><b>Definition</b> b_elf_metadata.c:115</div></div>
+<div class="ttc" id="ab__elf__metadata_8h_html_abac21b24c9b06f5a7c3b125fc6d064d4"><div class="ttname"><a href="b__elf__metadata_8h.html#abac21b24c9b06f5a7c3b125fc6d064d4">dump_elf32hdr</a></div><div class="ttdeci">void dump_elf32hdr(Elf32_Ehdr *elf)</div><div class="ttdoc">Dump the ELF header information for a 32-bit ELF file.</div><div class="ttdef"><b>Definition</b> b_elf_metadata.c:45</div></div>
+<div class="ttc" id="ab__elf__metadata_8h_html_aea9ac97425b847247f2201076e3a5218"><div class="ttname"><a href="b__elf__metadata_8h.html#aea9ac97425b847247f2201076e3a5218">dump_elf64hdr</a></div><div class="ttdeci">void dump_elf64hdr(Elf64_Ehdr *elf)</div><div class="ttdoc">Dump the ELF header information for a 64-bit ELF file.</div><div class="ttdef"><b>Definition</b> b_elf_metadata.c:75</div></div>
 <div class="ttc" id="abaseer_8h_html"><div class="ttname"><a href="baseer_8h.html">baseer.h</a></div><div class="ttdoc">Core file handling and execution API for Baseer.</div></div>
 <div class="ttc" id="abparser_8h_html"><div class="ttname"><a href="bparser_8h.html">bparser.h</a></div><div class="ttdoc">Binary parser abstraction supporting memory and streaming files.</div></div>
-<div class="ttc" id="astructbparser_html"><div class="ttname"><a href="structbparser.html">bparser</a></div><div class="ttdoc">Parser object.</div><div class="ttdef"><b>Definition</b> bparser.h:35</div></div>
+<div class="ttc" id="astructbparser_html"><div class="ttname"><a href="structbparser.html">bparser</a></div><div class="ttdoc">Parser object.</div><div class="ttdef"><b>Definition</b> bparser.h:19</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->

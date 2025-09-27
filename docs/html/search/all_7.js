@@ -1,7 +1,7 @@
 var searchData=
 [
-  ['setbp_0',['setBP',['../debugger_8c.html#a46c28deefe27e450fe35881d5319bf93',1,'debugger.c']]],
-  ['size_1',['size',['../structbaseer__target__t.html#a6e0834aa134f59e0c304bf1279d55672',1,'baseer_target_t']]],
-  ['step_5fover_2',['step_over',['../debugger_8c.html#a0343f9c7a1e9135576e29c48c083683e',1,'debugger.c']]],
-  ['sym_5flist_3',['sym_list',['../structsym__list.html',1,'']]]
+  ['handle_5faction_0',['handle_action',['../debugger_8c.html#a0cf63db5ac47b62a00e91d611a0fd07e',1,'handle_action(context *ctx, void *args):&#160;debugger.c'],['../debugger_8h.html#a0cf63db5ac47b62a00e91d611a0fd07e',1,'handle_action(context *ctx, void *args):&#160;debugger.c']]],
+  ['handle_5fbpoint_1',['handle_bpoint',['../debugger_8c.html#ac2fdceaf5836ab15d9512b534fa155fb',1,'handle_bpoint(context *ctx):&#160;debugger.c'],['../debugger_8h.html#ac2fdceaf5836ab15d9512b534fa155fb',1,'handle_bpoint(context *ctx):&#160;debugger.c']]],
+  ['hash_2',['hash',['../b__hashmap_8c.html#a7c9e0d90bc8135bbc9d94ee1979c01ee',1,'b_hashmap.c']]],
+  ['hashmap_5ft_3',['hashmap_t',['../structhashmap__t.html',1,'']]]
 ];

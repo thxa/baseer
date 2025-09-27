@@ -25,9 +25,11 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
+  <td id="projectlogo"><img alt="Logo" src="logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">Baseer<span id="projectnumber">&#160;0.1.0</span>
+   <div id="projectname">Baseer<span id="projectnumber">&#160;0.2.0</span>
    </div>
+   <div id="projectbrief">Baseer is an advanced binary analysis tool designed to provide deep insights into any file.</div>
   </td>
  </tr>
  </tbody>
@@ -92,9 +94,10 @@ $(function(){initNavTree('debugger_8c.html','',''); });
 </div><!--header-->
 <div class="contents">
 
-<p>Functions to handle debugging binary and command logic.  
+<p>Implementation of a lightweight debugger for ELF binaries using ptrace.  
 <a href="#details">More...</a></p>
-<div class="textblock"><code>#include &lt;elf.h&gt;</code><br />
+<div class="textblock"><code>#include &lt;stdint.h&gt;</code><br />
+<code>#include &lt;elf.h&gt;</code><br />
 <code>#include &lt;stdio.h&gt;</code><br />
 <code>#include &lt;ctype.h&gt;</code><br />
 <code>#include &quot;udis86.h&quot;</code><br />
@@ -104,50 +107,263 @@ $(function(){initNavTree('debugger_8c.html','',''); });
 <code>#include &lt;string.h&gt;</code><br />
 <code>#include &lt;sys/mman.h&gt;</code><br />
 <code>#include &lt;sys/wait.h&gt;</code><br />
-<code>#include &quot;debugger.h&quot;</code><br />
+<code>#include &quot;<a class="el" href="debugger_8h_source.html">debugger.h</a>&quot;</code><br />
 <code>#include &lt;sys/ptrace.h&gt;</code><br />
+<code>#include &quot;../bx_elf_utils/bx_elf_utils.h&quot;</code><br />
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:a44cadf6b6d2996703095c55c79d96195" id="r_a44cadf6b6d2996703095c55c79d96195"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a44cadf6b6d2996703095c55c79d96195">parse_cmd</a> (<a class="el" href="structcontext.html">context</a> *ctx)</td></tr>
-<tr class="memdesc:a44cadf6b6d2996703095c55c79d96195"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function to handle user commands.  <br /></td></tr>
+<tr class="memdesc:a44cadf6b6d2996703095c55c79d96195"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse and execute a user command entered in the debugger prompt.  <br /></td></tr>
 <tr class="memitem:a0cf63db5ac47b62a00e91d611a0fd07e" id="r_a0cf63db5ac47b62a00e91d611a0fd07e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0cf63db5ac47b62a00e91d611a0fd07e">handle_action</a> (<a class="el" href="structcontext.html">context</a> *ctx, void *args)</td></tr>
-<tr class="memdesc:a0cf63db5ac47b62a00e91d611a0fd07e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function to handle command that don't need a function .  <br /></td></tr>
-<tr class="memitem:a54938d2b6415efb1e55083cb4333614c" id="r_a54938d2b6415efb1e55083cb4333614c"><td class="memItemLeft" align="right" valign="top"><a id="a54938d2b6415efb1e55083cb4333614c" name="a54938d2b6415efb1e55083cb4333614c"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>print_helpCMD</b> ()</td></tr>
-<tr class="memdesc:a54938d2b6415efb1e55083cb4333614c"><td class="mdescLeft">&#160;</td><td class="mdescRight">print the help commands . <br /></td></tr>
-<tr class="memitem:aa373d503c01b9fcae5d45f970fabf8b6" id="r_aa373d503c01b9fcae5d45f970fabf8b6"><td class="memItemLeft" align="right" valign="top"><a id="aa373d503c01b9fcae5d45f970fabf8b6" name="aa373d503c01b9fcae5d45f970fabf8b6"></a>
-<a class="el" href="structbp.html">bp</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>findBP</b> (<a class="el" href="structcontext.html">context</a> *ctx, uint64_t rip)</td></tr>
-<tr class="memdesc:aa373d503c01b9fcae5d45f970fabf8b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">find a breakpoint that program hits. <br /></td></tr>
-<tr class="memitem:aa368ce0ff990876c9ea6611125d01cd5" id="r_aa368ce0ff990876c9ea6611125d01cd5"><td class="memItemLeft" align="right" valign="top"><a id="aa368ce0ff990876c9ea6611125d01cd5" name="aa368ce0ff990876c9ea6611125d01cd5"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>delBP</b> (<a class="el" href="structcontext.html">context</a> *ctx, void *args)</td></tr>
-<tr class="memdesc:aa368ce0ff990876c9ea6611125d01cd5"><td class="mdescLeft">&#160;</td><td class="mdescRight">delete a breakpoint. <br /></td></tr>
-<tr class="memitem:a0343f9c7a1e9135576e29c48c083683e" id="r_a0343f9c7a1e9135576e29c48c083683e"><td class="memItemLeft" align="right" valign="top"><a id="a0343f9c7a1e9135576e29c48c083683e" name="a0343f9c7a1e9135576e29c48c083683e"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>step_over</b> (<a class="el" href="structcontext.html">context</a> *ctx, void *args)</td></tr>
-<tr class="memdesc:a0343f9c7a1e9135576e29c48c083683e"><td class="mdescLeft">&#160;</td><td class="mdescRight">function that do step over a function call. <br /></td></tr>
-<tr class="memitem:a46c28deefe27e450fe35881d5319bf93" id="r_a46c28deefe27e450fe35881d5319bf93"><td class="memItemLeft" align="right" valign="top"><a id="a46c28deefe27e450fe35881d5319bf93" name="a46c28deefe27e450fe35881d5319bf93"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>setBP</b> (<a class="el" href="structcontext.html">context</a> *ctx, void *args)</td></tr>
-<tr class="memdesc:a46c28deefe27e450fe35881d5319bf93"><td class="mdescLeft">&#160;</td><td class="mdescRight">set a breakpoint. <br /></td></tr>
-<tr class="memitem:ac2fdceaf5836ab15d9512b534fa155fb" id="r_ac2fdceaf5836ab15d9512b534fa155fb"><td class="memItemLeft" align="right" valign="top"><a id="ac2fdceaf5836ab15d9512b534fa155fb" name="ac2fdceaf5836ab15d9512b534fa155fb"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>handle_bpoint</b> (<a class="el" href="structcontext.html">context</a> *ctx)</td></tr>
-<tr class="memitem:a04f49fd9e411d994dbc2c637c4b1e040" id="r_a04f49fd9e411d994dbc2c637c4b1e040"><td class="memItemLeft" align="right" valign="top"><a id="a04f49fd9e411d994dbc2c637c4b1e040" name="a04f49fd9e411d994dbc2c637c4b1e040"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>listBP</b> (<a class="el" href="structcontext.html">context</a> *ctx, void *args)</td></tr>
-<tr class="memitem:a69638fb4119958d602a84508c7305746" id="r_a69638fb4119958d602a84508c7305746"><td class="memItemLeft" align="right" valign="top"><a id="a69638fb4119958d602a84508c7305746" name="a69638fb4119958d602a84508c7305746"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>restore_all_BP</b> (<a class="el" href="structcontext.html">context</a> *ctx, int opt)</td></tr>
-<tr class="memitem:ab98a3865f9bc4aab5e9144e5d603b041" id="r_ab98a3865f9bc4aab5e9144e5d603b041"><td class="memItemLeft" align="right" valign="top"><a id="ab98a3865f9bc4aab5e9144e5d603b041" name="ab98a3865f9bc4aab5e9144e5d603b041"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>dis_ctx</b> (<a class="el" href="structcontext.html">context</a> *ctx)</td></tr>
-<tr class="memitem:a36d9996b85e1afb5811044fb0abda9a3" id="r_a36d9996b85e1afb5811044fb0abda9a3"><td class="memItemLeft" align="right" valign="top"><a id="a36d9996b85e1afb5811044fb0abda9a3" name="a36d9996b85e1afb5811044fb0abda9a3"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>init_values</b> (<a class="el" href="structbparser.html">bparser</a> *target, <a class="el" href="structcontext.html">context</a> *ctx)</td></tr>
-<tr class="memitem:a8c8c13197d1cf9fd33010890fcaebe78" id="r_a8c8c13197d1cf9fd33010890fcaebe78"><td class="memItemLeft" align="right" valign="top"><a id="a8c8c13197d1cf9fd33010890fcaebe78" name="a8c8c13197d1cf9fd33010890fcaebe78"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>destroy_bp</b> (<a class="el" href="structbp.html">bp</a> *bpoint)</td></tr>
-<tr class="memitem:acfedc0b1c8833d514dc5567edc8a4515" id="r_acfedc0b1c8833d514dc5567edc8a4515"><td class="memItemLeft" align="right" valign="top"><a id="acfedc0b1c8833d514dc5567edc8a4515" name="acfedc0b1c8833d514dc5567edc8a4515"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>destroy_all</b> (<a class="el" href="structcontext.html">context</a> *ctx)</td></tr>
-<tr class="memitem:a2ca5943ca1c1a69c579d47b567e9a581" id="r_a2ca5943ca1c1a69c579d47b567e9a581"><td class="memItemLeft" align="right" valign="top"><a id="a2ca5943ca1c1a69c579d47b567e9a581" name="a2ca5943ca1c1a69c579d47b567e9a581"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>b_debugger</b> (<a class="el" href="structbparser.html">bparser</a> *target, void *arg)</td></tr>
+<tr class="memdesc:a0cf63db5ac47b62a00e91d611a0fd07e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle actions that correspond directly to simple commands (e.g., quit, help, continue, single-step).  <br /></td></tr>
+<tr class="memitem:a54938d2b6415efb1e55083cb4333614c" id="r_a54938d2b6415efb1e55083cb4333614c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a54938d2b6415efb1e55083cb4333614c">print_helpCMD</a> ()</td></tr>
+<tr class="memdesc:a54938d2b6415efb1e55083cb4333614c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Print the list of available debugger commands.  <br /></td></tr>
+<tr class="memitem:a9d37cb08ac98ba7e8db761b99b49f779" id="r_a9d37cb08ac98ba7e8db761b99b49f779"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9d37cb08ac98ba7e8db761b99b49f779">set_mem_reg</a> (<a class="el" href="structcontext.html">context</a> *ctx, void *args)</td></tr>
+<tr class="memdesc:a9d37cb08ac98ba7e8db761b99b49f779"><td class="mdescLeft">&#160;</td><td class="mdescRight">Modify the value of a register or memory location.  <br /></td></tr>
+<tr class="memitem:a6fb2180751b77b9ba629b972f15a2cca" id="r_a6fb2180751b77b9ba629b972f15a2cca"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6fb2180751b77b9ba629b972f15a2cca">examin_mem</a> (<a class="el" href="structcontext.html">context</a> *ctx, void *args)</td></tr>
+<tr class="memdesc:a6fb2180751b77b9ba629b972f15a2cca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Examine memory at a specific address.  <br /></td></tr>
+<tr class="memitem:aa368ce0ff990876c9ea6611125d01cd5" id="r_aa368ce0ff990876c9ea6611125d01cd5"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa368ce0ff990876c9ea6611125d01cd5">delBP</a> (<a class="el" href="structcontext.html">context</a> *ctx, void *args)</td></tr>
+<tr class="memdesc:aa368ce0ff990876c9ea6611125d01cd5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Delete a breakpoint by ID.  <br /></td></tr>
+<tr class="memitem:a0343f9c7a1e9135576e29c48c083683e" id="r_a0343f9c7a1e9135576e29c48c083683e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0343f9c7a1e9135576e29c48c083683e">step_over</a> (<a class="el" href="structcontext.html">context</a> *ctx, void *args)</td></tr>
+<tr class="memdesc:a0343f9c7a1e9135576e29c48c083683e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Step over a function call instruction.  <br /></td></tr>
+<tr class="memitem:ad23595e93ed7a706ca350d702d6734a7" id="r_ad23595e93ed7a706ca350d702d6734a7"><td class="memItemLeft" align="right" valign="top">uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad23595e93ed7a706ca350d702d6734a7">find_sym</a> (<a class="el" href="structcontext.html">context</a> *ctx, char *name)</td></tr>
+<tr class="memdesc:ad23595e93ed7a706ca350d702d6734a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find the address of a symbol in the loaded program.  <br /></td></tr>
+<tr class="memitem:a46c28deefe27e450fe35881d5319bf93" id="r_a46c28deefe27e450fe35881d5319bf93"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a46c28deefe27e450fe35881d5319bf93">setBP</a> (<a class="el" href="structcontext.html">context</a> *ctx, void *args)</td></tr>
+<tr class="memdesc:a46c28deefe27e450fe35881d5319bf93"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set a breakpoint at a given address or symbol name.  <br /></td></tr>
+<tr class="memitem:ac2fdceaf5836ab15d9512b534fa155fb" id="r_ac2fdceaf5836ab15d9512b534fa155fb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac2fdceaf5836ab15d9512b534fa155fb">handle_bpoint</a> (<a class="el" href="structcontext.html">context</a> *ctx)</td></tr>
+<tr class="memdesc:ac2fdceaf5836ab15d9512b534fa155fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle a breakpoint hit by restoring the instruction and adjusting RIP.  <br /></td></tr>
+<tr class="memitem:a04f49fd9e411d994dbc2c637c4b1e040" id="r_a04f49fd9e411d994dbc2c637c4b1e040"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a04f49fd9e411d994dbc2c637c4b1e040">listBP</a> (<a class="el" href="structcontext.html">context</a> *ctx, void *args)</td></tr>
+<tr class="memdesc:a04f49fd9e411d994dbc2c637c4b1e040"><td class="mdescLeft">&#160;</td><td class="mdescRight">List all active breakpoints.  <br /></td></tr>
+<tr class="memitem:a69638fb4119958d602a84508c7305746" id="r_a69638fb4119958d602a84508c7305746"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a69638fb4119958d602a84508c7305746">restore_all_BP</a> (<a class="el" href="structcontext.html">context</a> *ctx, int opt)</td></tr>
+<tr class="memdesc:a69638fb4119958d602a84508c7305746"><td class="mdescLeft">&#160;</td><td class="mdescRight">Restore all breakpoints to their original values or reapply traps.  <br /></td></tr>
+<tr class="memitem:ab98a3865f9bc4aab5e9144e5d603b041" id="r_ab98a3865f9bc4aab5e9144e5d603b041"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab98a3865f9bc4aab5e9144e5d603b041">dis_ctx</a> (<a class="el" href="structcontext.html">context</a> *ctx)</td></tr>
+<tr class="memdesc:ab98a3865f9bc4aab5e9144e5d603b041"><td class="mdescLeft">&#160;</td><td class="mdescRight">Display process registers, flags, disassembly, and stack contents.  <br /></td></tr>
+<tr class="memitem:a36d9996b85e1afb5811044fb0abda9a3" id="r_a36d9996b85e1afb5811044fb0abda9a3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a36d9996b85e1afb5811044fb0abda9a3">init_values</a> (<a class="el" href="structbparser.html">bparser</a> *target, <a class="el" href="structcontext.html">context</a> *ctx)</td></tr>
+<tr class="memdesc:a36d9996b85e1afb5811044fb0abda9a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the debugger context from a parsed ELF binary.  <br /></td></tr>
+<tr class="memitem:ac0e6c0148bae4415ed675203a6ac0fef" id="r_ac0e6c0148bae4415ed675203a6ac0fef"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac0e6c0148bae4415ed675203a6ac0fef">destroy_bp_sym</a> (<a class="el" href="structcontext.html">context</a> *ctx)</td></tr>
+<tr class="memdesc:ac0e6c0148bae4415ed675203a6ac0fef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Free all breakpoint and symbol structures in the context.  <br /></td></tr>
+<tr class="memitem:acfedc0b1c8833d514dc5567edc8a4515" id="r_acfedc0b1c8833d514dc5567edc8a4515"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acfedc0b1c8833d514dc5567edc8a4515">destroy_all</a> (<a class="el" href="structcontext.html">context</a> *ctx)</td></tr>
+<tr class="memdesc:acfedc0b1c8833d514dc5567edc8a4515"><td class="mdescLeft">&#160;</td><td class="mdescRight">Free all allocated resources in the debugger context.  <br /></td></tr>
+<tr class="memitem:a2ca5943ca1c1a69c579d47b567e9a581" id="r_a2ca5943ca1c1a69c579d47b567e9a581"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2ca5943ca1c1a69c579d47b567e9a581">b_debugger</a> (<a class="el" href="structbparser.html">bparser</a> *target, void *arg)</td></tr>
+<tr class="memdesc:a2ca5943ca1c1a69c579d47b567e9a581"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run the debugger on a given binary.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Functions to handle debugging binary and command logic. </p>
+<div class="textblock"><p>Implementation of a lightweight debugger for ELF binaries using ptrace. </p>
+<p>This file provides functionality for:</p><ul>
+<li>Parsing user commands</li>
+<li>Handling breakpoints</li>
+<li>Inspecting and modifying memory and registers</li>
+<li>Displaying disassembly and process state</li>
+<li>Running a target program under debugger control </li>
+</ul>
 </div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="a2ca5943ca1c1a69c579d47b567e9a581" name="a2ca5943ca1c1a69c579d47b567e9a581"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2ca5943ca1c1a69c579d47b567e9a581">&#9670;&#160;</a></span>b_debugger()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool b_debugger </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structbparser.html">bparser</a> *</td>          <td class="paramname"><span class="paramname"><em>target</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *</td>          <td class="paramname"><span class="paramname"><em>arg</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Run the debugger on a given binary. </p>
+<p>Launch and manage the debugger main loop.</p>
+<p>Forks a child process, loads the binary via memfd_create, and sets an initial breakpoint. Then enters the main command loop for user interaction.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">target</td><td>Pointer to binary parser structure with ELF data. </td></tr>
+    <tr><td class="paramname">arg</td><td>Arguments structure containing argc and argv. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>true on success, false otherwise. </dd></dl>
+
+</div>
+</div>
+<a id="aa368ce0ff990876c9ea6611125d01cd5" name="aa368ce0ff990876c9ea6611125d01cd5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa368ce0ff990876c9ea6611125d01cd5">&#9670;&#160;</a></span>delBP()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool delBP </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcontext.html">context</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *</td>          <td class="paramname"><span class="paramname"><em>args</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Delete a breakpoint by ID. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ctx</td><td>Pointer to debugger context. </td></tr>
+    <tr><td class="paramname">args</td><td>Breakpoint ID. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>true if deletion succeeds, false otherwise. </dd></dl>
+
+</div>
+</div>
+<a id="acfedc0b1c8833d514dc5567edc8a4515" name="acfedc0b1c8833d514dc5567edc8a4515"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acfedc0b1c8833d514dc5567edc8a4515">&#9670;&#160;</a></span>destroy_all()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void destroy_all </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcontext.html">context</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Free all allocated resources in the debugger context. </p>
+<p>Destroy all context-related memory.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ctx</td><td>Pointer to debugger context. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ac0e6c0148bae4415ed675203a6ac0fef" name="ac0e6c0148bae4415ed675203a6ac0fef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac0e6c0148bae4415ed675203a6ac0fef">&#9670;&#160;</a></span>destroy_bp_sym()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void destroy_bp_sym </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcontext.html">context</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Free all breakpoint and symbol structures in the context. </p>
+<p>Free all breakpoints and symbols in the context.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ctx</td><td>Pointer to debugger context. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ab98a3865f9bc4aab5e9144e5d603b041" name="ab98a3865f9bc4aab5e9144e5d603b041"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab98a3865f9bc4aab5e9144e5d603b041">&#9670;&#160;</a></span>dis_ctx()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void dis_ctx </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcontext.html">context</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Display process registers, flags, disassembly, and stack contents. </p>
+<p>Display current registers, flags, disassembly, and stack.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ctx</td><td>Pointer to debugger context. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a6fb2180751b77b9ba629b972f15a2cca" name="a6fb2180751b77b9ba629b972f15a2cca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6fb2180751b77b9ba629b972f15a2cca">&#9670;&#160;</a></span>examin_mem()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool examin_mem </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcontext.html">context</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *</td>          <td class="paramname"><span class="paramname"><em>args</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Examine memory at a specific address. </p>
+<p>Examine memory at a given address.</p>
+<p>Command format: <span class="tt">x ADDR SIZE</span></p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ctx</td><td>Pointer to debugger context. </td></tr>
+    <tr><td class="paramname">args</td><td>Address and size arguments. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>true on success, false otherwise. </dd></dl>
+
+</div>
+</div>
+<a id="ad23595e93ed7a706ca350d702d6734a7" name="ad23595e93ed7a706ca350d702d6734a7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad23595e93ed7a706ca350d702d6734a7">&#9670;&#160;</a></span>find_sym()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint64_t find_sym </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcontext.html">context</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *</td>          <td class="paramname"><span class="paramname"><em>name</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Find the address of a symbol in the loaded program. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ctx</td><td>Pointer to debugger context. </td></tr>
+    <tr><td class="paramname">name</td><td>Symbol name to search for. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Symbol address if found, 0 otherwise. </dd></dl>
+
+</div>
+</div>
 <a id="a0cf63db5ac47b62a00e91d611a0fd07e" name="a0cf63db5ac47b62a00e91d611a0fd07e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a0cf63db5ac47b62a00e91d611a0fd07e">&#9670;&#160;</a></span>handle_action()</h2>
 
@@ -167,13 +383,106 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>b_debugger</b> (<a cl
       </table>
 </div><div class="memdoc">
 
-<p>Function to handle command that don't need a function . </p>
+<p>Handle actions that correspond directly to simple commands (e.g., quit, help, continue, single-step). </p>
+<p>Execute a user command.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">ctx</td><td>is the cpu status </td></tr>
+    <tr><td class="paramname">ctx</td><td>Pointer to debugger context. </td></tr>
+    <tr><td class="paramname">args</td><td>Optional arguments passed with the command. </td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>true if the command was successfully handled, false otherwise. </dd></dl>
+
+</div>
+</div>
+<a id="ac2fdceaf5836ab15d9512b534fa155fb" name="ac2fdceaf5836ab15d9512b534fa155fb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac2fdceaf5836ab15d9512b534fa155fb">&#9670;&#160;</a></span>handle_bpoint()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void handle_bpoint </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcontext.html">context</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Handle a breakpoint hit by restoring the instruction and adjusting RIP. </p>
+<p>Handle breakpoint hit logic.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ctx</td><td>Pointer to debugger context. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a36d9996b85e1afb5811044fb0abda9a3" name="a36d9996b85e1afb5811044fb0abda9a3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a36d9996b85e1afb5811044fb0abda9a3">&#9670;&#160;</a></span>init_values()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void init_values </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structbparser.html">bparser</a> *</td>          <td class="paramname"><span class="paramname"><em>target</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcontext.html">context</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Initialize the debugger context from a parsed ELF binary. </p>
+<p>Initialize context values from target binary.</p>
+<p>Reads ELF headers and symbol tables to populate context values.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">target</td><td>Pointer to binary parser structure with ELF data. </td></tr>
+    <tr><td class="paramname">ctx</td><td>Pointer to debugger context to initialize. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a04f49fd9e411d994dbc2c637c4b1e040" name="a04f49fd9e411d994dbc2c637c4b1e040"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a04f49fd9e411d994dbc2c637c4b1e040">&#9670;&#160;</a></span>listBP()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool listBP </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcontext.html">context</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *</td>          <td class="paramname"><span class="paramname"><em>args</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>List all active breakpoints. </p>
+<p>List all breakpoints.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ctx</td><td>Pointer to debugger context. </td></tr>
+    <tr><td class="paramname">args</td><td>Unused. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>true always. </dd></dl>
 
 </div>
 </div>
@@ -192,13 +501,164 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>b_debugger</b> (<a cl
       </table>
 </div><div class="memdoc">
 
-<p>Function to handle user commands. </p>
+<p>Parse and execute a user command entered in the debugger prompt. </p>
+<p>Parse and dispatch a command from the user.</p>
+<p>Reads a command from stdin, splits it into operator and arguments, and executes the corresponding debugger function.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">ctx</td><td>is the cpu status </td></tr>
+    <tr><td class="paramname">ctx</td><td>Pointer to debugger context structure containing process state. </td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a54938d2b6415efb1e55083cb4333614c" name="a54938d2b6415efb1e55083cb4333614c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a54938d2b6415efb1e55083cb4333614c">&#9670;&#160;</a></span>print_helpCMD()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void print_helpCMD </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Print the list of available debugger commands. </p>
+<p>Print available debugger commands. </p>
+
+</div>
+</div>
+<a id="a69638fb4119958d602a84508c7305746" name="a69638fb4119958d602a84508c7305746"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a69638fb4119958d602a84508c7305746">&#9670;&#160;</a></span>restore_all_BP()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void restore_all_BP </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcontext.html">context</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>opt</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Restore all breakpoints to their original values or reapply traps. </p>
+<p>Restore all breakpoints (enable or disable).</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ctx</td><td>Pointer to debugger context. </td></tr>
+    <tr><td class="paramname">opt</td><td>If 1, restore original instruction. If 0, reset breakpoint trap. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a9d37cb08ac98ba7e8db761b99b49f779" name="a9d37cb08ac98ba7e8db761b99b49f779"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9d37cb08ac98ba7e8db761b99b49f779">&#9670;&#160;</a></span>set_mem_reg()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool set_mem_reg </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcontext.html">context</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *</td>          <td class="paramname"><span class="paramname"><em>args</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Modify the value of a register or memory location. </p>
+<p>Modify memory or registers.</p>
+<p>Command format: <span class="tt">$REG=VALUE</span> or <span class="tt">ADDR=VALUE</span></p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ctx</td><td>Pointer to debugger context. </td></tr>
+    <tr><td class="paramname">args</td><td>Command argument string. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>true on success, false otherwise. </dd></dl>
+
+</div>
+</div>
+<a id="a46c28deefe27e450fe35881d5319bf93" name="a46c28deefe27e450fe35881d5319bf93"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a46c28deefe27e450fe35881d5319bf93">&#9670;&#160;</a></span>setBP()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool setBP </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcontext.html">context</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *</td>          <td class="paramname"><span class="paramname"><em>args</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Set a breakpoint at a given address or symbol name. </p>
+<p>Set a breakpoint at an address or symbol.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ctx</td><td>Pointer to debugger context. </td></tr>
+    <tr><td class="paramname">args</td><td>Address or symbol name. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>true if the breakpoint was successfully set, false otherwise. </dd></dl>
+
+</div>
+</div>
+<a id="a0343f9c7a1e9135576e29c48c083683e" name="a0343f9c7a1e9135576e29c48c083683e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0343f9c7a1e9135576e29c48c083683e">&#9670;&#160;</a></span>step_over()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool step_over </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structcontext.html">context</a> *</td>          <td class="paramname"><span class="paramname"><em>ctx</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void *</td>          <td class="paramname"><span class="paramname"><em>args</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Step over a function call instruction. </p>
+<p>Step over a function call.</p>
+<p>Inserts a temporary breakpoint after the call instruction and continues execution.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ctx</td><td>Pointer to debugger context. </td></tr>
+    <tr><td class="paramname">args</td><td>Unused. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>true on success, false otherwise. </dd></dl>
 
 </div>
 </div>

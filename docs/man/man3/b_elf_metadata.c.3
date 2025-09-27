@@ -1,4 +1,4 @@
-.TH "modules/b_elf_metadata/b_elf_metadata.c" 3 "Version 0.1.0" "Baseer" \" -*- nroff -*-
+.TH "modules/b_elf_metadata/b_elf_metadata.c" 3 "Version 0.2.0" "Baseer" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -8,6 +8,12 @@ modules/b_elf_metadata/b_elf_metadata.c \- Functions for parsing and printing EL
 .br
 .PP
 \fR#include 'b_elf_metadata\&.h'\fP
+.br
+\fR#include '\&.\&./b_hashmap/b_hashmap\&.h'\fP
+.br
+\fR#include <elf\&.h>\fP
+.br
+\fR#include <string\&.h>\fP
 .br
 
 .SS "Functions"
@@ -22,14 +28,6 @@ modules/b_elf_metadata/b_elf_metadata.c \- Functions for parsing and printing EL
 .br
 .RI "Dump the ELF header information for a 64-bit ELF file\&. "
 .ti -1c
-.RI "void \fBdump_elf32_phdr\fP (Elf32_Ehdr *elf, Elf32_Phdr *phdr, \fBbparser\fP *parser)"
-.br
-.RI "Dump the program header table of a 32-bit ELF file\&. "
-.ti -1c
-.RI "void \fBdump_elf64_phdr\fP (Elf64_Ehdr *elf, Elf64_Phdr *phdr, \fBbparser\fP *parser)"
-.br
-.RI "Dump the program header table of a 64-bit ELF file\&. "
-.ti -1c
 .RI "void \fBdump_elf32_shdr\fP (Elf32_Ehdr *elf, Elf32_Shdr *shdrs, \fBbparser\fP *parser)"
 .br
 .RI "Dump the section header table of a 32-bit ELF file\&. "
@@ -37,6 +35,14 @@ modules/b_elf_metadata/b_elf_metadata.c \- Functions for parsing and printing EL
 .RI "void \fBdump_elf64_shdr\fP (Elf64_Ehdr *elf, Elf64_Shdr *shdrs, \fBbparser\fP *parser)"
 .br
 .RI "Dump the section header table of a 64-bit ELF file\&. "
+.ti -1c
+.RI "void \fBdump_elf32_phdr\fP (Elf32_Ehdr *elf, Elf32_Phdr *phdr, \fBbparser\fP *parser)"
+.br
+.RI "Dump the program header table of a 32-bit ELF file\&. "
+.ti -1c
+.RI "void \fBdump_elf64_phdr\fP (Elf64_Ehdr *elf, Elf64_Phdr *phdr, \fBbparser\fP *parser)"
+.br
+.RI "Dump the program header table of a 64-bit ELF file\&. "
 .ti -1c
 .RI "bool \fBprint_meta_data\fP (\fBbparser\fP *parser, void *args)"
 .br
@@ -67,18 +73,8 @@ This file depends on:
 .IP "\(bu" 2
 ELF structures (Elf32_Ehdr, Elf32_Phdr, Elf32_Shdr, etc\&.)
 .IP "\(bu" 2
-Helper functions like \fBdump_elf32hdr()\fP, \fBdump_elf64hdr()\fP, \fBdump_elf32_shdr()\fP, \fBdump_elf64_shdr()\fP, \fBdump_elf32_phdr()\fP, \fBdump_elf64_phdr()\fP
+Helper functions like \fBdump_elf32hdr()\fP, \fBdump_elf64hdr()\fP, \fBdump_elf32_shdr()\fP, \fBdump_elf64_shdr()\fP, \fBdump_elf32_phdr()\fP, \fBdump_elf64_phdr()\fP 
 .PP
-.RE
-.PP
-\fBAuthor\fP
-.RS 4
-Thamer 
-.RE
-.PP
-\fBDate\fP
-.RS 4
-2025 
 .RE
 .PP
 

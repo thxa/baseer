@@ -1,11 +1,14 @@
-.TH "bp" 3 "Version 0.1.0" "Baseer" \" -*- nroff -*-
+.TH "bp" 3 "Version 0.2.0" "Baseer" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-bp
+bp \- Represents a single breakpoint\&.  
+
 .SH SYNOPSIS
 .br
 .PP
+.PP
+\fR#include <debugger\&.h>\fP
 .SS "Public Attributes"
 
 .in +1c
@@ -22,6 +25,19 @@ bp
 .RI "unsigned int \fBid\fP"
 .br
 .in -1c
+.SH "Detailed Description"
+.PP 
+Represents a single breakpoint\&. 
+.SH "Member Data Documentation"
+.PP 
+.SS "uint64_t bp::addr"
+Breakpoint address 
+.SS "unsigned int bp::id"
+Breakpoint ID 
+.SS "\fBbp\fP* bp::next"
+Next breakpoint in list 
+.SS "uint64_t bp::orig"
+Original instruction word 
 
 .SH "Author"
 .PP 

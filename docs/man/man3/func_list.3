@@ -1,11 +1,14 @@
-.TH "func_list" 3 "Version 0.1.0" "Baseer" \" -*- nroff -*-
+.TH "func_list" 3 "Version 0.2.0" "Baseer" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-func_list
+func_list \- Represents a debugger command and its associated function\&.  
+
 .SH SYNOPSIS
 .br
 .PP
+.PP
+\fR#include <debugger\&.h>\fP
 .SS "Public Attributes"
 
 .in +1c
@@ -13,9 +16,18 @@ func_list
 .RI "char * \fBcmd\fP"
 .br
 .ti -1c
-.RI "func_callback_t \fBfunc\fP"
+.RI "\fBfunc_callback_t\fP \fBfunc\fP"
 .br
 .in -1c
+.SH "Detailed Description"
+.PP 
+Represents a debugger command and its associated function\&. 
+.SH "Member Data Documentation"
+.PP 
+.SS "char* func_list::cmd"
+Command string 
+.SS "\fBfunc_callback_t\fP func_list::func"
+Function pointer 
 
 .SH "Author"
 .PP 

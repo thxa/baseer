@@ -1,11 +1,14 @@
-.TH "bp_list" 3 "Version 0.1.0" "Baseer" \" -*- nroff -*-
+.TH "bp_list" 3 "Version 0.2.0" "Baseer" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-bp_list
+bp_list \- A linked list of breakpoints\&.  
+
 .SH SYNOPSIS
 .br
 .PP
+.PP
+\fR#include <debugger\&.h>\fP
 .SS "Public Attributes"
 
 .in +1c
@@ -19,6 +22,17 @@ bp_list
 .RI "uint32_t \fBcounter\fP"
 .br
 .in -1c
+.SH "Detailed Description"
+.PP 
+A linked list of breakpoints\&. 
+.SH "Member Data Documentation"
+.PP 
+.SS "uint32_t bp_list::counter"
+Breakpoint counter (used for IDs) 
+.SS "\fBbp\fP* bp_list::first"
+First breakpoint 
+.SS "\fBbp\fP* bp_list::last"
+Last breakpoint 
 
 .SH "Author"
 .PP 

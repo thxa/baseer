@@ -1,4 +1,4 @@
-.TH "baseer_target_t" 3 "Version 0.1.0" "Baseer" \" -*- nroff -*-
+.TH "baseer_target_t" 3 "Version 0.2.0" "Baseer" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -13,6 +13,12 @@ baseer_target_t \- Struct representing a file target in memory or streaming mode
 
 .in +1c
 .ti -1c
+.RI "FILE * \fBfp\fP"
+.br
+.ti -1c
+.RI "\fBbaseer_mode_t\fP \fBmode\fP"
+.br
+.ti -1c
 .RI "unsigned int \fBsize\fP"
 .br
 .ti -1c
@@ -26,6 +32,10 @@ Struct representing a file target in memory or streaming mode\&.
 .PP 
 .SS "void* baseer_target_t::block"
 Memory block or FILE* cast 
+.SS "FILE* baseer_target_t::fp"
+File pointer 
+.SS "\fBbaseer_mode_t\fP baseer_target_t::mode"
+File access mode 
 .SS "unsigned int baseer_target_t::size"
 File size in bytes 
 

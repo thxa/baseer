@@ -25,9 +25,11 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
+  <td id="projectlogo"><img alt="Logo" src="logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">Baseer<span id="projectnumber">&#160;0.1.0</span>
+   <div id="projectname">Baseer<span id="projectnumber">&#160;0.2.0</span>
    </div>
+   <div id="projectbrief">Baseer is an advanced binary analysis tool designed to provide deep insights into any file.</div>
   </td>
  </tr>
  </tbody>
@@ -95,25 +97,20 @@ $(function(){initNavTree('bx__elf__disasm_8c.html','',''); });
 <p>Functions for disassembling ELF files and printing metadata.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &quot;bx_elf_disasm.h&quot;</code><br />
+<code>#include &quot;../b_hashmap/b_hashmap.h&quot;</code><br />
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a04b9976842d1536121feb927c98780ff" id="r_a04b9976842d1536121feb927c98780ff"><td class="memItemLeft" align="right" valign="top"><a id="a04b9976842d1536121feb927c98780ff" name="a04b9976842d1536121feb927c98780ff"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_metadata_section</b> (const char *name)</td></tr>
-<tr class="memitem:aaa214de29823c920abee1bda46b83598" id="r_aaa214de29823c920abee1bda46b83598"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aaa214de29823c920abee1bda46b83598">dump_disasm_elf32_phdr</a> (Elf32_Ehdr *elf, Elf32_Phdr *phdr, <a class="el" href="structbparser.html">bparser</a> *parser)</td></tr>
-<tr class="memdesc:aaa214de29823c920abee1bda46b83598"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disassembles and prints the program headers of a 32-bit ELF file.  <br /></td></tr>
-<tr class="memitem:addef15ece1c4e3ed0085fce836b36085" id="r_addef15ece1c4e3ed0085fce836b36085"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#addef15ece1c4e3ed0085fce836b36085">dump_disasm_elf64_phdr</a> (Elf64_Ehdr *elf, Elf64_Phdr *phdr, <a class="el" href="structbparser.html">bparser</a> *parser)</td></tr>
-<tr class="memdesc:addef15ece1c4e3ed0085fce836b36085"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disassembles and prints the program headers of a 64-bit ELF file.  <br /></td></tr>
 <tr class="memitem:a0064869d8fc943e02f0d8348cc1d7d99" id="r_a0064869d8fc943e02f0d8348cc1d7d99"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0064869d8fc943e02f0d8348cc1d7d99">dump_disasm_elf32_shdr</a> (Elf32_Ehdr *elf, Elf32_Shdr *shdrs, <a class="el" href="structbparser.html">bparser</a> *parser)</td></tr>
 <tr class="memdesc:a0064869d8fc943e02f0d8348cc1d7d99"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disassemble and print the ELF32 section headers.  <br /></td></tr>
 <tr class="memitem:a19f70148f6038c65dd0f773e518e63d6" id="r_a19f70148f6038c65dd0f773e518e63d6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a19f70148f6038c65dd0f773e518e63d6">dump_disasm_elf64_shdr</a> (Elf64_Ehdr *elf, Elf64_Shdr *shdrs, <a class="el" href="structbparser.html">bparser</a> *parser)</td></tr>
 <tr class="memdesc:a19f70148f6038c65dd0f773e518e63d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disassemble and print the ELF64 section headers.  <br /></td></tr>
+<tr class="memitem:aaa214de29823c920abee1bda46b83598" id="r_aaa214de29823c920abee1bda46b83598"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aaa214de29823c920abee1bda46b83598">dump_disasm_elf32_phdr</a> (Elf32_Ehdr *elf, Elf32_Phdr *phdr, <a class="el" href="structbparser.html">bparser</a> *parser)</td></tr>
+<tr class="memdesc:aaa214de29823c920abee1bda46b83598"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disassembles and prints the program headers of a 32-bit ELF file.  <br /></td></tr>
+<tr class="memitem:addef15ece1c4e3ed0085fce836b36085" id="r_addef15ece1c4e3ed0085fce836b36085"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#addef15ece1c4e3ed0085fce836b36085">dump_disasm_elf64_phdr</a> (Elf64_Ehdr *elf, Elf64_Phdr *phdr, <a class="el" href="structbparser.html">bparser</a> *parser)</td></tr>
+<tr class="memdesc:addef15ece1c4e3ed0085fce836b36085"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disassembles and prints the program headers of a 64-bit ELF file.  <br /></td></tr>
 <tr class="memitem:ac1962f8ecf008e619b8e320ef4fd7b9d" id="r_ac1962f8ecf008e619b8e320ef4fd7b9d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac1962f8ecf008e619b8e320ef4fd7b9d">print_elf_disasm</a> (<a class="el" href="structbparser.html">bparser</a> *parser, void *args)</td></tr>
 <tr class="memdesc:ac1962f8ecf008e619b8e320ef4fd7b9d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Print ELF file disassembly and metadata.  <br /></td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
-Variables</h2></td></tr>
-<tr class="memitem:a5b853d5b2baeeeeab3591dde38b47931" id="r_a5b853d5b2baeeeeab3591dde38b47931"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5b853d5b2baeeeeab3591dde38b47931">metadata_sections</a> []</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Functions for disassembling ELF files and printing metadata. </p>
@@ -318,37 +315,6 @@ Variables</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>true if the ELF file was successfully analyzed and disassembled; false if the ELF class or machine type is unsupported or unknown. </dd></dl>
 
-</div>
-</div>
-<a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
-<a id="a5b853d5b2baeeeeab3591dde38b47931" name="a5b853d5b2baeeeeab3591dde38b47931"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5b853d5b2baeeeeab3591dde38b47931">&#9670;&#160;</a></span>metadata_sections</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">const char* metadata_sections[]</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Initial value:</b><div class="fragment"><div class="line">= {</div>
-<div class="line">    <span class="stringliteral">&quot;.rela.dyn&quot;</span>,</div>
-<div class="line">    <span class="stringliteral">&quot;.rela.plt&quot;</span>,</div>
-<div class="line">    <span class="stringliteral">&quot;.dynsym&quot;</span>,</div>
-<div class="line">    <span class="stringliteral">&quot;.dynstr&quot;</span>,</div>
-<div class="line">    <span class="stringliteral">&quot;.eh_frame&quot;</span>,</div>
-<div class="line">    <span class="stringliteral">&quot;.eh_frame_hdr&quot;</span>,</div>
-<div class="line">    <span class="stringliteral">&quot;.note.gnu.property&quot;</span>,</div>
-<div class="line">    <span class="stringliteral">&quot;.note.gnu.build-id&quot;</span>,</div>
-<div class="line">    <span class="stringliteral">&quot;.comment&quot;</span>,</div>
-<div class="line">    <span class="stringliteral">&quot;.gnu.version&quot;</span>,</div>
-<div class="line">    <span class="stringliteral">&quot;.interp&quot;</span>,</div>
-<div class="line">    <span class="stringliteral">&quot;.gnu.hash&quot;</span>,</div>
-<div class="line">    <span class="stringliteral">&quot;.gnu.version_r&quot;</span>,</div>
-<div class="line">    NULL</div>
-<div class="line">}</div>
-</div><!-- fragment -->
 </div>
 </div>
 </div><!-- contents -->

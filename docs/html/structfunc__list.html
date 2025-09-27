@@ -25,9 +25,11 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
+  <td id="projectlogo"><img alt="Logo" src="logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">Baseer<span id="projectnumber">&#160;0.1.0</span>
+   <div id="projectname">Baseer<span id="projectnumber">&#160;0.2.0</span>
    </div>
+   <div id="projectbrief">Baseer is an advanced binary analysis tool designed to provide deep insights into any file.</div>
   </td>
  </tr>
  </tbody>
@@ -91,14 +93,50 @@ $(function(){initNavTree('structfunc__list.html','','structfunc__list-members');
   <div class="headertitle"><div class="title">func_list Struct Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Represents a debugger command and its associated function.  
+ <a href="#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="debugger_8h_source.html">debugger.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:ad6b02b94ff42b2ecc4b59d661fa2589b" id="r_ad6b02b94ff42b2ecc4b59d661fa2589b"><td class="memItemLeft" align="right" valign="top"><a id="ad6b02b94ff42b2ecc4b59d661fa2589b" name="ad6b02b94ff42b2ecc4b59d661fa2589b"></a>
-char *&#160;</td><td class="memItemRight" valign="bottom"><b>cmd</b></td></tr>
-<tr class="memitem:aeab5a024d850b5b789afb4b76aac730f" id="r_aeab5a024d850b5b789afb4b76aac730f"><td class="memItemLeft" align="right" valign="top"><a id="aeab5a024d850b5b789afb4b76aac730f" name="aeab5a024d850b5b789afb4b76aac730f"></a>
-func_callback_t&#160;</td><td class="memItemRight" valign="bottom"><b>func</b></td></tr>
+<tr class="memitem:ad6b02b94ff42b2ecc4b59d661fa2589b" id="r_ad6b02b94ff42b2ecc4b59d661fa2589b"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad6b02b94ff42b2ecc4b59d661fa2589b">cmd</a></td></tr>
+<tr class="memitem:aeab5a024d850b5b789afb4b76aac730f" id="r_aeab5a024d850b5b789afb4b76aac730f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="debugger_8h.html#abf667baee6c5f8efb4a963122d6e7507">func_callback_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aeab5a024d850b5b789afb4b76aac730f">func</a></td></tr>
 </table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Represents a debugger command and its associated function. </p>
+</div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
+<a id="ad6b02b94ff42b2ecc4b59d661fa2589b" name="ad6b02b94ff42b2ecc4b59d661fa2589b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad6b02b94ff42b2ecc4b59d661fa2589b">&#9670;&#160;</a></span>cmd</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">char* func_list::cmd</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Command string </p>
+
+</div>
+</div>
+<a id="aeab5a024d850b5b789afb4b76aac730f" name="aeab5a024d850b5b789afb4b76aac730f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeab5a024d850b5b789afb4b76aac730f">&#9670;&#160;</a></span>func</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="debugger_8h.html#abf667baee6c5f8efb4a963122d6e7507">func_callback_t</a> func_list::func</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Function pointer </p>
+
+</div>
+</div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
 <li>modules/b_debugger/<a class="el" href="debugger_8h_source.html">debugger.h</a></li>
 </ul>

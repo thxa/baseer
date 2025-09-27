@@ -1,4 +1,4 @@
-.TH "baseer.h" 3 "Version 0.1.0" "Baseer" \" -*- nroff -*-
+.TH "baseer.h" 3 "Version 0.2.0" "Baseer" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -21,6 +21,8 @@ baseer.h \- Core file handling and execution API for Baseer\&.
 .br
 \fR#include <ctype\&.h>\fP
 .br
+\fR#include 'linenoise\&.h'\fP
+.br
 
 .SS "Classes"
 
@@ -41,7 +43,7 @@ baseer.h \- Core file handling and execution API for Baseer\&.
 .RI "#define \fBBASEER_VERSION_MAJOR\fP   0"
 .br
 .ti -1c
-.RI "#define \fBBASEER_VERSION_MINOR\fP   1"
+.RI "#define \fBBASEER_VERSION_MINOR\fP   2"
 .br
 .ti -1c
 .RI "#define \fBBASEER_VERSION_MICRO\fP   0"
@@ -68,16 +70,22 @@ baseer.h \- Core file handling and execution API for Baseer\&.
 .RI "#define \fBCOLOR_RESET\fP   '\\033[0m'"
 .br
 .ti -1c
-.RI "#define \fBCOLOR_GREEN\fP   '\\033[1;32m'"
+.RI "#define \fBCOLOR_BLACK\fP   '\\033[30m'"
 .br
 .ti -1c
-.RI "#define \fBCOLOR_BLUE\fP   '\\033[1;34m'"
+.RI "#define \fBCOLOR_GRAY\fP   '\\033[90m'"
 .br
 .ti -1c
-.RI "#define \fBCOLOR_YELLOW\fP   '\\033[1;33m'"
+.RI "#define \fBCOLOR_RED\fP   '\\033[31m'"
 .br
 .ti -1c
-.RI "#define \fBCOLOR_RED\fP   '\\033[1;31m'"
+.RI "#define \fBCOLOR_GREEN\fP   '\\033[32m'"
+.br
+.ti -1c
+.RI "#define \fBCOLOR_YELLOW\fP   '\\033[33m'"
+.br
+.ti -1c
+.RI "#define \fBCOLOR_BLUE\fP   '\\033[34m'"
 .br
 .ti -1c
 .RI "#define \fBCOLOR_MAGENTA\fP   '\\033[35m'"
@@ -86,10 +94,64 @@ baseer.h \- Core file handling and execution API for Baseer\&.
 .RI "#define \fBCOLOR_CYAN\fP   '\\033[36m'"
 .br
 .ti -1c
-.RI "#define \fBCOLOR_RAND\fP(i,  c1,  c2)"
+.RI "#define \fBCOLOR_WHITE\fP   '\\033[37m'"
 .br
 .ti -1c
-.RI "#define \fBBLOCK_LENGTH\fP   40"
+.RI "#define \fBCOLOR_BBLACK\fP   '\\033[1;30m'"
+.br
+.ti -1c
+.RI "#define \fBCOLOR_BRED\fP   '\\033[1;31m'"
+.br
+.ti -1c
+.RI "#define \fBCOLOR_BGREEN\fP   '\\033[1;32m'"
+.br
+.ti -1c
+.RI "#define \fBCOLOR_BYELLOW\fP   '\\033[1;33m'"
+.br
+.ti -1c
+.RI "#define \fBCOLOR_BBLUE\fP   '\\033[1;34m'"
+.br
+.ti -1c
+.RI "#define \fBCOLOR_BMAGENTA\fP   '\\033[1;35m'"
+.br
+.ti -1c
+.RI "#define \fBCOLOR_BCYAN\fP   '\\033[1;36m'"
+.br
+.ti -1c
+.RI "#define \fBCOLOR_BWHITE\fP   '\\033[1;37m'"
+.br
+.ti -1c
+.RI "#define \fBCOLOR_BG_BLACK\fP   '\\033[40m'"
+.br
+.ti -1c
+.RI "#define \fBCOLOR_BG_RED\fP   '\\033[41m'"
+.br
+.ti -1c
+.RI "#define \fBCOLOR_BG_GREEN\fP   '\\033[42m'"
+.br
+.ti -1c
+.RI "#define \fBCOLOR_BG_YELLOW\fP   '\\033[43m'"
+.br
+.ti -1c
+.RI "#define \fBCOLOR_BG_BLUE\fP   '\\033[44m'"
+.br
+.ti -1c
+.RI "#define \fBCOLOR_BG_MAGENTA\fP   '\\033[45m'"
+.br
+.ti -1c
+.RI "#define \fBCOLOR_BG_CYAN\fP   '\\033[46m'"
+.br
+.ti -1c
+.RI "#define \fBCOLOR_BG_WHITE\fP   '\\033[47m'"
+.br
+.ti -1c
+.RI "#define \fBMAX_INPUT_ARGS\fP   20"
+.br
+.ti -1c
+.RI "#define \fBDEFAULT_BLOCK_LENGTH\fP   16"
+.br
+.ti -1c
+.RI "#define \fBBLOCK_LENGTH\fP   (get_block_length())"
 .br
 .in -1c
 .SS "Typedefs"
@@ -108,22 +170,19 @@ baseer.h \- Core file handling and execution API for Baseer\&.
 
 .in +1c
 .ti -1c
-.RI "enum \fBfile_mode\fP { \fBSTREAM\fP, \fBMEMORY\fP }"
+.RI "enum \fBbaseer_mode_t\fP { \fBBASEER_MODE_MEMORY\fP, \fBBASEER_MODE_STREAM\fP, \fBBASEER_MODE_BOTH\fP }"
 .br
+.RI "Enum representing file access modes\&. "
 .in -1c
 .SS "Functions"
 
 .in +1c
 .ti -1c
-.RI "\fBbaseer_target_t\fP * \fBbaseer_open_memory\fP (char *file_path)"
+.RI "\fBbaseer_target_t\fP * \fBbaseer_open\fP (char *file_path, \fBbaseer_mode_t\fP mode)"
 .br
-.RI "Open a file fully loaded into memory\&. "
+.RI "Open a file in specified mode (memory, streaming, or both) "
 .ti -1c
-.RI "\fBbaseer_target_t\fP * \fBbaseer_open_file\fP (char *file_path)"
-.br
-.RI "Open a file in streaming mode (FILE*) without full memory load\&. "
-.ti -1c
-.RI "void \fBbaseer_close\fP (\fBbaseer_target_t\fP *target, int mode)"
+.RI "void \fBbaseer_close\fP (\fBbaseer_target_t\fP *target)"
 .br
 .RI "Close a file target and free associated resources\&. "
 .ti -1c
@@ -157,13 +216,6 @@ Max file size for memory mode
     TOSTRING(BASEER_VERSION_MAJOR) "\&." \\
     TOSTRING(BASEER_VERSION_MINOR) "\&." \\
     TOSTRING(BASEER_VERSION_MICRO)
-.PP
-.fi
-
-.SS "#define COLOR_RAND( i,  c1,  c2)"
-\fBValue:\fP
-.nf
-(i & 1)?c1:c2;
 .PP
 .fi
 
@@ -213,7 +265,7 @@ true on success, false on failure
 
 .SH "Function Documentation"
 .PP 
-.SS "void baseer_close (\fBbaseer_target_t\fP * target, int mode)"
+.SS "void baseer_close (\fBbaseer_target_t\fP * target)"
 
 .PP
 Close a file target and free associated resources\&. 
@@ -244,30 +296,16 @@ true on success, false on failure
 .RE
 .PP
 
-.SS "\fBbaseer_target_t\fP * baseer_open_file (char * file_path)"
+.SS "\fBbaseer_target_t\fP * baseer_open (char * file_path, \fBbaseer_mode_t\fP mode)"
 
 .PP
-Open a file in streaming mode (FILE*) without full memory load\&. 
+Open a file in specified mode (memory, streaming, or both) 
 .PP
 \fBParameters\fP
 .RS 4
 \fIfile_path\fP Path to the file 
-.RE
-.PP
-\fBReturns\fP
-.RS 4
-Pointer to \fBbaseer_target_t\fP on success, NULL on failure 
-.RE
-.PP
-
-.SS "\fBbaseer_target_t\fP * baseer_open_memory (char * file_path)"
-
-.PP
-Open a file fully loaded into memory\&. 
-.PP
-\fBParameters\fP
-.RS 4
-\fIfile_path\fP Path to the file 
+.br
+\fImode\fP Access mode (MEMORY, STREAM, BOTH) 
 .RE
 .PP
 \fBReturns\fP

@@ -1,11 +1,14 @@
-.TH "Cmd" 3 "Version 0.1.0" "Baseer" \" -*- nroff -*-
+.TH "Cmd" 3 "Version 0.2.0" "Baseer" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-Cmd
+Cmd \- Represents a parsed user command\&.  
+
 .SH SYNOPSIS
 .br
 .PP
+.PP
+\fR#include <debugger\&.h>\fP
 .SS "Public Attributes"
 
 .in +1c
@@ -15,10 +18,16 @@ Cmd
 .ti -1c
 .RI "uint64_t \fBaddr\fP"
 .br
-.ti -1c
-.RI "uint64_t \fBextra\fP"
-.br
 .in -1c
+.SH "Detailed Description"
+.PP 
+Represents a parsed user command\&. 
+.SH "Member Data Documentation"
+.PP 
+.SS "uint64_t Cmd::addr"
+Optional command address argument 
+.SS "char* Cmd::op"
+Command operation string 
 
 .SH "Author"
 .PP 

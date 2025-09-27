@@ -1,4 +1,4 @@
-.TH "modules/bparser/bparser.c" 3 "Version 0.1.0" "Baseer" \" -*- nroff -*-
+.TH "modules/bparser/bparser.c" 3 "Version 0.2.0" "Baseer" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -14,7 +14,7 @@ modules/bparser/bparser.c \- Binary parser implementation\&.
 
 .in +1c
 .ti -1c
-.RI "\fBbparser\fP * \fBbparser_load\fP (\fBbparser_type\fP type, void *data)"
+.RI "\fBbparser\fP * \fBbparser_load\fP (\fBbaseer_target_t\fP *target)"
 .br
 .RI "Load a parser object\&. "
 .ti -1c
@@ -53,7 +53,7 @@ true on success, false on failure
 .RE
 .PP
 
-.SS "\fBbparser\fP * bparser_load (\fBbparser_type\fP type, void * data)"
+.SS "\fBbparser\fP * bparser_load (\fBbaseer_target_t\fP * data)"
 
 .PP
 Load a parser object\&. 

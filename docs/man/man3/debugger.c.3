@@ -1,12 +1,14 @@
-.TH "modules/b_debugger/debugger.c" 3 "Version 0.1.0" "Baseer" \" -*- nroff -*-
+.TH "modules/b_debugger/debugger.c" 3 "Version 0.2.0" "Baseer" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
-modules/b_debugger/debugger.c \- Functions to handle debugging binary and command logic\&.  
+modules/b_debugger/debugger.c \- Implementation of a lightweight debugger for ELF binaries using ptrace\&.  
 
 .SH SYNOPSIS
 .br
 .PP
+\fR#include <stdint\&.h>\fP
+.br
 \fR#include <elf\&.h>\fP
 .br
 \fR#include <stdio\&.h>\fP
@@ -31,6 +33,8 @@ modules/b_debugger/debugger.c \- Functions to handle debugging binary and comman
 .br
 \fR#include <sys/ptrace\&.h>\fP
 .br
+\fR#include '\&.\&./bx_elf_utils/bx_elf_utils\&.h'\fP
+.br
 
 .SS "Functions"
 
@@ -38,82 +42,367 @@ modules/b_debugger/debugger.c \- Functions to handle debugging binary and comman
 .ti -1c
 .RI "void \fBparse_cmd\fP (\fBcontext\fP *ctx)"
 .br
-.RI "Function to handle user commands\&. "
+.RI "Parse and execute a user command entered in the debugger prompt\&. "
 .ti -1c
 .RI "bool \fBhandle_action\fP (\fBcontext\fP *ctx, void *args)"
 .br
-.RI "Function to handle command that don't need a function \&. "
+.RI "Handle actions that correspond directly to simple commands (e\&.g\&., quit, help, continue, single-step)\&. "
 .ti -1c
 .RI "void \fBprint_helpCMD\fP ()"
 .br
-.RI "print the help commands \&. "
+.RI "Print the list of available debugger commands\&. "
 .ti -1c
-.RI "\fBbp\fP * \fBfindBP\fP (\fBcontext\fP *ctx, uint64_t rip)"
+.RI "bool \fBset_mem_reg\fP (\fBcontext\fP *ctx, void *args)"
 .br
-.RI "find a breakpoint that program hits\&. "
+.RI "Modify the value of a register or memory location\&. "
+.ti -1c
+.RI "bool \fBexamin_mem\fP (\fBcontext\fP *ctx, void *args)"
+.br
+.RI "Examine memory at a specific address\&. "
 .ti -1c
 .RI "bool \fBdelBP\fP (\fBcontext\fP *ctx, void *args)"
 .br
-.RI "delete a breakpoint\&. "
+.RI "Delete a breakpoint by ID\&. "
 .ti -1c
 .RI "bool \fBstep_over\fP (\fBcontext\fP *ctx, void *args)"
 .br
-.RI "function that do step over a function call\&. "
+.RI "Step over a function call instruction\&. "
+.ti -1c
+.RI "uint64_t \fBfind_sym\fP (\fBcontext\fP *ctx, char *name)"
+.br
+.RI "Find the address of a symbol in the loaded program\&. "
 .ti -1c
 .RI "bool \fBsetBP\fP (\fBcontext\fP *ctx, void *args)"
 .br
-.RI "set a breakpoint\&. "
+.RI "Set a breakpoint at a given address or symbol name\&. "
 .ti -1c
 .RI "void \fBhandle_bpoint\fP (\fBcontext\fP *ctx)"
 .br
+.RI "Handle a breakpoint hit by restoring the instruction and adjusting RIP\&. "
 .ti -1c
 .RI "bool \fBlistBP\fP (\fBcontext\fP *ctx, void *args)"
 .br
+.RI "List all active breakpoints\&. "
 .ti -1c
 .RI "void \fBrestore_all_BP\fP (\fBcontext\fP *ctx, int opt)"
 .br
+.RI "Restore all breakpoints to their original values or reapply traps\&. "
 .ti -1c
 .RI "void \fBdis_ctx\fP (\fBcontext\fP *ctx)"
 .br
+.RI "Display process registers, flags, disassembly, and stack contents\&. "
 .ti -1c
 .RI "void \fBinit_values\fP (\fBbparser\fP *target, \fBcontext\fP *ctx)"
 .br
+.RI "Initialize the debugger context from a parsed ELF binary\&. "
 .ti -1c
-.RI "void \fBdestroy_bp\fP (\fBbp\fP *bpoint)"
+.RI "void \fBdestroy_bp_sym\fP (\fBcontext\fP *ctx)"
 .br
+.RI "Free all breakpoint and symbol structures in the context\&. "
 .ti -1c
 .RI "void \fBdestroy_all\fP (\fBcontext\fP *ctx)"
 .br
+.RI "Free all allocated resources in the debugger context\&. "
 .ti -1c
 .RI "bool \fBb_debugger\fP (\fBbparser\fP *target, void *arg)"
 .br
+.RI "Run the debugger on a given binary\&. "
 .in -1c
 .SH "Detailed Description"
 .PP 
-Functions to handle debugging binary and command logic\&. 
+Implementation of a lightweight debugger for ELF binaries using ptrace\&. 
 
+This file provides functionality for:
+.IP "\(bu" 2
+Parsing user commands
+.IP "\(bu" 2
+Handling breakpoints
+.IP "\(bu" 2
+Inspecting and modifying memory and registers
+.IP "\(bu" 2
+Displaying disassembly and process state
+.IP "\(bu" 2
+Running a target program under debugger control 
+.PP
 
 .SH "Function Documentation"
 .PP 
-.SS "bool handle_action (\fBcontext\fP * ctx, void * args)"
+.SS "bool b_debugger (\fBbparser\fP * target, void * arg)"
 
 .PP
-Function to handle command that don't need a function \&. 
+Run the debugger on a given binary\&. Launch and manage the debugger main loop\&.
+
+.PP
+Forks a child process, loads the binary via memfd_create, and sets an initial breakpoint\&. Then enters the main command loop for user interaction\&.
+
 .PP
 \fBParameters\fP
 .RS 4
-\fIctx\fP is the cpu status 
+\fItarget\fP Pointer to binary parser structure with ELF data\&. 
+.br
+\fIarg\fP Arguments structure containing argc and argv\&. 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+true on success, false otherwise\&. 
+.RE
+.PP
+
+.SS "bool delBP (\fBcontext\fP * ctx, void * args)"
+
+.PP
+Delete a breakpoint by ID\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIctx\fP Pointer to debugger context\&. 
+.br
+\fIargs\fP Breakpoint ID\&. 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+true if deletion succeeds, false otherwise\&. 
+.RE
+.PP
+
+.SS "void destroy_all (\fBcontext\fP * ctx)"
+
+.PP
+Free all allocated resources in the debugger context\&. Destroy all context-related memory\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIctx\fP Pointer to debugger context\&. 
+.RE
+.PP
+
+.SS "void destroy_bp_sym (\fBcontext\fP * ctx)"
+
+.PP
+Free all breakpoint and symbol structures in the context\&. Free all breakpoints and symbols in the context\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIctx\fP Pointer to debugger context\&. 
+.RE
+.PP
+
+.SS "void dis_ctx (\fBcontext\fP * ctx)"
+
+.PP
+Display process registers, flags, disassembly, and stack contents\&. Display current registers, flags, disassembly, and stack\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIctx\fP Pointer to debugger context\&. 
+.RE
+.PP
+
+.SS "bool examin_mem (\fBcontext\fP * ctx, void * args)"
+
+.PP
+Examine memory at a specific address\&. Examine memory at a given address\&.
+
+.PP
+Command format: \fRx ADDR SIZE\fP
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIctx\fP Pointer to debugger context\&. 
+.br
+\fIargs\fP Address and size arguments\&. 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+true on success, false otherwise\&. 
+.RE
+.PP
+
+.SS "uint64_t find_sym (\fBcontext\fP * ctx, char * name)"
+
+.PP
+Find the address of a symbol in the loaded program\&. 
+.PP
+\fBParameters\fP
+.RS 4
+\fIctx\fP Pointer to debugger context\&. 
+.br
+\fIname\fP Symbol name to search for\&. 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+Symbol address if found, 0 otherwise\&. 
+.RE
+.PP
+
+.SS "bool handle_action (\fBcontext\fP * ctx, void * args)"
+
+.PP
+Handle actions that correspond directly to simple commands (e\&.g\&., quit, help, continue, single-step)\&. Execute a user command\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIctx\fP Pointer to debugger context\&. 
+.br
+\fIargs\fP Optional arguments passed with the command\&. 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+true if the command was successfully handled, false otherwise\&. 
+.RE
+.PP
+
+.SS "void handle_bpoint (\fBcontext\fP * ctx)"
+
+.PP
+Handle a breakpoint hit by restoring the instruction and adjusting RIP\&. Handle breakpoint hit logic\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIctx\fP Pointer to debugger context\&. 
+.RE
+.PP
+
+.SS "void init_values (\fBbparser\fP * target, \fBcontext\fP * ctx)"
+
+.PP
+Initialize the debugger context from a parsed ELF binary\&. Initialize context values from target binary\&.
+
+.PP
+Reads ELF headers and symbol tables to populate context values\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fItarget\fP Pointer to binary parser structure with ELF data\&. 
+.br
+\fIctx\fP Pointer to debugger context to initialize\&. 
+.RE
+.PP
+
+.SS "bool listBP (\fBcontext\fP * ctx, void * args)"
+
+.PP
+List all active breakpoints\&. List all breakpoints\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIctx\fP Pointer to debugger context\&. 
+.br
+\fIargs\fP Unused\&. 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+true always\&. 
 .RE
 .PP
 
 .SS "void parse_cmd (\fBcontext\fP * ctx)"
 
 .PP
-Function to handle user commands\&. 
+Parse and execute a user command entered in the debugger prompt\&. Parse and dispatch a command from the user\&.
+
+.PP
+Reads a command from stdin, splits it into operator and arguments, and executes the corresponding debugger function\&.
+
 .PP
 \fBParameters\fP
 .RS 4
-\fIctx\fP is the cpu status 
+\fIctx\fP Pointer to debugger context structure containing process state\&. 
+.RE
+.PP
+
+.SS "void print_helpCMD ()"
+
+.PP
+Print the list of available debugger commands\&. Print available debugger commands\&. 
+.SS "void restore_all_BP (\fBcontext\fP * ctx, int opt)"
+
+.PP
+Restore all breakpoints to their original values or reapply traps\&. Restore all breakpoints (enable or disable)\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIctx\fP Pointer to debugger context\&. 
+.br
+\fIopt\fP If 1, restore original instruction\&. If 0, reset breakpoint trap\&. 
+.RE
+.PP
+
+.SS "bool set_mem_reg (\fBcontext\fP * ctx, void * args)"
+
+.PP
+Modify the value of a register or memory location\&. Modify memory or registers\&.
+
+.PP
+Command format: \fR$REG=VALUE\fP or \fRADDR=VALUE\fP
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIctx\fP Pointer to debugger context\&. 
+.br
+\fIargs\fP Command argument string\&. 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+true on success, false otherwise\&. 
+.RE
+.PP
+
+.SS "bool setBP (\fBcontext\fP * ctx, void * args)"
+
+.PP
+Set a breakpoint at a given address or symbol name\&. Set a breakpoint at an address or symbol\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIctx\fP Pointer to debugger context\&. 
+.br
+\fIargs\fP Address or symbol name\&. 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+true if the breakpoint was successfully set, false otherwise\&. 
+.RE
+.PP
+
+.SS "bool step_over (\fBcontext\fP * ctx, void * args)"
+
+.PP
+Step over a function call instruction\&. Step over a function call\&.
+
+.PP
+Inserts a temporary breakpoint after the call instruction and continues execution\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIctx\fP Pointer to debugger context\&. 
+.br
+\fIargs\fP Unused\&. 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+true on success, false otherwise\&. 
 .RE
 .PP
 

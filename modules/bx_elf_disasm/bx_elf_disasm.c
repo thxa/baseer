@@ -78,7 +78,6 @@ void dump_disasm_elf32_shdr(Elf32_Ehdr* elf , Elf32_Shdr* shdrs, bparser* parser
             // ============================ END SECTION METADATA =============================
 
             // ============================ BEGIN SECTION BODY =============================
-            long long int offset = shdrs[i].sh_offset;
             if (shdrs[i].sh_size > 0) {
                 void* block = malloc(shdrs[i].sh_size);
                 bparser_read(parser, block, shdrs[i].sh_offset, shdrs[i].sh_size);
@@ -148,7 +147,6 @@ void dump_disasm_elf64_shdr(Elf64_Ehdr* elf , Elf64_Shdr* shdrs, bparser* parser
             // ============================ END SECTION METADATA =============================
 
             // ============================ BEGIN SECTION BODY =============================
-            long long int offset = shdrs[i].sh_offset;
             if (shdrs[i].sh_size > 0) {
                 void* block = malloc(shdrs[i].sh_size);
                 bparser_read(parser, block, shdrs[i].sh_offset, shdrs[i].sh_size);
@@ -306,7 +304,6 @@ void dump_disasm_elf64_phdr(Elf64_Ehdr *elf, Elf64_Phdr* phdr, bparser*parser)
         }
         // ============================ END PROGRAM BODY =============================
     }
-
 }
 // ========================= END PROGRAM HEADER ==================================
 

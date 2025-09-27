@@ -1,4 +1,4 @@
-.TH "bparser" 3 "Version 0.1.0" "Baseer" \" -*- nroff -*-
+.TH "bparser" 3 "Version 0.2.0" "Baseer" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -13,19 +13,16 @@ bparser \- Parser object\&.
 
 .in +1c
 .ti -1c
-.RI "union {"
+.RI "\fBbaseer_mode_t\fP \fBmode\fP"
 .br
 .ti -1c
-.RI "   FILE * \fBfp\fP"
+.RI "FILE * \fBfp\fP"
 .br
 .ti -1c
-.RI "   \fBbparser_mem_t\fP \fBmem\fP"
+.RI "size_t \fBsize\fP"
 .br
 .ti -1c
-.RI "} \fBsource\fP"
-.br
-.ti -1c
-.RI "\fBbparser_type\fP \fBtype\fP"
+.RI "const void * \fBblock\fP"
 .br
 .in -1c
 .SH "Detailed Description"

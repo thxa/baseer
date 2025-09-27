@@ -1,4 +1,4 @@
-.TH "modules/bparser/bparser.h" 3 "Version 0.1.0" "Baseer" \" -*- nroff -*-
+.TH "modules/bparser/bparser.h" 3 "Version 0.2.0" "Baseer" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -20,10 +20,6 @@ modules/bparser/bparser.h \- Binary parser abstraction supporting memory and str
 
 .in +1c
 .ti -1c
-.RI "struct \fBbparser_mem_t\fP"
-.br
-.RI "Memory source for the parser\&. "
-.ti -1c
 .RI "struct \fBbparser\fP"
 .br
 .RI "Parser object\&. "
@@ -36,19 +32,11 @@ modules/bparser/bparser.h \- Binary parser abstraction supporting memory and str
 .br
 .RI "Callback for bparser tools\&. "
 .in -1c
-.SS "Enumerations"
-
-.in +1c
-.ti -1c
-.RI "enum \fBbparser_type\fP { \fBBPARSER_FILE\fP, \fBBPARSER_MEM\fP }"
-.br
-.RI "Parser type: memory or streaming\&. "
-.in -1c
 .SS "Functions"
 
 .in +1c
 .ti -1c
-.RI "\fBbparser\fP * \fBbparser_load\fP (\fBbparser_type\fP type, void *data)"
+.RI "\fBbparser\fP * \fBbparser_load\fP (\fBbaseer_target_t\fP *data)"
 .br
 .RI "Load a parser object\&. "
 .ti -1c
@@ -107,7 +95,7 @@ true on success, false on failure
 .RE
 .PP
 
-.SS "\fBbparser\fP * bparser_load (\fBbparser_type\fP type, void * data)"
+.SS "\fBbparser\fP * bparser_load (\fBbaseer_target_t\fP * data)"
 
 .PP
 Load a parser object\&. 

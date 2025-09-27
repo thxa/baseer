@@ -123,7 +123,7 @@ bool handle_action(context *ctx,void *args){
 	}else if (strcmp(ctx->cmd.op,"i") == 0) {
 		sym_list *sym = ctx->sym;
 		while (sym != NULL) {
-			printf("function %s 0x%llx\n",sym->name,sym->addr);
+			printf("function %s 0x%lx\n",sym->name,sym->addr);
 			sym = sym->next;
 		}
 		ctx->do_wait = false;
@@ -227,8 +227,8 @@ bool set_mem_reg(context *ctx,void *args){
  */
 bool examin_mem(context *ctx,void *args){
 	char *arg = (char*)args;
-	if(arg == '\0') return false;
-	while(arg != '\0' && isspace((unsigned char)*arg))arg++;
+	if(*arg == '\0') return false;
+	while(*arg != '\0' && isspace((unsigned char)*arg))arg++;
 	uint64_t addr = 0 ;
 	uint64_t size = 0 ;
 	uint32_t counter = 0 ;
@@ -259,8 +259,8 @@ bool examin_mem(context *ctx,void *args){
 			return true;
 		}
 		if(i % 2 == 0 ){
-			printf(COLOR_YELLOW "0x%llx" COLOR_RESET " : " , 
-				(addr + i * (ctx->arch / 8 )), v);
+			printf(COLOR_YELLOW "0x%lx" COLOR_RESET " : " , 
+				(addr + i * (ctx->arch / 8 )));
 			printf(fmt,v);
 
 		}else {
@@ -314,7 +314,7 @@ bool delBP(context *ctx, void* args){
 				ctx->list->last = tmp;
 			}
 			INFO("")
-			printf("deleted breakpoint at: %llx\n",ptr->addr);
+			printf("deleted breakpoint at: %lx\n",ptr->addr);
 			free(ptr);
 			return true;
 		}
@@ -322,7 +322,7 @@ bool delBP(context *ctx, void* args){
 		ptr = ptr->next;
 	}
 	ERROR("")
-	printf("breakpoint with id: %d not found\n",id);
+	printf("breakpoint with id: %ld not found\n", id);
 	return true;
 	
 }
@@ -496,7 +496,7 @@ bool listBP(context *ctx,void *args){
 	bp *ptr = head;
 	while (ptr != NULL) {
 		INFO("")
-		printf("break point id: %d at : 0x%llx\n",ptr->id,ptr->addr);
+		printf("break point id: %d at : 0x%lx\n",ptr->id,ptr->addr);
 		ptr = ptr->next;
 	}
 	return true;
@@ -538,6 +538,7 @@ void restore_all_BP(context *ctx,int opt){
  * @param ctx Pointer to debugger context.
  */
 void dis_ctx(context *ctx){
+        linenoiseClearScreen();
 	ptrace(PTRACE_GETREGS, ctx->pid, NULL, &ctx->regs);
 	ud_t ud_obj;
 	uint8_t data[160];
@@ -546,7 +547,7 @@ void dis_ctx(context *ctx){
 	pos_name *regs = (ctx->arch == 64) ? regs_64 : regs_32;
 
 	for (int i = 0 ; i < len; i++) {
-		printf(COLOR_CYAN "\t%s" COLOR_RESET "=> " COLOR_BLUE "0x%llx\n"COLOR_RESET, regs[i].name ,*(uint64_t*)((char*)&ctx->regs+regs[i].pos) );
+		printf(COLOR_CYAN "\t%s" COLOR_RESET "=> " COLOR_BLUE "0x%lx\n"COLOR_RESET, regs[i].name ,*(uint64_t*)((char*)&ctx->regs+regs[i].pos) );
 	}
 	len =sizeof(flags)/sizeof(pos_name) ;
 	printf("FLAGS: ");
@@ -569,23 +570,23 @@ void dis_ctx(context *ctx){
 	ud_set_mode(&ud_obj, ctx->arch);
 	ud_set_syntax(&ud_obj, UD_SYN_INTEL);
 	ud_set_pc(&ud_obj, ctx->regs.rip);
-	while(ud_disassemble(&ud_obj)){
-		// if(ud_insn_off(&ud_obj) == ctx->regs.rip){
-		// 	printf(COLOR_GREEN "    --> 0x%llx: %s\n"COLOR_RESET,(uint64_t)ud_insn_off(&ud_obj),ud_insn_asm(&ud_obj));
-		// }else {
-		// 	printf(COLOR_MAGENTA "\t0x%llx: %s\n"COLOR_RESET,(uint64_t)ud_insn_off(&ud_obj),ud_insn_asm(&ud_obj));
-		// }
-                if(ud_insn_off(&ud_obj) == ctx->regs.rip){
-			printf(COLOR_GREEN "    --> 0x%llx: "COLOR_RESET,(uint64_t)ud_insn_off(&ud_obj));
-                        print_highlight_asm(ud_insn_asm(&ud_obj));
-		}else {
-			printf(COLOR_MAGENTA "\t0x%llx: " COLOR_RESET,(uint64_t)ud_insn_off(&ud_obj));
-                        print_highlight_asm(ud_insn_asm(&ud_obj));
-		}
+        while(ud_disassemble(&ud_obj)){
+            // if(ud_insn_off(&ud_obj) == ctx->regs.rip){
+            // 	printf(COLOR_GREEN "    --> 0x%llx: %s\n"COLOR_RESET,(uint64_t)ud_insn_off(&ud_obj),ud_insn_asm(&ud_obj));
+            // }else {
+            // 	printf(COLOR_MAGENTA "\t0x%llx: %s\n"COLOR_RESET,(uint64_t)ud_insn_off(&ud_obj),ud_insn_asm(&ud_obj));
+            // }
+            if(ud_insn_off(&ud_obj) == ctx->regs.rip){
+                printf(COLOR_GREEN "    --> 0x%lx: "COLOR_RESET,(uint64_t)ud_insn_off(&ud_obj));
+                print_highlight_asm(ud_insn_asm(&ud_obj));
+            }else {
+                printf(COLOR_MAGENTA "\t0x%lx: " COLOR_RESET,(uint64_t)ud_insn_off(&ud_obj));
+                print_highlight_asm(ud_insn_asm(&ud_obj));
+            }
 
-		if(ud_insn_mnemonic(&ud_obj)  == UD_Iret || ud_insn_off(&ud_obj) >= (ctx->regs.rip + 0x20))
-			break;
-	}
+            if(ud_insn_mnemonic(&ud_obj)  == UD_Iret || ud_insn_off(&ud_obj) >= (ctx->regs.rip + 0x20))
+                break;
+        }
 
 	printf(COLOR_YELLOW "------------- stack ----------------\n" COLOR_RESET);
 	char *fmt = (ctx->arch == 64) ? " 0x%llx" : " 0x%x";

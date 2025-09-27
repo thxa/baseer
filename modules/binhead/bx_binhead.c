@@ -7,7 +7,8 @@
 #include "../bx_elf/bx_elf.h"
 #include "../bx_tar/bx_tar.h"
 
-unsigned int count_bits(unsigned long long int n) {
+unsigned int count_bits(unsigned long long int n)
+{
     unsigned int cnt = 0;
     while (n) {
         cnt++;
@@ -16,7 +17,8 @@ unsigned int count_bits(unsigned long long int n) {
     return cnt;
 }
 
-unsigned int count_bytes(unsigned long long n) {
+unsigned int count_bytes(unsigned long long n)
+{
     unsigned int cnt = count_bits(n);
     if((cnt % BYTE) > 0) {
         cnt = (cnt / BYTE) + 1;
@@ -26,7 +28,8 @@ unsigned int count_bytes(unsigned long long n) {
     return cnt;
 }
 
-unsigned long long int reverse_bytes(unsigned long long int n) {
+unsigned long long int reverse_bytes(unsigned long long int n)
+{
     unsigned long long int result = 0;
     unsigned int cnt = count_bytes(n);
     for (int i = 0; i < cnt; i++) {
@@ -83,7 +86,7 @@ bool bx_binhead(baseer_target_t *target, void *arg)
             flag_1 = 0, flag_2 = 0;
         }
 
-        if(flag_1 || flag_2 ) {
+        if(flag_1 || flag_2){
             // printf("This file is %s\n", magics[i].name);
             bparser_apply(bp, *magics[i].parser, arg);
             free(pattern); // clean up because next free will not be reached

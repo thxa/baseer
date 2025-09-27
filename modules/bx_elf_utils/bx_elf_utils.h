@@ -24,7 +24,9 @@ const char* sh_type_to_str(unsigned int sh_type);
 const char* elf_type_to_str(unsigned int type);
 const char *type_p_to_str(unsigned int p_type);
 void print_highlight_asm(const char *asm_instructions);
-
+void print_disasm(unsigned char *ptr, size_t size, unsigned long long offset, unsigned char bit_type);
+void print_symbols_with_disasm_32bit(bparser* parser, Elf32_Ehdr* elf, Elf32_Shdr* shdrs, Elf32_Shdr *symtab, Elf32_Shdr *strtab);
+void print_symbols_with_disasm_64bit(bparser* parser, Elf64_Ehdr* elf, Elf64_Shdr* shdrs, Elf64_Shdr *symtab, Elf64_Shdr *strtab);
 
 void display_byte(const unsigned char *byte);
 void display_byte_char(const unsigned char *byte);

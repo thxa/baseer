@@ -731,6 +731,95 @@ void print_symbols_64bit(bparser* parser, Elf64_Ehdr* elf, Elf64_Shdr* shdrs, El
     }
 }
 
+
+void print_symbols_with_disasm_32bit(bparser* parser, Elf32_Ehdr* elf, Elf32_Shdr* shdrs, Elf32_Shdr *symtab, Elf32_Shdr *strtab) 
+{
+    Elf32_Shdr shstr = shdrs[elf->e_shstrndx];
+    const char* shstrtab = (const char*)(parser->block + shstr.sh_offset);
+
+    const char* symname = &shstrtab[symtab -> sh_name];
+    const char* strname = &shstrtab[strtab -> sh_name];
+
+    Elf32_Sym *syms = (Elf32_Sym *)(parser->block + symtab->sh_offset);
+    const char *strs = (const char *)(parser->block + strtab->sh_offset);
+
+    unsigned int count = symtab->sh_size / sizeof(Elf32_Sym);
+
+    printf(COLOR_RESET);
+    printf("\n");
+    printf(COLOR_YELLOW"=== Symbols (" COLOR_BLUE "%s" COLOR_YELLOW " + " COLOR_BLUE "%s" COLOR_YELLOW ") ===\n" COLOR_RESET, symname, strname);
+
+    for (int i = 0; i < count; i++) {
+        const char *name = strs + syms[i].st_name;
+
+        // Decode type
+        unsigned char type = ELF32_ST_TYPE(syms[i].st_info);
+        const char *type_str = "UNKNOWN";
+        const char *color    = COLOR_GRAY; // default
+
+        switch (type) {
+            case STT_NOTYPE:   type_str = "NOTYPE";  color = COLOR_GRAY;    break;
+            case STT_OBJECT:   type_str = "OBJECT";  color = COLOR_GREEN;   break;
+            case STT_FUNC:     type_str = "FUNC";    color = COLOR_YELLOW;  break;
+            case STT_SECTION:  type_str = "SECTION"; color = COLOR_BLUE;    break;
+            case STT_FILE:     type_str = "FILE";    color = COLOR_CYAN;    break;
+        }
+
+        if(syms[i].st_size > 0){
+            if(type == STT_FUNC) {
+                unsigned char* ptr = (unsigned char*)parser->block + syms[i].st_value;
+                printf("\n");
+                printf(COLOR_WHITE "|-- %s:" COLOR_RESET "\n", name);
+                print_disasm(ptr, syms[i].st_size, syms[i].st_value, ELFCLASS32);
+            }
+        }
+    }
+}
+
+void print_symbols_with_disasm_64bit(bparser* parser, Elf64_Ehdr* elf, Elf64_Shdr* shdrs, Elf64_Shdr *symtab, Elf64_Shdr *strtab) 
+{
+    Elf64_Shdr shstr = shdrs[elf->e_shstrndx];
+    const char* shstrtab = (const char*)(parser->block + shstr.sh_offset);
+
+    const char* symname = &shstrtab[symtab -> sh_name];
+    const char* strname = &shstrtab[strtab -> sh_name];
+
+    Elf64_Sym *syms = (Elf64_Sym *)(parser->block + symtab->sh_offset);
+    const char *strs = (const char *)(parser->block + strtab->sh_offset);
+
+    unsigned int count = symtab->sh_size / sizeof(Elf64_Sym);
+
+    printf(COLOR_RESET);
+    printf("\n");
+    printf(COLOR_YELLOW"=== Symbols (" COLOR_BLUE "%s" COLOR_YELLOW " + " COLOR_BLUE "%s" COLOR_YELLOW ") ===\n" COLOR_RESET, symname, strname);
+
+    for (int i = 0; i < count; i++) {
+        const char *name = strs + syms[i].st_name;
+
+        // Decode type
+        unsigned char type = ELF64_ST_TYPE(syms[i].st_info);
+        const char *type_str = "UNKNOWN";
+        const char *color    = COLOR_GRAY; // default
+
+        switch (type) {
+            case STT_NOTYPE:   type_str = "NOTYPE";  color = COLOR_GRAY;    break;
+            case STT_OBJECT:   type_str = "OBJECT";  color = COLOR_GREEN;   break;
+            case STT_FUNC:     type_str = "FUNC";    color = COLOR_YELLOW;  break;
+            case STT_SECTION:  type_str = "SECTION"; color = COLOR_BLUE;    break;
+            case STT_FILE:     type_str = "FILE";    color = COLOR_CYAN;    break;
+        }
+
+        if(syms[i].st_size > 0){
+            if(type == STT_FUNC) {
+                unsigned char* ptr = (unsigned char*)parser->block + syms[i].st_value;
+                printf("\n");
+                printf(COLOR_WHITE "|-- %s:" COLOR_RESET "\n", name);
+                print_disasm(ptr, syms[i].st_size, syms[i].st_value, ELFCLASS64);
+            }
+        }
+    }
+}
+
 // inline function to print hex header row
 void print_hex_header(unsigned long long offset)
 {
@@ -870,6 +959,24 @@ void print_body_bytes(unsigned char *ptr, size_t size, unsigned long long offset
         }
     }
 }
+
+
+// Convert block of bytes to asm instructions 32 or 64
+void print_disasm(unsigned char *ptr, size_t size, unsigned long long offset, unsigned char bit_type)
+{
+    ud_t ud_obj;
+    ud_init(&ud_obj);
+    ud_set_input_buffer(&ud_obj, ptr, size);
+    ud_set_mode(&ud_obj, (bit_type == ELFCLASS32) ? 32: 64);        // 32 or 64 bit
+    ud_set_syntax(&ud_obj, UD_SYN_INTEL);
+    ud_set_pc(&ud_obj, offset);
+    // printf(COLOR_YELLOW "\nDisassembly:\n" COLOR_RESET);
+    while (ud_disassemble(&ud_obj)) {
+        printf(COLOR_YELLOW "|----0x%08llx:  " COLOR_RESET, (unsigned long long)ud_insn_off(&ud_obj));
+        print_highlight_asm(ud_insn_asm(&ud_obj));
+    }
+}
+
 
 void format_p_flags(uint32_t p_flags, char *buf, size_t size)
 {

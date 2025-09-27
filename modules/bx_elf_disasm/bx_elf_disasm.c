@@ -3,6 +3,7 @@
  * @brief Functions for disassembling ELF files and printing metadata.
  */
 #include "bx_elf_disasm.h"
+#include "../b_hashmap/b_hashmap.h"
 
 // List of metadata sections
 const char* metadata_sections[] = {
@@ -31,6 +32,157 @@ bool is_metadata_section(const char* name)
     return false;
 }
 
+// ========================= BEGIN SECTION HEADER ==================================
+/**
+ * @brief Disassemble and print the ELF32 section headers.
+ *
+ * Iterates over all section headers in a 32-bit ELF file.
+ * Prints metadata (name, type, flags, address, size, etc.) and
+ * disassembles machine code sections using udis86. Metadata sections
+ * (e.g., .rela.dyn, .interp) are identified and not disassembled.
+ *
+ * @param elf Pointer to the ELF32 header.
+ * @param shdrs Pointer to the array of ELF32 section headers.
+ * @param parser Pointer to a bparser structure for reading binary data.
+ */
+void dump_disasm_elf32_shdr(Elf32_Ehdr* elf , Elf32_Shdr* shdrs, bparser* parser)
+{
+    Elf32_Shdr shstr = shdrs[elf->e_shstrndx];
+    const char* shstrtab = (const char*)(parser->block + shstr.sh_offset);
+
+    printf(COLOR_BLUE "\n=== Sections ===\n" COLOR_RESET);
+    // print_section_header_legend();
+
+    // create hashmap of section headers to retreve the specifa name of section header needed
+    hashmap_t *map = create_map();
+    
+    for (int i = 0; i < elf->e_shnum; i++) {
+
+        // ============================ BEGIN SECTION METADATA =============================
+        // Section name
+        const char* name = &shstrtab[shdrs[i].sh_name];
+
+        // Type
+        const char* type_str = sh_type_to_str(shdrs[i].sh_type);
+
+        // Insert section header pointers into a hashmap for quick retrieval by name
+        insert(map, name, &shdrs[i]);
+
+        if(shdrs[i].sh_flags & SHF_EXECINSTR) {
+            // Flags
+            char flags[64] = "";
+            format_sh_flags(shdrs[i].sh_flags, flags, sizeof(flags));
+            printf("\n");
+
+            print_section_header_metadata_32bit(i, name, type_str, flags, shdrs);
+            // ============================ END SECTION METADATA =============================
+
+            // ============================ BEGIN SECTION BODY =============================
+            long long int offset = shdrs[i].sh_offset;
+            if (shdrs[i].sh_size > 0) {
+                void* block = malloc(shdrs[i].sh_size);
+                bparser_read(parser, block, shdrs[i].sh_offset, shdrs[i].sh_size);
+                unsigned char *ptr = (unsigned char*)block;
+                unsigned char bit_type = ((unsigned char*)parser->block)[EI_CLASS];
+                // print_body_bytes(ptr, shdrs[i].sh_size, shdrs[i].sh_offset, shdrs[i].sh_flags, bit_type);
+                print_disasm(ptr, shdrs[i].sh_size, shdrs[i].sh_offset, bit_type);
+                free(block);
+            }
+        }
+        // ============================ END SECTION BODY =============================
+    }
+
+    Elf32_Shdr *symtab, *strtab;
+    // if((symtab = (Elf32_Shdr*)get(map, ".dynsym")) != NULL && (strtab = (Elf32_Shdr*)get(map, ".dynstr")) != NULL) {
+    //     print_symbols_32bit(parser, elf, shdrs, symtab, strtab);
+    //     printf("\n\n");
+    // }
+
+    if((symtab = (Elf32_Shdr*)get(map, ".symtab")) != NULL && (strtab = (Elf32_Shdr*)get(map, ".strtab")) != NULL) {
+        print_symbols_with_disasm_32bit(parser, elf, shdrs, symtab, strtab);
+    }
+
+    free_map(map);
+}
+
+/**
+ * @brief Disassemble and print the ELF64 section headers.
+ *
+ * Iterates over all section headers in a 64-bit ELF file.
+ * Prints metadata (name, type, flags, address, size, etc.) and
+ * disassembles machine code sections using udis86. Metadata sections
+ * (e.g., .rela.dyn, .interp) are identified and not disassembled.
+ *
+ * @param elf Pointer to the ELF64 header.
+ * @param shdrs Pointer to the array of ELF64 section headers.
+ * @param parser Pointer to a bparser structure for reading binary data.
+ */
+void dump_disasm_elf64_shdr(Elf64_Ehdr* elf , Elf64_Shdr* shdrs, bparser* parser)
+{
+    Elf64_Shdr shstr = shdrs[elf->e_shstrndx];
+    const char* shstrtab = (const char*)(parser->block + shstr.sh_offset);
+
+    printf(COLOR_BLUE "\n=== Sections ===\n" COLOR_RESET);
+    // print_section_header_legend();
+
+    // create hashmap of section headers to retreve the specifa name of section header needed
+    hashmap_t *map = create_map();
+    
+    for (int i = 0; i < elf->e_shnum; i++) {
+
+
+        // ============================ BEGIN SECTION METADATA =============================
+        // Section name
+        const char* name = &shstrtab[shdrs[i].sh_name];
+
+        // Type
+        const char* type_str = sh_type_to_str(shdrs[i].sh_type);
+
+        // Insert section header pointers into a hashmap for quick retrieval by name
+        insert(map, name, &shdrs[i]);
+
+        if(shdrs[i].sh_flags & SHF_EXECINSTR) {
+            // Flags
+            char flags[64] = "";
+            format_sh_flags(shdrs[i].sh_flags, flags, sizeof(flags));
+            printf("\n");
+            print_section_header_metadata_64bit(i, name, type_str, flags, shdrs);
+            // ============================ END SECTION METADATA =============================
+
+            // ============================ BEGIN SECTION BODY =============================
+            long long int offset = shdrs[i].sh_offset;
+            if (shdrs[i].sh_size > 0) {
+                void* block = malloc(shdrs[i].sh_size);
+                bparser_read(parser, block, shdrs[i].sh_offset, shdrs[i].sh_size);
+                unsigned char *ptr = (unsigned char*)block;
+                unsigned char bit_type = ((unsigned char*)parser->block)[EI_CLASS];
+                // print_body_bytes(ptr, shdrs[i].sh_size, shdrs[i].sh_offset, shdrs[i].sh_flags, bit_type);
+                print_disasm(ptr, shdrs[i].sh_size, shdrs[i].sh_offset, bit_type);
+                free(block);
+            }
+        }
+        // ============================ END SECTION BODY =============================
+    }
+
+    Elf64_Shdr *symtab, *strtab;
+    // if((symtab = (Elf64_Shdr*)get(map, ".dynsym")) != NULL && (strtab = (Elf64_Shdr*)get(map, ".dynstr")) != NULL) {
+    //     // print_symbols_64bit(parser, elf, shdrs, symtab, strtab);
+    //     printf("\n\n");
+    // }
+
+    if((symtab = (Elf64_Shdr*)get(map, ".symtab")) != NULL && (strtab = (Elf64_Shdr*)get(map, ".strtab")) != NULL) {
+        print_symbols_with_disasm_64bit(parser, elf, shdrs, symtab, strtab);
+    }
+
+
+
+    free_map(map);
+}
+// ========================= END SECTION HEADER ==================================
+
+
+
+
 // ========================= BEGIN PROGRAM HEADER ==================================
 /**
  * @brief Disassembles and prints the program headers of a 32-bit ELF file.
@@ -58,65 +210,43 @@ bool is_metadata_section(const char* name)
  */
 void dump_disasm_elf32_phdr(Elf32_Ehdr *elf, Elf32_Phdr* phdr, bparser*parser)
 {
-    printf(COLOR_BLUE "\n=== Program Headers ===\n" COLOR_RESET);
+    printf(COLOR_BLUE "\n=== Program segments ===\n" COLOR_RESET);
+    // print_program_header_legend();
 
     for (int i = 0; i < elf->e_phnum; i++) {
-
+        if(!(phdr[i].p_flags & PF_X)) continue; 
         // ============================ BEGIN PROGRAM METADATA =============================
+    
         const char *type_str = type_p_to_str(phdr[i].p_type);
+        char flags[64];
+        format_p_flags(phdr[i].p_flags, flags, sizeof(flags));
 
-        char flags[4] = "";
-        if (phdr[i].p_flags & PF_R) strcat(flags, "R");
-        if (phdr[i].p_flags & PF_W) strcat(flags, "W");
-        if (phdr[i].p_flags & PF_X) strcat(flags, "X");
-
-
-        printf(COLOR_GREEN 
-            "%-3s %-15s %-8s %-10s %-10s %-10s %-10s %-10s %-10s\n" 
-            COLOR_RESET,
-            "ID", "Type", "Flags", "Offset", "VirtAddr", "PhysAddr", "FileSz", "MemSz", "Align");
-        printf(COLOR_GREEN "%-3d %-15s %-8s 0x%08lx 0x%08lx 0x%08lx 0x%08lx 0x%08lx 0x%08lx\n" COLOR_RESET,
-                i, type_str, flags,
-                phdr[i].p_offset,
-                phdr[i].p_vaddr,
-                phdr[i].p_paddr,
-                phdr[i].p_filesz,
-                phdr[i].p_memsz,
-                phdr[i].p_align);
+        printf("\n");
+        print_program_header_metadata_32bit(i, type_str, flags, phdr);
 
         if (phdr[i].p_type == PT_INTERP) {
             char *interp = (char*)(parser->block + phdr[i].p_offset);
-            printf(COLOR_YELLOW "    Interpreter: " COLOR_RESET "%s\n", interp);
+            printf(COLOR_GREEN "|---%-*s" COLOR_RESET   COLOR_YELLOW "%s\n" COLOR_GREEN , META_LABEL_WIDTH, "Interpreter: ", interp);
         }
         if (phdr[i].p_type == PT_DYNAMIC) {
-            printf(COLOR_YELLOW "    Dynamically linked\n" COLOR_RESET);
+            printf(COLOR_YELLOW "|---%-*s" COLOR_RESET "\n" COLOR_RESET, META_LABEL_WIDTH, "Dynamically linked");
         }
-        // ============================ END PROGRAM METADATA =============================
 
+        // ============================ END PROGRAM METADATA ============================
 
-        // ============================ BEGIN PROGRAM BODY ===============================
+        // ============================ BEGIN PROGRAM BODY =============================
         if (phdr[i].p_filesz > 0) {
             void *block = malloc(phdr[i].p_filesz);
             bparser_read(parser, block, phdr[i].p_offset, phdr[i].p_filesz);
-
-            ud_t ud_obj;
-            ud_init(&ud_obj);
-            ud_set_input_buffer(&ud_obj, (uint8_t*)block, (size_t)phdr[i].p_filesz);
-            ud_set_mode(&ud_obj, 32);
-            ud_set_syntax(&ud_obj, UD_SYN_INTEL);
-            ud_set_pc(&ud_obj, (uint64_t) phdr[i].p_offset);
-            while (ud_disassemble(&ud_obj)) {
-                printf(COLOR_YELLOW "0x%llx:" COLOR_RESET " %s\n",
-                        (unsigned long long)ud_insn_off(&ud_obj),
-                        ud_insn_asm(&ud_obj));
-                if (ud_insn_mnemonic(&ud_obj) == UD_Iret)
-                    break;
-            }
-
+            unsigned char* ptr = (unsigned char*)block;
+            unsigned char bit_type = ((unsigned char*)parser->block)[EI_CLASS];
+            print_body_bytes(ptr, phdr[i].p_filesz, phdr[i].p_offset, 0, 0);
+            print_disasm(ptr, phdr[i].p_filesz, phdr[i].p_offset, bit_type);
+            // print_body_bytes(ptr, phdr[i].p_filesz, phdr[i].p_offset, 0, 0);
+            // print_body_bytes(ptr, phdr[i].p_filesz, phdr[i].p_offset, phdr[i].p_flags);
             free(block);
         }
-        // ============================ END PROGRAM BODY ===============================
-
+        // ============================ END PROGRAM BODY =============================
     }
 }
 
@@ -146,238 +276,48 @@ void dump_disasm_elf32_phdr(Elf32_Ehdr *elf, Elf32_Phdr* phdr, bparser*parser)
  */
 void dump_disasm_elf64_phdr(Elf64_Ehdr *elf, Elf64_Phdr* phdr, bparser*parser)
 {
-    printf(COLOR_BLUE "\n=== Program Headers ===\n" COLOR_RESET);
+    printf(COLOR_BLUE "\n=== Program segments ===\n" COLOR_RESET);
+    // print_program_header_legend();
+
     for (int i = 0; i < elf->e_phnum; i++) {
-
+        if(!(phdr[i].p_flags & PF_X)) continue; 
         // ============================ BEGIN PROGRAM METADATA =============================
+    
         const char *type_str = type_p_to_str(phdr[i].p_type);
+        char flags[64];
+        format_p_flags(phdr[i].p_flags, flags, sizeof(flags));
 
-        char flags[4] = "";
-        if (phdr[i].p_flags & PF_R) strcat(flags, "R");
-        if (phdr[i].p_flags & PF_W) strcat(flags, "W");
-        if (phdr[i].p_flags & PF_X) strcat(flags, "X");
-
-
-        printf(COLOR_GREEN 
-            "%-3s %-15s %-8s %-10s %-10s %-10s %-10s %-10s %-10s\n" 
-            COLOR_RESET,
-            "ID", "Type", "Flags", "Offset", "VirtAddr", "PhysAddr", "FileSz", "MemSz", "Align");
-        printf(COLOR_GREEN "%-3d %-15s %-8s 0x%08lx 0x%08lx 0x%08lx 0x%08lx 0x%08lx 0x%08lx\n" COLOR_RESET,
-                i, type_str, flags,
-                phdr[i].p_offset,
-                phdr[i].p_vaddr,
-                phdr[i].p_paddr,
-                phdr[i].p_filesz,
-                phdr[i].p_memsz,
-                phdr[i].p_align);
+        printf("\n");
+        print_program_header_metadata_64bit(i, type_str, flags, phdr);
 
         if (phdr[i].p_type == PT_INTERP) {
             char *interp = (char*)(parser->block + phdr[i].p_offset);
-            printf(COLOR_YELLOW "    Interpreter: " COLOR_RESET "%s\n", interp);
+            printf(COLOR_GREEN "|---%-*s" COLOR_RESET   COLOR_YELLOW "%s\n" COLOR_GREEN , META_LABEL_WIDTH, "Interpreter: ", interp);
         }
         if (phdr[i].p_type == PT_DYNAMIC) {
-            printf(COLOR_YELLOW "    Dynamically linked\n" COLOR_RESET);
+            printf(COLOR_YELLOW "|---%-*s" COLOR_RESET "\n" COLOR_RESET, META_LABEL_WIDTH, "Dynamically linked");
         }
-        // ============================ END PROGRAM METADATA =============================
 
+        // ============================ END PROGRAM METADATA ============================
 
-        // ============================ BEGIN PROGRAM BODY ===============================
+        // ============================ BEGIN PROGRAM BODY =============================
         if (phdr[i].p_filesz > 0) {
             void *block = malloc(phdr[i].p_filesz);
             bparser_read(parser, block, phdr[i].p_offset, phdr[i].p_filesz);
-            ud_t ud_obj;
-            ud_init(&ud_obj);
-            ud_set_input_buffer(&ud_obj, (uint8_t*)block, (size_t)phdr[i].p_filesz);
-            ud_set_mode(&ud_obj, 64);
-            ud_set_syntax(&ud_obj, UD_SYN_INTEL);
-            ud_set_pc(&ud_obj, (uint64_t) phdr[i].p_offset);
-            while (ud_disassemble(&ud_obj)) {
-                printf(COLOR_YELLOW "0x%llx:" COLOR_RESET " %s\n",
-                        (unsigned long long)ud_insn_off(&ud_obj),
-                        ud_insn_asm(&ud_obj));
-                if (ud_insn_mnemonic(&ud_obj) == UD_Iret)
-                    break;
-            }
+            unsigned char* ptr = (unsigned char*)block;
+            unsigned char bit_type = ((unsigned char*)parser->block)[EI_CLASS];
+            print_body_bytes(ptr, phdr[i].p_filesz, phdr[i].p_offset, 0, 0);
+            print_disasm(ptr, phdr[i].p_filesz, phdr[i].p_offset, bit_type);
+            // print_body_bytes(ptr, phdr[i].p_filesz, phdr[i].p_offset, phdr[i].p_flags);
             free(block);
         }
-
-        // ============================ END PROGRAM BODY ===============================
+        // ============================ END PROGRAM BODY =============================
     }
+
 }
 // ========================= END PROGRAM HEADER ==================================
 
-// ========================= BEGIN SECTION HEADER ==================================
-/**
- * @brief Disassemble and print the ELF32 section headers.
- *
- * Iterates over all section headers in a 32-bit ELF file.
- * Prints metadata (name, type, flags, address, size, etc.) and
- * disassembles machine code sections using udis86. Metadata sections
- * (e.g., .rela.dyn, .interp) are identified and not disassembled.
- *
- * @param elf Pointer to the ELF32 header.
- * @param shdrs Pointer to the array of ELF32 section headers.
- * @param parser Pointer to a bparser structure for reading binary data.
- */
-void dump_disasm_elf32_shdr(Elf32_Ehdr* elf , Elf32_Shdr* shdrs, bparser* parser) {
-    Elf32_Shdr shstr = shdrs[elf->e_shstrndx];
-    const char* shstrtab = (const char*)(parser->block + shstr.sh_offset);
-    printf(COLOR_BLUE "\n=== Section Headers ===\n" COLOR_RESET);
 
-    for (int i = 0; i < elf->e_shnum; i++) {
-        // ============================ BEGIN SECTION METADATA =============================
-        // Section name
-        const char* name = &shstrtab[shdrs[i].sh_name];
-
-        // Type
-        const char* type_str = sh_type_to_str(shdrs[i].sh_type);
-
-        // Flags
-        char flags[8] = "";
-        if (shdrs[i].sh_flags & SHF_WRITE)     strcat(flags, "W");
-        if (shdrs[i].sh_flags & SHF_ALLOC)     strcat(flags, "A");
-        if (shdrs[i].sh_flags & SHF_EXECINSTR) strcat(flags, "X");
-
-        printf(COLOR_GREEN 
-                "%-3s %-20s %-10s %-6s %-10s %-10s %-8s %-5s %-5s %-10s %-10s\n" 
-                COLOR_RESET,
-                "ID", "Name", "Type", "Flags", "Addr", "Offset", "Size", "Link", "Info", "Align", "EntSize");
-        char* color = COLOR_CYAN;
-        printf("%s%-3d %-20s %-10s %-6s 0x%08lx 0x%08lx 0x%08lx %-5d %-5d 0x%08lx 0x%08lx\n" 
-                COLOR_RESET,
-                color,
-                i, name, type_str, flags,
-                shdrs[i].sh_addr,
-                shdrs[i].sh_offset,
-                shdrs[i].sh_size,
-                shdrs[i].sh_link,
-                shdrs[i].sh_info,
-                shdrs[i].sh_addralign,
-                shdrs[i].sh_entsize);
-        // ============================ END SECTION METADATA =============================
-        // ========================= BEGIN SECTION BODY ==================================
-        if (shdrs[i].sh_size > 0) {
-            void* block = malloc(shdrs[i].sh_size);
-            bparser_read(parser, block, shdrs[i].sh_offset, shdrs[i].sh_size);
-            printf(COLOR_YELLOW "Section [%d] %s bytes:\n" COLOR_RESET, i, name);
-
-            if(is_metadata_section(name)) {
-                printf(COLOR_YELLOW "[!] This is metadata... not implemented yet \n" COLOR_RESET);
-                // unsigned char* ptr = (unsigned char*)block;
-                // for (size_t j = 0; j < shdrs[i].sh_size; j++) {
-                //     printf("%02x ", ptr[j]);
-                    // if ((j + 1) % BLOCK_LENGTH  == 0) printf("\n");
-                // }
-                printf("\n\n");
-            } else {
-                ud_t ud_obj;
-                ud_init(&ud_obj);
-                ud_set_input_buffer(&ud_obj, (uint8_t*)block, (size_t)shdrs[i].sh_size);
-                ud_set_mode(&ud_obj, 32);
-                ud_set_syntax(&ud_obj, UD_SYN_INTEL);
-                ud_set_pc(&ud_obj, (uint64_t) shdrs[i].sh_offset);
-                while (ud_disassemble(&ud_obj)) {
-
-                    printf(COLOR_YELLOW "0x%08x:" COLOR_RESET " %s\n",
-                            (unsigned long long)ud_insn_off(&ud_obj),
-                            ud_insn_asm(&ud_obj));
-                    if (ud_insn_mnemonic(&ud_obj) == UD_Iret)
-                        break;
-                }
-            }
-            
-
-            free(block);
-        }
-        // ========================= END SECTION BODY ==================================
-    }
-}
-
-/**
- * @brief Disassemble and print the ELF64 section headers.
- *
- * Iterates over all section headers in a 64-bit ELF file.
- * Prints metadata (name, type, flags, address, size, etc.) and
- * disassembles machine code sections using udis86. Metadata sections
- * (e.g., .rela.dyn, .interp) are identified and not disassembled.
- *
- * @param elf Pointer to the ELF64 header.
- * @param shdrs Pointer to the array of ELF64 section headers.
- * @param parser Pointer to a bparser structure for reading binary data.
- */
-void dump_disasm_elf64_shdr(Elf64_Ehdr* elf , Elf64_Shdr* shdrs, bparser* parser) {
-    Elf64_Shdr shstr = shdrs[elf->e_shstrndx];
-    const char* shstrtab = (const char*)(parser->block + shstr.sh_offset);
-    for (int i = 0; i < elf->e_shnum; i++) {
-        // ============================ BEGIN SECTION METADATA =============================
-        // Section name
-        const char* name = &shstrtab[shdrs[i].sh_name];
-        // Type
-        const char* type_str = sh_type_to_str(shdrs[i].sh_type);
-
-        // Flags
-        char flags[8] = "";
-        if (shdrs[i].sh_flags & SHF_WRITE)     strcat(flags, "W");
-        if (shdrs[i].sh_flags & SHF_ALLOC)     strcat(flags, "A");
-        if (shdrs[i].sh_flags & SHF_EXECINSTR) strcat(flags, "X");
-
-        printf(COLOR_GREEN 
-                "%-3s %-20s %-10s %-6s %-10s %-10s %-8s %-5s %-5s %-10s %-10s\n" 
-                COLOR_RESET,
-                "ID", "Name", "Type", "Flags", "Addr", "Offset", "Size", "Link", "Info", "Align", "EntSize");
-        char* color = COLOR_CYAN;
-        printf("%s%-3d %-20s %-10s %-6s 0x%08lx 0x%08lx 0x%08lx %-5d %-5d 0x%08lx 0x%08lx\n" 
-                COLOR_RESET,
-                color,
-                i, name, type_str, flags,
-                shdrs[i].sh_addr,
-                shdrs[i].sh_offset,
-                shdrs[i].sh_size,
-                shdrs[i].sh_link,
-                shdrs[i].sh_info,
-                shdrs[i].sh_addralign,
-                shdrs[i].sh_entsize);
-        // ============================ END SECTION METADATA =============================
-        // ========================= BEGIN SECTION BODY ==================================
-        if (shdrs[i].sh_size > 0) {
-            void* block = malloc(shdrs[i].sh_size);
-            bparser_read(parser, block, shdrs[i].sh_offset, shdrs[i].sh_size);
-            printf(COLOR_YELLOW "Section [%d] %s bytes:\n" COLOR_RESET, i, name);
-            if(is_metadata_section(name)) {
-
-                printf(COLOR_YELLOW "[!] This is metadata... not implemented yet \n" COLOR_RESET);
-                
-                // unsigned char* ptr = (unsigned char*)block;
-                // for (size_t j = 0; j < shdrs[i].sh_size; j++) {
-                    // printf("%02x ", ptr[j]);
-                    // if ((j + 1) % BLOCK_LENGTH  == 0) printf("\n");
-                // }
-                
-                printf("\n\n");
-            } else {
-                ud_t ud_obj;
-                ud_init(&ud_obj);
-                ud_set_input_buffer(&ud_obj, (uint8_t*)block, (size_t)shdrs[i].sh_size);
-                ud_set_mode(&ud_obj, 64);
-                ud_set_syntax(&ud_obj, UD_SYN_INTEL);
-                ud_set_pc(&ud_obj, (uint64_t) shdrs[i].sh_offset);
-                while (ud_disassemble(&ud_obj)) {
-
-                    printf("0x%016llx: %s\n", 
-                            (unsigned long long)ud_insn_off(&ud_obj), 
-                            ud_insn_asm(&ud_obj));
-
-                    if (ud_insn_mnemonic(&ud_obj) == UD_Iret)
-                        break;
-                }
-            }
-
-           free(block);
-        }
-        // ========================= END SECTION BODY ==================================
-    }
-}
-// ========================= END SECTION HEADER ==================================
 
 /**
  * @brief Print ELF file disassembly and metadata.
@@ -468,7 +408,5 @@ bool print_elf_disasm(bparser* parser, void* args) {
         printf(COLOR_RED "Unknown ELF class: %d\n" COLOR_RESET, bit_type);
         return false;
     }
-
-    printf(COLOR_BLUE "=========================\n" COLOR_RESET);
     return true;
 }

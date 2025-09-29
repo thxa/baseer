@@ -3,6 +3,7 @@
 #include "../bparser/bparser.h"
 #include "../../baseer.h"
 #include <string.h>
+#include "../../utils/ui.h"
 
 bool bx_tar(bparser* parser, void *arg);
 

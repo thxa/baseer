@@ -188,7 +188,8 @@ bool bx_tar(bparser* parser, void *arg)
             free(block);
         }
     } else {
-        printf(COLOR_YELLOW "[!] Not implemented "COLOR_RED"%s"COLOR_RESET COLOR_YELLOW" yet\n" COLOR_RESET, args[2]);
+        fprintf(stderr, "[!] Unsupported flag: %s\n", args[2]);
+        // printf(COLOR_YELLOW "[!] Not implemented "COLOR_RED"%s"COLOR_RESET COLOR_YELLOW" yet\n" COLOR_RESET, args[2]);
     }
     return true;
 }

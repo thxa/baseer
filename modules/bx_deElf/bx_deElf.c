@@ -9,7 +9,7 @@
 #include <stdint.h>
 
 #ifndef RETDEC_DEFAULT_BIN
-#define RETDEC_DEFAULT_BIN "/home/t/RetDec-v5.0-Linux-Release/bin/retdec-decompiler"
+#define RETDEC_DEFAULT_BIN "/opt/baseer/decompiler/bin/retdec-decompiler"
 #endif
 
 #define COLOR_STRING  "\033[0;32m"  // green
@@ -277,7 +277,7 @@ static bool run_retdec(const char *in_path, const char *out_path) {
     if (WIFEXITED(ret)){
         int exit_status = WEXITSTATUS(ret);
         if (exit_status != 0) {
-            fprintf(stderr, "[!] retdec-decompiler exited with status %d\n", exit_status);
+            fprintf(stderr, "[!] retdec-decompiler exited with status %d\n[!] you need to install decompiler using this command:\nsudo /opt/baseer/install_decompiler.sh\n", exit_status);
             return false;
         }
     } else {
@@ -293,8 +293,8 @@ bool decompile_elf(bparser *parser, void *arg){
         return false;
     }
 
-    char in_path[] = "./tmp/baseer_input_XXXXXX";
-    char out_path[] = "./tmp/baseer_output_XXXXXX";
+    char in_path[] = "/tmp/baseer_input_XXXXXX";
+    char out_path[] = "/tmp/baseer_output_XXXXXX";
 
     int in_fd = mkstemp(in_path);
     if (in_fd < 0) {

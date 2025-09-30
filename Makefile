@@ -47,9 +47,9 @@ BUILDDIR        = build
 MODULEDIR       = $(BUILDDIR)/modules
 
 # Install paths
-PREFIX          = /usr/local
-BINDIR          = $(PREFIX)/bin
-LIBDIR          = $(PREFIX)/lib/baseer/modules
+PREFIX          = /opt/baseer
+BINDIR          = $(PREFIX)/
+LIBDIR          = $(PREFIX)/modules
 
 # Targets
 TARGET          = $(BUILDDIR)/baseer
@@ -108,18 +108,23 @@ $(BX_TAR_SO): $(BX_TAR) | $(MODULEDIR)
 $(BX_deElf_SO): $(BX_deElf) | $(MODULEDIR)
 	$(CC) $(CFLAGS) -shared $< -o $@
 
-
-
 # Install
 install: all
 	mkdir -p $(BINDIR) $(LIBDIR)
-	cp $(TARGET) $(BINDIR)/
-	cp $(MODULEDIR)/*.so $(LIBDIR)/
+	cp $(TARGET) $(BINDIR)
+	cp $(MODULEDIR)/*.so $(LIBDIR)
+	chmod 755 install_decompiler.sh
+	cp install_decompiler.sh $(BINDIR)
+	cp README.md LICENSE $(BINDIR)
+	ln -s $(BINDIR)/baseer /usr/bin/baseer 
+	
+
 
 # Uninstall
 uninstall:
-	rm -f $(BINDIR)/baseer
+	rm -rf $(BINDIR)
 	rm -rf $(LIBDIR)
+	rm /usr/bin/baseer
 
 # Clean build artifacts
 clean:

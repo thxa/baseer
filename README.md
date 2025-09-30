@@ -37,6 +37,9 @@ Extensions add advanced capabilities:
 - **udis86**: Used for disassembling x86 and x64 architecture binaries.  
   [GitHub Repository](https://github.com/vmt/udis86)
 
+- **RetDec**: Used as the decompiler for translating binaries into a higher-level representation.  
+  [GitHub Repository](https://github.com/avast/retdec)
+
 
 
 ## Install Baseer 
@@ -66,9 +69,6 @@ To uninstall:
 ```bash
 make uninstall
 ```
-
-## Requirements
-- udis86
 
 ## Install Baseer 
 ```bash 

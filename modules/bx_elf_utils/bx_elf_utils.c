@@ -880,6 +880,177 @@ void print_symbols_64bit(bparser* parser, Elf64_Ehdr* elf, Elf64_Shdr* shdrs, El
 }
 
 /**
+ * @brief Convert an AMD x86-64 relocation type to its string representation.
+ *
+ * This function takes a relocation type constant (R_X86_64_*) and returns
+ * a human-readable string describing the type. If the type is unknown,
+ * it returns "UNKNOWN".
+ *
+ * @param type The relocation type value (uint32_t), typically extracted from
+ *             the r_info field of an Elf64_Rela or Elf64_Rel entry using
+ *             ELF64_R_TYPE().
+ *
+ * @return A constant string representing the relocation type name.
+ *
+ * @note This only covers standard AMD x86-64 relocation types.
+ *
+ * @code
+ * uint32_t type = ELF64_R_TYPE(rela_entry.r_info);
+ * printf("Relocation type: %s\n", rel_R_X86_64_type_to_str(type));
+ * @endcode
+ */
+const char* rel_R_X86_64_type_to_str(uint32_t type) {
+    switch (type) {
+        case R_X86_64_NONE:        return "R_X86_64_NONE";
+        case R_X86_64_64:          return "R_X86_64_64";
+        case R_X86_64_PC32:        return "R_X86_64_PC32";
+        case R_X86_64_GOT32:       return "R_X86_64_GOT32";
+        case R_X86_64_PLT32:       return "R_X86_64_PLT32";
+        case R_X86_64_COPY:        return "R_X86_64_COPY";
+        case R_X86_64_GLOB_DAT:    return "R_X86_64_GLOB_DAT";
+        case R_X86_64_JUMP_SLOT:   return "R_X86_64_JUMP_SLOT";
+        case R_X86_64_RELATIVE:    return "R_X86_64_RELATIVE";
+        case R_X86_64_GOTPCREL:    return "R_X86_64_GOTPCREL";
+        case R_X86_64_32:          return "R_X86_64_32";
+        case R_X86_64_32S:         return "R_X86_64_32S";
+        case R_X86_64_16:          return "R_X86_64_16";
+        case R_X86_64_PC16:        return "R_X86_64_PC16";
+        case R_X86_64_8:           return "R_X86_64_8";
+        case R_X86_64_PC8:         return "R_X86_64_PC8";
+        case R_X86_64_DTPMOD64:    return "R_X86_64_DTPMOD64";
+        case R_X86_64_DTPOFF64:    return "R_X86_64_DTPOFF64";
+        case R_X86_64_TPOFF64:     return "R_X86_64_TPOFF64";
+        case R_X86_64_TLSGD:       return "R_X86_64_TLSGD";
+        case R_X86_64_TLSLD:       return "R_X86_64_TLSLD";
+        case R_X86_64_DTPOFF32:    return "R_X86_64_DTPOFF32";
+        case R_X86_64_GOTTPOFF:    return "R_X86_64_GOTTPOFF";
+        case R_X86_64_TPOFF32:     return "R_X86_64_TPOFF32";
+        case R_X86_64_PC64:        return "R_X86_64_PC64";
+        case R_X86_64_GOTOFF64:    return "R_X86_64_GOTOFF64";
+        case R_X86_64_GOTPC32:     return "R_X86_64_GOTPC32";
+        case R_X86_64_GOT64:       return "R_X86_64_GOT64";
+        case R_X86_64_GOTPCREL64:  return "R_X86_64_GOTPCREL64";
+        case R_X86_64_GOTPC64:     return "R_X86_64_GOTPC64";
+        case R_X86_64_GOTPLT64:    return "R_X86_64_GOTPLT64";
+        case R_X86_64_PLTOFF64:    return "R_X86_64_PLTOFF64";
+        case R_X86_64_SIZE32:      return "R_X86_64_SIZE32";
+        case R_X86_64_SIZE64:      return "R_X86_64_SIZE64";
+        case R_X86_64_GOTPC32_TLSDESC: return "R_X86_64_GOTPC32_TLSDESC";
+        case R_X86_64_TLSDESC_CALL: return "R_X86_64_TLSDESC_CALL";
+        case R_X86_64_TLSDESC:     return "R_X86_64_TLSDESC";
+        case R_X86_64_IRELATIVE:   return "R_X86_64_IRELATIVE";
+        case R_X86_64_RELATIVE64:  return "R_X86_64_RELATIVE64";
+        case R_X86_64_GOTPCRELX:   return "R_X86_64_GOTPCRELX";
+        case R_X86_64_REX_GOTPCRELX:return "R_X86_64_REX_GOTPCRELX";
+        default:                   return "UNKNOWN";
+    }
+}
+
+
+
+/**
+ * @brief Print all relocation entries from a 32-bit .rela.plt section.
+ *
+ * This function iterates over a 32-bit ELF relocation section of type
+ * `SHT_RELA` (typically `.rela.plt`) and prints each entry in a human-readable
+ * format including the offset, info, addend, symbol index, and relocation type.
+ *
+ * @param parser  Pointer to the binary parser structure containing the ELF file in memory.
+ * @param elf     Pointer to the ELF32 header of the binary.
+ * @param shdrs   Array of section headers for the ELF file.
+ * @param rela_shdr Pointer to the section header of the .rela.plt section.
+ * @param symtab  Pointer to the section header of the symbol table (.dynsym) used for this relocation.
+ * @param strtab  Pointer to the section header of the string table used for symbol names.
+ *
+ * @note Uses ELF32_R_SYM() and ELF32_R_TYPE() macros to extract symbol index and
+ *       relocation type from r_info. Relocation type names should be mapped
+ *       appropriately for 32-bit x86 (use a 32-bit relocation mapping function).
+ *
+ * @code
+ * print_rela_plt_32bit(parser, elf, shdrs, &rela_section, &dynsym_section, &dynstr_section);
+ * @endcode
+ */
+void print_rela_plt_32bit(bparser* parser, Elf32_Ehdr* elf, Elf32_Shdr* shdrs, Elf32_Shdr *symtab, Elf32_Shdr *strtab) 
+{
+    Elf32_Shdr shstr = shdrs[elf->e_shstrndx];
+    const char* shstrtab = (const char*)(parser->block + shstr.sh_offset);
+    const char* secname = &shstrtab[symtab->sh_name];
+
+    Elf32_Rela *rela = (Elf32_Rela *)(parser->block + symtab->sh_offset);
+    size_t count = symtab->sh_size / sizeof(Elf32_Rela);
+
+    printf(COLOR_YELLOW "\n=== Relocation Entries (%s) ===\n" COLOR_RESET, secname);
+    printf(COLOR_WHITE "%-6s %-14s %-14s %-14s %-10s %-10s\n" COLOR_RESET,
+            "Index", "Offset", "Info", "Addend", "Sym", "Type");
+    printf(COLOR_WHITE "--------------------------------------------------------------------------\n" COLOR_RESET);
+
+    for (size_t i = 0; i < count; i++) {
+        uint32_t r_info   = rela[i].r_info;
+        uint32_t sym_idx  = ELF32_R_SYM(r_info);
+        uint32_t type     = ELF32_R_TYPE(r_info);
+
+        printf("%-6zu 0x%012x 0x%012x %-14d %-10u %-10s\n",
+                i,
+                rela[i].r_offset,
+                r_info,
+                rela[i].r_addend,
+                sym_idx,
+                rel_R_X86_64_type_to_str(type));
+    }
+}
+
+/**
+ * @brief Print all relocation entries from a 64-bit .rela.plt section.
+ *
+ * This function iterates over a 64-bit ELF relocation section of type
+ * `SHT_RELA` (typically `.rela.plt`) and prints each entry in a human-readable
+ * format, including the offset, info, addend, symbol index, and relocation type.
+ *
+ * @param parser  Pointer to the binary parser structure containing the ELF file in memory.
+ * @param elf     Pointer to the ELF64 header of the binary.
+ * @param shdrs   Array of section headers for the ELF file.
+ * @param symtab  Pointer to the section header of the relocation section (.rela.plt).
+ * @param strtab  Pointer to the section header of the string table used for symbol names.
+ *
+ * @note Uses ELF64_R_SYM() and ELF64_R_TYPE() macros to extract the symbol index and
+ *       relocation type from r_info. Relocation type names are resolved using
+ *       `rel_R_X86_64_type_to_str()`.
+ *
+ * @code
+ * print_rela_plt_64bit(parser, elf, shdrs, &rela_section, &dynstr_section);
+ * @endcode
+ */
+void print_rela_plt_64bit(bparser* parser, Elf64_Ehdr* elf, Elf64_Shdr* shdrs, Elf64_Shdr *symtab, Elf64_Shdr *strtab) 
+{
+    Elf64_Shdr shstr = shdrs[elf->e_shstrndx];
+    const char* shstrtab = (const char*)(parser->block + shstr.sh_offset);
+    const char* secname = &shstrtab[symtab->sh_name];
+
+    Elf64_Rela *rela = (Elf64_Rela *)(parser->block + symtab->sh_offset);
+    size_t count = symtab->sh_size / sizeof(Elf64_Rela);
+
+    printf(COLOR_YELLOW "\n=== Relocation Entries (%s) ===\n" COLOR_RESET, secname);
+    printf(COLOR_WHITE "%-6s %-14s %-14s %-14s %-10s %-10s\n" COLOR_RESET,
+            "Index", "Offset", "Info", "Addend", "Sym", "Type");
+    printf(COLOR_WHITE "--------------------------------------------------------------------------\n" COLOR_RESET);
+
+    for (size_t i = 0; i < count; i++) {
+        uint64_t r_info   = rela[i].r_info;
+        uint32_t sym_idx  = ELF64_R_SYM(r_info);
+        uint32_t type     = ELF64_R_TYPE(r_info);
+
+        printf("%-6zu 0x%012lx 0x%012lx %-14ld %-10u %-10s\n",
+                i,
+                rela[i].r_offset,
+                r_info,
+                rela[i].r_addend,
+                sym_idx,
+                rel_R_X86_64_type_to_str(type));
+    }
+}
+
+
+/**
  * @brief Print ELF32 symbols along with disassembly for functions.
  *
  * This function iterates over the symbol table of a 32-bit ELF file,

@@ -31,6 +31,8 @@ void print_symbols_with_disasm_64bit(bparser* parser, Elf64_Ehdr* elf, Elf64_Shd
 void format_sh_flags(uint64_t sh_flags, char *buf, size_t size);
 void print_symbols_32bit(bparser* parser, Elf32_Ehdr* elf, Elf32_Shdr* shdrs, Elf32_Shdr *symtab, Elf32_Shdr *strtab);
 void print_symbols_64bit(bparser* parser, Elf64_Ehdr* elf, Elf64_Shdr* shdrs, Elf64_Shdr *symtab, Elf64_Shdr *strtab);
+void print_rela_plt_32bit(bparser* parser, Elf32_Ehdr* elf, Elf32_Shdr* shdrs, Elf32_Shdr *symtab, Elf32_Shdr *strtab);
+void print_rela_plt_64bit(bparser* parser, Elf64_Ehdr* elf, Elf64_Shdr* shdrs, Elf64_Shdr *symtab, Elf64_Shdr *strtab);
 void print_section_header_metadata_32bit(unsigned int id, const char *name, const char *type_str, const char *flags, Elf32_Shdr *shdrs);
 void print_section_header_metadata_64bit(unsigned int id, const char *name, const char *type_str, const char *flags, Elf64_Shdr *shdrs);
 void print_program_header_metadata_32bit(unsigned int id, const char *type_str, const char *flags, Elf32_Phdr* phdr);

@@ -38,6 +38,7 @@ int main(int argc, char** args)
         }
 
         inputs input = {&argc, args};
+
         parse_args(&input);
         
         if(target){
@@ -46,6 +47,7 @@ int main(int argc, char** args)
             }
         }
         if(target) baseer_close(target);
+
 
         return 0;
     }

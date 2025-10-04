@@ -755,6 +755,36 @@ void destroy_all(context *ctx){
  * @return true on success, false otherwise.
  */
 bool b_debugger(bparser *target, void *arg){
+
+    // printf("from debugger...\n");
+    // hashmap_t *maps = ((inputs*)arg) -> map;
+    // if((hashmap_t*)get(maps, "sections") != NULL){
+    //     hashmap_t *map = (hashmap_t*)get(maps, "sections");
+    //     printf("there are sections...\n");
+    // }
+
+    // // 64 bit
+    // if((hashmap_t*)get(maps, "symbols") != NULL){
+    //     hashmap_t *symbols = (hashmap_t*)get(maps, "symbols");
+    //     printf("there are symbols...\n");
+    //     // for (int i = 0; i < TABLE_SIZE; i++) {
+    //     //     bht_node_t *bht_node = symbols->buckets[i];
+    //     //     while (bht_node != NULL) {
+    //     //         bht_node_t *temp = bht_node;
+    //     //         bht_node = bht_node->next;
+    //     //         printf("symbol name: %s\n", temp -> name);
+    //     //     }
+    //     // }
+        
+    //     if((Elf64_Sym*)get(symbols, "main") != NULL){
+    //         Elf64_Sym* func = (Elf64_Sym*)get(symbols, "main");
+    //         printf("offset: %llx\n size: %d\n", func->st_value, func->st_size);
+    //     }
+    // }
+
+
+
+
 	setbuf(stdout, NULL);
 	int argc = *((inputs*)arg) -> argc;
 	char** args = ((inputs*)arg) -> args;

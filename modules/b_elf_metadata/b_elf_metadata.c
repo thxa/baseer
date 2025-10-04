@@ -166,6 +166,14 @@ void dump_elf32_shdr(Elf32_Ehdr* elf, Elf32_Shdr* shdrs, bparser* parser)
         print_symbols_32bit(parser, elf, shdrs, symtab, strtab);
     }
 
+    if((symtab = (Elf32_Shdr*)get(map, ".rel.plt")) != NULL) {
+        print_rela_plt_32bit(parser, elf, shdrs, symtab, strtab);
+    }
+
+    if((symtab = (Elf32_Shdr*)get(map, ".rela.plt")) != NULL) {
+        print_rela_plt_32bit(parser, elf, shdrs, symtab, strtab);
+    }
+
     free_map(map);
 }
 
@@ -245,6 +253,14 @@ void dump_elf64_shdr(Elf64_Ehdr* elf , Elf64_Shdr* shdrs, bparser* parser)
 
     if((symtab = (Elf64_Shdr*)get(map, ".symtab")) != NULL && (strtab = (Elf64_Shdr*)get(map, ".strtab")) != NULL) {
         print_symbols_64bit(parser, elf, shdrs, symtab, strtab);
+    }
+
+    if((symtab = (Elf64_Shdr*)get(map, ".rel.plt")) != NULL) {
+        print_rela_plt_64bit(parser, elf, shdrs, symtab, strtab);
+    }
+
+    if((symtab = (Elf64_Shdr*)get(map, ".rela.plt")) != NULL) {
+        print_rela_plt_64bit(parser, elf, shdrs, symtab, strtab);
     }
 
 

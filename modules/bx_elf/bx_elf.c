@@ -4,21 +4,16 @@ bool bx_elf(bparser* parser, void *arg)
 {
     int argc = *((inputs*)arg) -> argc;
     char** args = ((inputs*)arg) -> args;
-    // printf("This is from elf: %d\n", argc);
-    // printf("This is from elf: %s\n", args_4);
 
-    // if(strcmp("-m", args[2]) == 0) {
-    //     bparser_apply(parser, print_meta_data, arg);
-    //     // print_meta_data(parser);
-    // } else if (strcmp("-a", args[2]) == 0) {
-    //     bparser_apply(parser, print_elf_disasm, arg);
-    // } else if(strcmp("-d", args[2]) == 0) {
-    //     bparser_apply(parser, b_debugger, arg);
-    // } else if (strcmp("-c", args[2]) == 0) {
-    //     bparser_apply(parser, decompile_elf, arg);
-    // }else {
-    //     printf("Not %s implement yet.", args[2]);
-    // }
+    // if (map
+    // ((inputs*)arg) -> 
+    // create hashmap of any hashmaps needed by baseer extentions to used it for other extentions...
+    // hashmap_t *map = create_map();
+
+    // Insert section header pointers into a hashmap for quick retrieval by name
+    // insert(map, name, &shdrs[i]);
+    // (Elf32_Shdr*)get(map, ".dynstr");
+
 
     for(int i = 2; i < argc; i++) {
         if(strcmp("-m", args[i]) == 0) {
@@ -35,6 +30,12 @@ bool bx_elf(bparser* parser, void *arg)
             fprintf(stderr, "[!] Unsupported flag: %s\n", args[i]);
         }
     }
+
+    // if((symtab = get(map, "symbols")) != NULL) {
+        // print_symbols_32bit(parser, elf, shdrs, symtab, strtab);
+        // printf("\n\n");
+    // }
+    // free_map(map);
 
     return true;
 }

@@ -4,11 +4,11 @@ bool bx_elf(bparser* parser, void *arg)
 {
     int argc = *((inputs*)arg) -> argc;
     char** args = ((inputs*)arg) -> args;
-    
+    hashmap_t *maps = ((inputs*)arg) -> map;
     
     // create hashmap of any hashmaps needed by baseer extentions to used it for other extentions...
-    ((inputs*)arg) -> map = create_map();
-    hashmap_t *maps = ((inputs*)arg) -> map;
+    // ((inputs*)arg) -> map = create_map();
+    // hashmap_t *maps = ((inputs*)arg) -> map;
     // if((hashmap_t*)get(maps, "sections") != NULL){
     //     hashmap_t *map = (hashmap_t*)get(maps, "sections");
     // }

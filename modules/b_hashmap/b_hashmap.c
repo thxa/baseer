@@ -107,3 +107,18 @@ void free_map(hashmap_t *map)
     free(map);
 }
 
+void free_maps(hashmap_t *map)
+{
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        bht_node_t *bht_node = map->buckets[i];
+        while (bht_node != NULL) {
+            bht_node_t *temp = bht_node;
+            bht_node = bht_node->next;
+            free(temp->name);
+            free_map((hashmap_t*)temp->bht_node_p);
+            free(temp);
+        }
+    }
+    free(map);
+}
+

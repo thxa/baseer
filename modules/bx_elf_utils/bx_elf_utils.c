@@ -946,8 +946,6 @@ const char* rel_R_X86_64_type_to_str(uint32_t type) {
     }
 }
 
-
-
 /**
  * @brief Print all relocation entries from a 32-bit .rela.plt section.
  *

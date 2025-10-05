@@ -37,7 +37,11 @@ int main(int argc, char** args)
             return 1;
         }
 
+
         inputs input = {&argc, args};
+        // create hashmap of any hashmaps needed by baseer extentions to used it for other extentions...
+        input.map = create_map();
+ 
         parse_args(&input);
         
         if(target){
@@ -46,6 +50,8 @@ int main(int argc, char** args)
             }
         }
         if(target) baseer_close(target);
+
+        free_map(input.map);
 
         return 0;
     }

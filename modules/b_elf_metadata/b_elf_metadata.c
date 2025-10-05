@@ -22,7 +22,6 @@
 #include "b_elf_metadata.h"
 #include "../b_hashmap/b_hashmap.h"
 #include <elf.h>
-#include <string.h>
 
 // ========================= BEGIN ELF HEADER ==================================
 /**
@@ -112,7 +111,7 @@ void dump_elf64hdr(Elf64_Ehdr *elf)
  * @note Output is color formatted and written to standard output.
  * @see dump_elf64_shdr()
  */
-void dump_elf32_shdr(Elf32_Ehdr* elf, Elf32_Shdr* shdrs, bparser* parser) 
+void dump_elf32_shdr(Elf32_Ehdr* elf, Elf32_Shdr* shdrs, bparser* parser, void* arg) 
 {
     Elf32_Shdr shstr = shdrs[elf->e_shstrndx];
     const char* shstrtab = (const char*)(parser->block + shstr.sh_offset);
@@ -120,9 +119,23 @@ void dump_elf32_shdr(Elf32_Ehdr* elf, Elf32_Shdr* shdrs, bparser* parser)
     printf(COLOR_BLUE "\n=== Section Headers ===\n" COLOR_RESET);
     print_section_header_legend();
 
+    // ======================================= init maps  =================================================
     // create hashmap of section headers to retreve the specifa name of section header needed
-    hashmap_t *map = create_map();
-    
+    // hashmap_t *map = create_map();
+    hashmap_t *maps = ((inputs*)arg) -> map;
+    if((hashmap_t*)get(maps, "sections") == NULL){
+        insert(maps, "sections", create_map());
+    }
+
+    if((hashmap_t*)get(maps, "symbols") == NULL){
+        insert(maps, "symbols", create_map());
+    }
+
+    // ======================================= init maps  =================================================
+
+    hashmap_t *map = (hashmap_t*)get(maps, "sections");
+    hashmap_t *symbols = (hashmap_t*)get(maps, "symbols");
+
     for (int i = 0; i < elf->e_shnum; i++) {
         // ============================ BEGIN SECTION METADATA =============================
         // Section name
@@ -132,7 +145,9 @@ void dump_elf32_shdr(Elf32_Ehdr* elf, Elf32_Shdr* shdrs, bparser* parser)
         const char* type_str = sh_type_to_str(shdrs[i].sh_type);
 
         // Insert section header pointers into a hashmap for quick retrieval by name
-        insert(map, name, &shdrs[i]);
+        if((Elf32_Shdr*)get(map, name) == NULL){
+            insert(map, name, &shdrs[i]);
+        }
 
         // Flags
         char flags[64] = "";
@@ -163,18 +178,33 @@ void dump_elf32_shdr(Elf32_Ehdr* elf, Elf32_Shdr* shdrs, bparser* parser)
     }
 
     if((symtab = (Elf32_Shdr*)get(map, ".symtab")) != NULL && (strtab = (Elf32_Shdr*)get(map, ".strtab")) != NULL) {
+
+        // Insert symbols in hashmap
+        Elf32_Sym *syms = (Elf32_Sym *)(parser->block + symtab->sh_offset);
+        const char *strs = (const char *)(parser->block + strtab->sh_offset);
+        unsigned int count = symtab->sh_size / sizeof(Elf32_Sym);
+        for (int i = 0; i < count; i++) {
+            const char *name = strs + syms[i].st_name;
+            if((Elf32_Sym*)get(symbols, name) == NULL){
+                insert(symbols, name, &syms[i]);
+            }
+        }
+
         print_symbols_32bit(parser, elf, shdrs, symtab, strtab);
+        printf("\n\n");
     }
 
     if((symtab = (Elf32_Shdr*)get(map, ".rel.plt")) != NULL) {
         print_rela_plt_32bit(parser, elf, shdrs, symtab, strtab);
+        printf("\n\n");
     }
 
     if((symtab = (Elf32_Shdr*)get(map, ".rela.plt")) != NULL) {
         print_rela_plt_32bit(parser, elf, shdrs, symtab, strtab);
+        printf("\n\n");
     }
 
-    free_map(map);
+    // free_map(map);
 }
 
 /**
@@ -202,15 +232,31 @@ void dump_elf32_shdr(Elf32_Ehdr* elf, Elf32_Shdr* shdrs, bparser* parser)
  * @note Output is color formatted and written to standard output.
  * @see dump_elf32_shdr()
  */
-void dump_elf64_shdr(Elf64_Ehdr* elf , Elf64_Shdr* shdrs, bparser* parser) 
+void dump_elf64_shdr(Elf64_Ehdr* elf , Elf64_Shdr* shdrs, bparser* parser, void* arg) 
 {
     Elf64_Shdr shstr = shdrs[elf->e_shstrndx];
     const char* shstrtab = (const char*)(parser->block + shstr.sh_offset);
     printf(COLOR_BLUE "\n=== Section Headers ===\n" COLOR_RESET);
     print_section_header_legend();
 
+
+    // ======================================= init maps  =================================================
     // create hashmap of section headers to retreve the specifa name of section header needed
-    hashmap_t *map = create_map();
+    // hashmap_t *map = create_map();
+    hashmap_t *maps = ((inputs*)arg) -> map;
+    if((hashmap_t*)get(maps, "sections") == NULL){
+        insert(maps, "sections", create_map());
+    }
+
+    if((hashmap_t*)get(maps, "symbols") == NULL){
+        insert(maps, "symbols", create_map());
+    }
+
+    // ======================================= init maps  =================================================
+
+    hashmap_t *map = (hashmap_t*)get(maps, "sections");
+    hashmap_t *symbols = (hashmap_t*)get(maps, "symbols");
+
 
     for (int i = 0; i < elf->e_shnum; i++) {
         // ============================ BEGIN SECTION METADATA =============================
@@ -221,7 +267,11 @@ void dump_elf64_shdr(Elf64_Ehdr* elf , Elf64_Shdr* shdrs, bparser* parser)
         const char* type_str = sh_type_to_str(shdrs[i].sh_type);
 
         // Insert section header pointers into a hashmap for quick retrieval by name
-        insert(map, name, &shdrs[i]);
+        if((Elf64_Shdr*)get(map, name) == NULL){
+            insert(map, name, &shdrs[i]);
+        }
+
+
 
         // Flags
         char flags[64] = "";
@@ -252,6 +302,17 @@ void dump_elf64_shdr(Elf64_Ehdr* elf , Elf64_Shdr* shdrs, bparser* parser)
     }
 
     if((symtab = (Elf64_Shdr*)get(map, ".symtab")) != NULL && (strtab = (Elf64_Shdr*)get(map, ".strtab")) != NULL) {
+        // Insert symbols in hashmap
+        Elf64_Sym *syms = (Elf64_Sym *)(parser->block + symtab->sh_offset);
+        const char *strs = (const char *)(parser->block + strtab->sh_offset);
+        unsigned int count = symtab->sh_size / sizeof(Elf64_Sym);
+        for (int i = 0; i < count; i++) {
+            const char *name = strs + syms[i].st_name;
+            if((Elf64_Sym*)get(symbols, name) == NULL){
+                insert(symbols, name, &syms[i]);
+            }
+        }
+
         print_symbols_64bit(parser, elf, shdrs, symtab, strtab);
     }
 
@@ -263,10 +324,7 @@ void dump_elf64_shdr(Elf64_Ehdr* elf , Elf64_Shdr* shdrs, bparser* parser)
         print_rela_plt_64bit(parser, elf, shdrs, symtab, strtab);
     }
 
-
-
-
-    free_map(map);
+    // free_map(map);
 }
 // ========================= END SECTION ==================================
 
@@ -433,7 +491,8 @@ void dump_elf64_phdr(Elf64_Ehdr *elf, Elf64_Phdr* phdr, bparser*parser)
 // READ_BYTES(md, 64)
 
 
-bool print_meta_data(bparser* parser, void* args) {
+bool print_meta_data(bparser* parser, void* arg) 
+{
     unsigned char *data = (unsigned char*) parser->block;
     char bit_type = data[EI_CLASS];
     char endian   = data[EI_DATA];
@@ -456,7 +515,7 @@ bool print_meta_data(bparser* parser, void* args) {
         dump_elf32hdr(elf);
 
         if(elf->e_shnum > 0)
-            dump_elf32_shdr(elf, shdrs, parser);
+            dump_elf32_shdr(elf, shdrs, parser, arg);
 
         if(elf->e_phnum > 0)
             dump_elf32_phdr(elf, phdr, parser);
@@ -467,7 +526,7 @@ bool print_meta_data(bparser* parser, void* args) {
         Elf64_Shdr* shdrs = (Elf64_Shdr*)(data + elf->e_shoff);
         dump_elf64hdr(elf);
         if(elf->e_shnum > 0)
-            dump_elf64_shdr(elf, shdrs, parser);
+            dump_elf64_shdr(elf, shdrs, parser, arg);
 
         if(elf->e_phnum > 0)
             dump_elf64_phdr(elf, phdr, parser);

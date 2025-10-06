@@ -63,6 +63,8 @@ void baseer_CLI(void) {
     int cli_argc = 3;
     char *cli_args[4] = {"baseer", NULL, NULL, NULL};
     inputs input = {&cli_argc, cli_args};
+    // create hashmap of any hashmaps needed by baseer extentions to used it for other extentions...
+    input.map = create_map();
     linenoiseSetCompletionCallback(completion);
 
     printf("\nWelcome to Baseer CLI. Type 'help' for commands.\n");
@@ -188,6 +190,7 @@ void baseer_CLI(void) {
         free(line);
     }
     if (target){
+        free_map(input.map);
         baseer_close(target);
     }
 }

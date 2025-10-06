@@ -49,9 +49,9 @@ int main(int argc, char** args)
                 fprintf(stderr, "[!] Execution error\n");
             }
         }
+        free_map(input.map);
         if(target) baseer_close(target);
 
-        free_map(input.map);
 
         return 0;
     }

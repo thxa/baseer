@@ -208,9 +208,9 @@ bmagic magics[] = {
 };
 ```
 
-### Example: ELF Metadata Extension
+### Example: ELF Extensions
 
-Below is an example of an already built extension that prints ELF file metadata.
+Below is an example of an already built extension for ELF .
 ```c
 bool bx_elf(bparser* parser, void *arg)
 {

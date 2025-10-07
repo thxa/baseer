@@ -247,10 +247,10 @@ Create new extensions by inheriting from the Extension Base Class. Each extensio
 Baseer is built to be easily extended.
 To add a new format (e.g., PDF, PNG, ZIP):
 
-1. Create a new file in modules/<format>/bx_<format>.c.
-2. Define your format callback (bx_<format>).
-3. Implement your tools (e.g., b_<tool1>, b_<tool2>).
-4. Register your format in the bmagic array.
+1. Create a new file in `modules/<format>/bx_<format>.c`.
+2. Define your format callback (`bx_<format>`).
+3. Implement your tools (e.g., `b_<tool1>`, `b_<tool2>`).
+4. Register your format in the `bmagic` array.
 5. Rebuild Baseer with make.
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for a detailed guide.

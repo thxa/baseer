@@ -21,5 +21,6 @@ hashmap_t *create_map(void);
 void insert(hashmap_t *map, const char *name, void *bht_node_p);
 void* get(hashmap_t *map, const char *name);
 void free_map(hashmap_t *map);
+void free_maps(hashmap_t *map);
 
 #endif

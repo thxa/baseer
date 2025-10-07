@@ -19,6 +19,8 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include "linenoise.h"
+#include "modules/b_hashmap/b_hashmap.h"
+
 #define BASEER_VERSION_MAJOR 0  
 #define BASEER_VERSION_MINOR 2
 #define BASEER_VERSION_MICRO 0  
@@ -96,6 +98,7 @@ typedef struct {
     char** args;
     int input_argc;
     char* input_args[MAX_INPUT_ARGS];
+    hashmap_t *map;
 } inputs;
 
 /**

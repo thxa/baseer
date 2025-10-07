@@ -3,7 +3,7 @@
 #include "modules/binhead/bx_binhead.h"
 #include "utils/ui.h"
 #include "utils/b_CLI.h"
-
+#include "modules/b_hashmap/b_hashmap.h"
 /**
  * @brief Program entry point
  * 
@@ -19,6 +19,7 @@
 int main(int argc, char** args)
 {
     linenoiseClearScreen();
+
     print_banner();
     if (argc == 2 && strcmp("-i", args[1]) == 0) {
         baseer_CLI();
@@ -34,8 +35,13 @@ int main(int argc, char** args)
         if (!target) {
             fprintf(stderr, COLOR_RED"[!] Failed to open file : "COLOR_RESET"%s\n", args[1]);
             return 1;
-            }
+        }
+
+
         inputs input = {&argc, args};
+        // create hashmap of any hashmaps needed by baseer extentions to used it for other extentions...
+        input.map = create_map();
+ 
         parse_args(&input);
         
         if(target){
@@ -43,7 +49,9 @@ int main(int argc, char** args)
                 fprintf(stderr, "[!] Execution error\n");
             }
         }
+        free_map(input.map);
         if(target) baseer_close(target);
+
 
         return 0;
     }

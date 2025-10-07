@@ -70,12 +70,6 @@ To uninstall:
 make uninstall
 ```
 
-## Install Baseer 
-```bash 
-make install
-```
-
-
 ## Usage
 
 1. Compile the Core (C-based):

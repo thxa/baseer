@@ -1,6 +1,8 @@
 # بصير (Baseer)
 
-**بصير (Baseer)** is a flexible, C-based reverse engineering analysis tool built on a **Core + Extensions** architecture. It can handle files from **any programming language** and allows you to open files, extract byte blocks, and analyze them using modular, customizable extensions.
+**بصير (Baseer)** is a modular, extensible binary analysis framework written in C.
+It allows developers to inspect, disassemble, debug, and decompile binary files using a flexible callback system.
+Baseer identifies file formats using magic numbers and executes corresponding handlers dynamically.
 
 > ⚠️ Note: This project is still under development and may change frequently.
 
@@ -29,6 +31,28 @@ Extensions add advanced capabilities:
 - **Decompiler**: Convert binaries to readable source code.
 - **Debugger**: Dynamically monitor and analyze files.
 
+
+## Baseer in details
+Baseer is designed around a callback tree.
+Each file format (e.g., ELF, TAR, etc.) is represented by a branch that defines its own callbacks.
+Callbacks can perform operations such as reading metadata, disassembling, debugging, or decompiling.
+
+### Baseer Architecture Diagram
+![Baseer Architecture Diagram](./Diagrams/baseer_arch.png)
+
+
+### Key Concepts
+- `bparser` — the main parser structure that holds file information.
+- `bmagic` — defines a magic number, the file type name, and the function callback used for parsing.
+- `inputs` — holds runtime arguments and a hashmap for communication between callbacks.
+- `bparser_apply()` — dispatches the execution of a callback for a given format.
+- Callbacks (`bx_<format>`) — per-format handler (e.g., `bx_elf`, `bx_tar`) that interprets command-line flags.
+- Tools (`b_<tool>`) — actions executed by callbacks, such as `b_debugger`, `b_disasm`, `b_elf_metadata`, etc.
+
+Each branch in the diagram represents a callback path from the main function → Baseer callback → format handler → specific tools.
+
+
+
 ---
 [docs](./docs/html)
 
@@ -40,8 +64,46 @@ Extensions add advanced capabilities:
 - **RetDec**: Used as the decompiler for translating binaries into a higher-level representation.  
   [GitHub Repository](https://github.com/avast/retdec)
 
+---
+## Build Instructions
+
+Baseer uses a standard Makefile for compilation.
+
+### Clone the repository
+```bash
+git clone https://github.com/thxa/baseer.git
+cd baseer
+```
+### Build Baseer
+```bash
+make
+```
+
+### Run Baseer on a binary
+```
+./build/baseer <target-file> -m
+```
+
+### Compile and analyze file
+- 64 bit
+```bash 
+make && ./build/baseer examples/64bit_x86_64 -m | less -r
+```
+
+- 32 bit
+```bash 
+make && ./build/baseer examples/32bit_x86 -m | less -r
+```
 
 
+
+### Requirements
+- GCC
+- Linux environment (recommended)
+- make build system
+
+
+--- 
 ## Install Baseer 
 
 ### Installation on Arch Linux
@@ -54,7 +116,7 @@ yay -S baseer
 > Make sure you have an AUR helper installed (e.g., `yay`, `paru`) before running the command.
 
 ### Uninstallation
-To remove Baseer, use:
+To remove **Baseer**, use:
 ```bash
 pacman -Rs baseer
 ```
@@ -69,17 +131,9 @@ To uninstall:
 ```bash
 make uninstall
 ```
+---
 
 ## Usage
-
-1. Compile the Core (C-based):
-
-```bash
-make
-```
-
-
-2. Run Baseer
 
 Analyze a file using one of the following modes:
 - Show metadata:
@@ -88,24 +142,16 @@ baseer <file> -m
 ```
 - Disassemble:
 ```bash 
-./baseer <file> -a
+baseer <file> -a
 ```
 
 - Launch debugger:
 ```bash
-./baseer <file> -d
+baseer <file> -d
 ```
-
-
-- Compile and analyze the file
-- 64 bit
-```bash 
-make && ./build/baseer examples/64bit_x86_64 -m | less -r
-```
-
-- 32 bit
-```bash 
-make && ./build/baseer examples/32bit_x86 -m | less -r
+- Launch REPL:
+```bash
+baseer -i
 ```
 
 
@@ -130,22 +176,86 @@ make && ./build/baseer examples/32bit_x86 -m | less -r
 <!-- ```bash -->
 <!-- baseer sample.bin --pipeline fix_header|identify_block|disassembler -->
 <!-- ``` -->
-
+---
 ## Features
 
 - Written in C for speed and low-level control.
 - Language-agnostic: works with files from any programming language.
 - Modular and extensible architecture.
-<!-- - Supports complex analysis pipelines. -->
+- Supports complex analysis pipelines.
 - Easy API for creating new extensions.
 
-## Contributing
+<!-- ## Contributing -->
+---
+## How Baseer Works
 
+When you run Baseer with a target file, it:
+
+1. Reads the file header and detects its magic number.
+2. Searches the `bmagic` array for a match.
+3. Calls the corresponding callback (`bx_<format>`) to handle the file.
+4. Executes tools (`b_<tool>`) depending on command-line flags (e.g., `-m` for metadata, `-a` for disassembly, `-d` for debugging).
+
+### Example of the format registration:
+```c
+bmagic magics[] = {
+    {"ELF", ELF_MAGIC, reverse_bytes(ELF_MAGIC), bx_elf, 0},
+    {"TAR", TAR_MAGIC, reverse_bytes(TAR_MAGIC), bx_tar, 257},
+    // {"PDF", PDF_MAGIC, reverse_bytes(PDF_MAGIC), NULL, 0},
+    // {"PNG", PNG_MAGIC, reverse_bytes(PNG_MAGIC), NULL, 0},
+    // {"ZIP", ZIP_MAGIC, reverse_bytes(ZIP_MAGIC), NULL, 0},
+    // {"Mach-o", MACHO_MAGIC, reverse_bytes(MACHO_MAGIC), NULL, 0},
+};
+```
+
+### Example: ELF Metadata Extension
+
+Below is an example of an already built extension that prints ELF file metadata.
+```c
+bool bx_elf(bparser* parser, void *arg)
+{
+    int argc = *((inputs*)arg)->argc;
+    char** args = ((inputs*)arg)->args;
+
+    for (int i = 2; i < argc; i++) {
+        if (strcmp("-m", args[i]) == 0)
+            bparser_apply(parser, print_meta_data, arg);
+        else if (strcmp("-a", args[i]) == 0)
+            bparser_apply(parser, print_elf_disasm, arg);
+        else if (strcmp("-d", args[i]) == 0)
+            bparser_apply(parser, b_debugger, arg);
+        else if (strcmp("-c", args[i]) == 0)
+            bparser_apply(parser, decompile_elf, arg);
+        else
+            fprintf(stderr, "[!] Unsupported flag: %s\n", args[i]);
+    }
+
+    return true;
+}
+```
+
+<!--
 Create new extensions by inheriting from the Extension Base Class. Each extension should include:
 
 - Extension name.
 - Main function to analyze or modify byte blocks.
 - Ability to integrate with the pipeline.
+-->
+
+## Adding New Formats
+
+Baseer is built to be easily extended.
+To add a new format (e.g., PDF, PNG, ZIP):
+
+1. Create a new file in modules/<format>/bx_<format>.c.
+2. Define your format callback (bx_<format>).
+3. Implement your tools (e.g., b_<tool1>, b_<tool2>).
+4. Register your format in the bmagic array.
+5. Rebuild Baseer with make.
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for a detailed guide.
+
+---
 
 ## Supported File Types (Magic Numbers)
 

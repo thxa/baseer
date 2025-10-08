@@ -76,6 +76,7 @@ cd baseer
 ```
 ### Build Baseer
 ```bash
+cmake CMakeLists.txt
 make
 ```
 
@@ -87,21 +88,18 @@ make
 ### Compile and analyze file
 - 64 bit
 ```bash 
-make && ./build/baseer examples/64bit_x86_64 -m | less -r
+cmake CMakeLists.txt && make && ./build/baseer examples/64bit_x86_64 -m | less -r
 ```
 
 - 32 bit
 ```bash 
-make && ./build/baseer examples/32bit_x86 -m | less -r
+cmake CMakeLists.txt && make && ./build/baseer examples/32bit_x86 -m | less -r
 ```
-
-
 
 ### Requirements
 - GCC
 - Linux environment (recommended)
 - make build system
-
 
 --- 
 ## Install Baseer 
@@ -124,12 +122,12 @@ pacman -Rs baseer
 ### Install from Source
 To install **Baseer** from source:
 ```bash
-make install
+cmake CMakeLists.txt && make install
 ```
 
 To uninstall:
 ```bash
-make uninstall
+cmake CMakeLists.txt && make uninstall
 ```
 ---
 

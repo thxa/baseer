@@ -43,4 +43,31 @@ a.out
 
 .vscode/
 
+# CMake build directories
+build/
+cmake-build-*/
+*/cmake-build-*/
 
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+install_manifest.txt
+CTestTestfile.cmake
+_CPack_Packages/
+
+# Visual Studio files (if using Visual Studio with CMake)
+*.sln
+*.vcxproj*
+.vs/
+
+# Other common build artifacts
+*.o
+*.obj
+*.lo
+*.la
+*.so
+*.a
+*.lib
+*.dll
+*.exe

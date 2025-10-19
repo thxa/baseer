@@ -1,1 +1,0 @@
-savedcmd_dump_process.ko := ld -r -m elf_x86_64 -z noexecstack --no-warn-rwx-segments --build-id=sha1  -T /usr/lib/modules/6.17.3-arch2-1/build/scripts/module.lds -o dump_process.ko dump_process.o dump_process.mod.o .module-common.o

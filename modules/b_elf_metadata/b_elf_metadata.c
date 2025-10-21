@@ -170,12 +170,44 @@ void dump_elf32_shdr(Elf32_Ehdr* elf, Elf32_Shdr* shdrs, bparser* parser, void* 
         }
         // ============================ END SECTION BODY =============================
     }
+    // ================ print tables ==================
+    for (int i = 0; i < elf->e_shnum; i++) {
+        Elf32_Shdr curr_shd = shdrs[i];
+        if(curr_shd.sh_link == 0) continue;
+        Elf32_Shdr linked_shd = shdrs[curr_shd.sh_link];
+
+        // Section name
+        const char* name = &shstrtab[curr_shd.sh_name];
+        // check is it table type and have like `SYMTAB` `DYNSYMTAB` `REL` `RELA` and so on... and there LINK section for names.
+        if (curr_shd.sh_type == SHT_SYMTAB && linked_shd.sh_type == SHT_STRTAB) {
+            print_symbols_32bit(parser, elf, shdrs, &curr_shd, &linked_shd);
+
+        } else if(curr_shd.sh_type == SHT_DYNSYM && linked_shd.sh_type == SHT_STRTAB){
+            // TODO: need to make print_dynmaic_symbols ...
+            print_symbols_32bit(parser, elf, shdrs, &curr_shd, &linked_shd);
+
+        } else if(curr_shd.sh_type == SHT_REL){
+            // TODO: need to make print_rel ...
+            print_rela_32bit(parser, elf, shdrs, &curr_shd, &linked_shd);
+        } else if(curr_shd.sh_type == SHT_RELA){
+            print_rela_32bit(parser, elf, shdrs, &curr_shd, &linked_shd);
+
+        } else if(curr_shd.sh_type == SHT_RELR){
+            // TODO: need to make print_rela ...
+            print_rela_32bit(parser, elf, shdrs, &curr_shd, &linked_shd);
+        } else if(curr_shd.sh_type == SHT_DYNAMIC){
+            // TODO
+            // print_symbols_32bit(parser, elf, shdrs, &curr_shd, &linked_shd);
+        }
+    }
+
+
 
     Elf32_Shdr *symtab, *strtab;
-    if((symtab = (Elf32_Shdr*)get(map, ".dynsym")) != NULL && (strtab = (Elf32_Shdr*)get(map, ".dynstr")) != NULL) {
-        print_symbols_32bit(parser, elf, shdrs, symtab, strtab);
-        printf("\n\n");
-    }
+    // if((symtab = (Elf32_Shdr*)get(map, ".dynsym")) != NULL && (strtab = (Elf32_Shdr*)get(map, ".dynstr")) != NULL) {
+    //     print_symbols_32bit(parser, elf, shdrs, symtab, strtab);
+    //     printf("\n\n");
+    // }
 
     if((symtab = (Elf32_Shdr*)get(map, ".symtab")) != NULL && (strtab = (Elf32_Shdr*)get(map, ".strtab")) != NULL) {
 
@@ -189,20 +221,19 @@ void dump_elf32_shdr(Elf32_Ehdr* elf, Elf32_Shdr* shdrs, bparser* parser, void* 
                 insert(symbols, name, &syms[i]);
             }
         }
-
-        print_symbols_32bit(parser, elf, shdrs, symtab, strtab);
+        // print_symbols_32bit(parser, elf, shdrs, symtab, strtab);
         printf("\n\n");
     }
 
-    if((symtab = (Elf32_Shdr*)get(map, ".rel.plt")) != NULL) {
-        print_rela_plt_32bit(parser, elf, shdrs, symtab, strtab);
-        printf("\n\n");
-    }
+    // if((symtab = (Elf32_Shdr*)get(map, ".rel.plt")) != NULL) {
+    //     print_rela_32bit(parser, elf, shdrs, symtab, strtab);
+    //     printf("\n\n");
+    // }
 
-    if((symtab = (Elf32_Shdr*)get(map, ".rela.plt")) != NULL) {
-        print_rela_plt_32bit(parser, elf, shdrs, symtab, strtab);
-        printf("\n\n");
-    }
+    // if((symtab = (Elf32_Shdr*)get(map, ".rela.plt")) != NULL) {
+    //     print_rela_32bit(parser, elf, shdrs, symtab, strtab);
+    //     printf("\n\n");
+    // }
 
     // free_map(map);
 }
@@ -271,8 +302,6 @@ void dump_elf64_shdr(Elf64_Ehdr* elf , Elf64_Shdr* shdrs, bparser* parser, void*
             insert(map, name, &shdrs[i]);
         }
 
-
-
         // Flags
         char flags[64] = "";
         format_sh_flags(shdrs[i].sh_flags, flags, sizeof(flags));
@@ -280,7 +309,6 @@ void dump_elf64_shdr(Elf64_Ehdr* elf , Elf64_Shdr* shdrs, bparser* parser, void*
 
         print_section_header_metadata_64bit(i, name, type_str, flags, shdrs);
         // ============================ END SECTION METADATA =============================
-
 
         // ============================ BEGIN SECTION BODY =============================
         if (shdrs[i].sh_size > 0) {
@@ -295,12 +323,38 @@ void dump_elf64_shdr(Elf64_Ehdr* elf , Elf64_Shdr* shdrs, bparser* parser, void*
         // ============================ END SECTION BODY =============================
     }
 
-    Elf64_Shdr *symtab, *strtab;
-    if((symtab = (Elf64_Shdr*)get(map, ".dynsym")) != NULL && (strtab = (Elf64_Shdr*)get(map, ".dynstr")) != NULL) {
-        print_symbols_64bit(parser, elf, shdrs, symtab, strtab);
-        printf("\n\n");
+    // ================ print tables ==================
+    for (int i = 0; i < elf->e_shnum; i++) {
+        Elf64_Shdr curr_shd = shdrs[i];
+        if(curr_shd.sh_link == 0) continue;
+        Elf64_Shdr linked_shd = shdrs[curr_shd.sh_link];
+
+        // Section name
+        const char* name = &shstrtab[curr_shd.sh_name];
+        // check is it table type and have like `SYMTAB` `DYNSYMTAB` `REL` `RELA` and so on... and there LINK section for names.
+        if (curr_shd.sh_type == SHT_SYMTAB && linked_shd.sh_type == SHT_STRTAB) {
+            print_symbols_64bit(parser, elf, shdrs, &curr_shd, &linked_shd);
+
+        } else if(curr_shd.sh_type == SHT_DYNSYM && linked_shd.sh_type == SHT_STRTAB){
+            // TODO: need to make print_dynmaic_symbols ...
+            print_symbols_64bit(parser, elf, shdrs, &curr_shd, &linked_shd);
+
+        } else if(curr_shd.sh_type == SHT_REL){
+            // TODO: need to make print_rel ...
+            print_rela_64bit(parser, elf, shdrs, &curr_shd, &linked_shd);
+        } else if(curr_shd.sh_type == SHT_RELA){
+            print_rela_64bit(parser, elf, shdrs, &curr_shd, &linked_shd);
+
+        } else if(curr_shd.sh_type == SHT_RELR){
+            // TODO: need to make print_rela ...
+            print_rela_64bit(parser, elf, shdrs, &curr_shd, &linked_shd);
+        } else if(curr_shd.sh_type == SHT_DYNAMIC){
+            // TODO
+            // print_symbols_64bit(parser, elf, shdrs, &curr_shd, &linked_shd);
+        }
     }
 
+    Elf64_Shdr *symtab, *strtab;
     if((symtab = (Elf64_Shdr*)get(map, ".symtab")) != NULL && (strtab = (Elf64_Shdr*)get(map, ".strtab")) != NULL) {
         // Insert symbols in hashmap
         Elf64_Sym *syms = (Elf64_Sym *)(parser->block + symtab->sh_offset);
@@ -312,16 +366,6 @@ void dump_elf64_shdr(Elf64_Ehdr* elf , Elf64_Shdr* shdrs, bparser* parser, void*
                 insert(symbols, name, &syms[i]);
             }
         }
-
-        print_symbols_64bit(parser, elf, shdrs, symtab, strtab);
-    }
-
-    if((symtab = (Elf64_Shdr*)get(map, ".rel.plt")) != NULL) {
-        print_rela_plt_64bit(parser, elf, shdrs, symtab, strtab);
-    }
-
-    if((symtab = (Elf64_Shdr*)get(map, ".rela.plt")) != NULL) {
-        print_rela_plt_64bit(parser, elf, shdrs, symtab, strtab);
     }
 
     // free_map(map);

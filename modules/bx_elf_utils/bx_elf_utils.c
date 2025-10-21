@@ -946,106 +946,171 @@ const char* rel_R_X86_64_type_to_str(uint32_t type) {
     }
 }
 
-/**
- * @brief Print all relocation entries from a 32-bit .rela.plt section.
- *
- * This function iterates over a 32-bit ELF relocation section of type
- * `SHT_RELA` (typically `.rela.plt`) and prints each entry in a human-readable
- * format including the offset, info, addend, symbol index, and relocation type.
- *
- * @param parser  Pointer to the binary parser structure containing the ELF file in memory.
- * @param elf     Pointer to the ELF32 header of the binary.
- * @param shdrs   Array of section headers for the ELF file.
- * @param rela_shdr Pointer to the section header of the .rela.plt section.
- * @param symtab  Pointer to the section header of the symbol table (.dynsym) used for this relocation.
- * @param strtab  Pointer to the section header of the string table used for symbol names.
- *
- * @note Uses ELF32_R_SYM() and ELF32_R_TYPE() macros to extract symbol index and
- *       relocation type from r_info. Relocation type names should be mapped
- *       appropriately for 32-bit x86 (use a 32-bit relocation mapping function).
- *
- * @code
- * print_rela_plt_32bit(parser, elf, shdrs, &rela_section, &dynsym_section, &dynstr_section);
- * @endcode
- */
-void print_rela_plt_32bit(bparser* parser, Elf32_Ehdr* elf, Elf32_Shdr* shdrs, Elf32_Shdr *symtab, Elf32_Shdr *strtab) 
+void print_rela_32bit(bparser* parser, Elf32_Ehdr* elf, Elf32_Shdr* shdrs, Elf32_Shdr *reltab, Elf32_Shdr *symtab) 
 {
-    Elf32_Shdr shstr = shdrs[elf->e_shstrndx];
+    Elf32_Shdr shstr  = shdrs[elf->e_shstrndx];
+    Elf32_Shdr strtab = shdrs[symtab->sh_link];
+
     const char* shstrtab = (const char*)(parser->block + shstr.sh_offset);
-    const char* secname = &shstrtab[symtab->sh_name];
 
-    Elf32_Rela *rela = (Elf32_Rela *)(parser->block + symtab->sh_offset);
-    size_t count = symtab->sh_size / sizeof(Elf32_Rela);
+    const char* relname = &shstrtab[reltab->sh_name];
+    const char* symname = &shstrtab[symtab->sh_name];
+    const char* strname = &shstrtab[strtab.sh_name];
 
-    printf(COLOR_YELLOW "\n=== Relocation Entries (%s) ===\n" COLOR_RESET, secname);
-    printf(COLOR_WHITE "%-6s %-14s %-14s %-14s %-10s %-10s\n" COLOR_RESET,
-            "Index", "Offset", "Info", "Addend", "Sym", "Type");
+    Elf32_Rela* rela = (Elf32_Rela*)(parser->block + reltab->sh_offset);
+    size_t count = reltab->sh_size / sizeof(Elf32_Rela);
+
+    Elf32_Sym* syms = (Elf32_Sym*)(parser->block + symtab->sh_offset);
+    const char* strs = (const char*)(parser->block + strtab.sh_offset);
+
+    printf(COLOR_YELLOW "\n=== Relocation Table: %-15s ===\n" COLOR_RESET, relname);
+    printf("  Uses symbol table:  %s\n", symname);
+    printf("  Uses string table:  %s\n", strname);
+    printf(COLOR_WHITE "--------------------------------------------------------------------------\n" COLOR_RESET);
+    printf(COLOR_WHITE "%-6s %-14s %-14s %-10s %-20s %-12s\n" COLOR_RESET,
+           "Idx", "Offset", "Info", "Addend", "Symbol", "Type");
     printf(COLOR_WHITE "--------------------------------------------------------------------------\n" COLOR_RESET);
 
     for (size_t i = 0; i < count; i++) {
-        uint32_t r_info   = rela[i].r_info;
-        uint32_t sym_idx  = ELF32_R_SYM(r_info);
-        uint32_t type     = ELF32_R_TYPE(r_info);
+        uint32_t r_info  = rela[i].r_info;
+        uint32_t sym_idx = ELF32_R_SYM(r_info);
+        uint32_t type    = ELF32_R_TYPE(r_info);
+        int32_t  addend  = rela[i].r_addend;
 
-        printf("%-6zu 0x%012x 0x%012x %-14d %-10u %-10s\n",
-                i,
-                rela[i].r_offset,
-                r_info,
-                rela[i].r_addend,
-                sym_idx,
-                rel_R_X86_64_type_to_str(type));
+        const char* name = (sym_idx < (symtab->sh_size / sizeof(Elf32_Sym)))
+            ? (strs + syms[sym_idx].st_name)
+            : "<invalid>";
+
+        const char* type_str = rel_R_X86_64_type_to_str(type);
+        if (!type_str) type_str = "UNKNOWN";
+
+        // Optional: color the type for easier reading
+        const char* type_color = COLOR_CYAN;
+        if (strstr(type_str, "PLT")) type_color = COLOR_GREEN;
+        else if (strstr(type_str, "GLOB")) type_color = COLOR_MAGENTA;
+        else if (strstr(type_str, "RELATIVE")) type_color = COLOR_BLUE;
+
+        printf("%-6zu 0x%012x 0x%012x %-10d %-20s %s%-12s" COLOR_RESET "\n",
+               i,
+               rela[i].r_offset,
+               r_info,
+               addend,
+               name,
+               type_color,
+               type_str);
     }
+    printf("\n\n");
 }
 
-/**
- * @brief Print all relocation entries from a 64-bit .rela.plt section.
- *
- * This function iterates over a 64-bit ELF relocation section of type
- * `SHT_RELA` (typically `.rela.plt`) and prints each entry in a human-readable
- * format, including the offset, info, addend, symbol index, and relocation type.
- *
- * @param parser  Pointer to the binary parser structure containing the ELF file in memory.
- * @param elf     Pointer to the ELF64 header of the binary.
- * @param shdrs   Array of section headers for the ELF file.
- * @param symtab  Pointer to the section header of the relocation section (.rela.plt).
- * @param strtab  Pointer to the section header of the string table used for symbol names.
- *
- * @note Uses ELF64_R_SYM() and ELF64_R_TYPE() macros to extract the symbol index and
- *       relocation type from r_info. Relocation type names are resolved using
- *       `rel_R_X86_64_type_to_str()`.
- *
- * @code
- * print_rela_plt_64bit(parser, elf, shdrs, &rela_section, &dynstr_section);
- * @endcode
- */
-void print_rela_plt_64bit(bparser* parser, Elf64_Ehdr* elf, Elf64_Shdr* shdrs, Elf64_Shdr *symtab, Elf64_Shdr *strtab) 
+void print_rela_64bit(bparser* parser, Elf64_Ehdr* elf, Elf64_Shdr* shdrs,
+                      Elf64_Shdr* reltab, Elf64_Shdr* symtab)
 {
-    Elf64_Shdr shstr = shdrs[elf->e_shstrndx];
+    Elf64_Shdr shstr  = shdrs[elf->e_shstrndx];
+    Elf64_Shdr strtab = shdrs[symtab->sh_link];
+
     const char* shstrtab = (const char*)(parser->block + shstr.sh_offset);
-    const char* secname = &shstrtab[symtab->sh_name];
 
-    Elf64_Rela *rela = (Elf64_Rela *)(parser->block + symtab->sh_offset);
-    size_t count = symtab->sh_size / sizeof(Elf64_Rela);
+    const char* relname = &shstrtab[reltab->sh_name];
+    const char* symname = &shstrtab[symtab->sh_name];
+    const char* strname = &shstrtab[strtab.sh_name];
 
-    printf(COLOR_YELLOW "\n=== Relocation Entries (%s) ===\n" COLOR_RESET, secname);
-    printf(COLOR_WHITE "%-6s %-14s %-14s %-14s %-10s %-10s\n" COLOR_RESET,
-            "Index", "Offset", "Info", "Addend", "Sym", "Type");
+    Elf64_Rela* rela = (Elf64_Rela*)(parser->block + reltab->sh_offset);
+    size_t count = reltab->sh_size / sizeof(Elf64_Rela);
+
+    Elf64_Sym* syms = (Elf64_Sym*)(parser->block + symtab->sh_offset);
+    const char* strs = (const char*)(parser->block + strtab.sh_offset);
+
+    printf(COLOR_YELLOW "\n=== Relocation Table: %-15s ===\n" COLOR_RESET, relname);
+    printf("  Uses symbol table:  %s\n", symname);
+    printf("  Uses string table:  %s\n", strname);
+    printf(COLOR_WHITE "--------------------------------------------------------------------------\n" COLOR_RESET);
+    printf(COLOR_WHITE "%-6s %-14s %-14s %-10s %-20s %-12s\n" COLOR_RESET,
+           "Idx", "Offset", "Info", "Addend", "Symbol", "Type");
     printf(COLOR_WHITE "--------------------------------------------------------------------------\n" COLOR_RESET);
 
     for (size_t i = 0; i < count; i++) {
-        uint64_t r_info   = rela[i].r_info;
-        uint32_t sym_idx  = ELF64_R_SYM(r_info);
-        uint32_t type     = ELF64_R_TYPE(r_info);
+        uint64_t r_info  = rela[i].r_info;
+        uint64_t sym_idx = ELF64_R_SYM(r_info);
+        uint64_t type    = ELF64_R_TYPE(r_info);
+        int64_t  addend  = rela[i].r_addend;
 
-        printf("%-6zu 0x%012lx 0x%012lx %-14ld %-10u %-10s\n",
-                i,
-                rela[i].r_offset,
-                r_info,
-                rela[i].r_addend,
-                sym_idx,
-                rel_R_X86_64_type_to_str(type));
+        const char* name = (sym_idx < (symtab->sh_size / sizeof(Elf64_Sym)))
+            ? (strs + syms[sym_idx].st_name)
+            : "<invalid>";
+
+        const char* type_str = rel_R_X86_64_type_to_str(type);
+        if (!type_str) type_str = "UNKNOWN";
+
+        // Optional: color the type for easier reading
+        const char* type_color = COLOR_CYAN;
+        if (strstr(type_str, "PLT")) type_color = COLOR_GREEN;
+        else if (strstr(type_str, "GLOB")) type_color = COLOR_MAGENTA;
+        else if (strstr(type_str, "RELATIVE")) type_color = COLOR_BLUE;
+
+        printf("%-6zu 0x%012lx 0x%012lx %-10ld %-20s %s%-12s" COLOR_RESET "\n",
+               i,
+               rela[i].r_offset,
+               r_info,
+               addend,
+               name,
+               type_color,
+               type_str);
     }
+    printf("\n\n");
 }
+
+
+// void print_rela_64bit(bparser* parser, Elf64_Ehdr* elf, Elf64_Shdr* shdrs, Elf64_Shdr *reltab, Elf64_Shdr *symtab) 
+// {
+//     Elf64_Shdr shstr = shdrs[elf->e_shstrndx];
+//     Elf64_Shdr strtab = shdrs[symtab->sh_link];
+
+//     const char* shstrtab = (const char*)(parser->block + shstr.sh_offset);
+
+//     const char* relname = &shstrtab[reltab->sh_name];
+//     const char* symname = &shstrtab[symtab->sh_name];
+//     const char* strname = &shstrtab[strtab.sh_name];
+
+//     Elf64_Rela *rela = (Elf64_Rela *)(parser->block + reltab->sh_offset);
+//     size_t count = reltab->sh_size / sizeof(Elf64_Rela);
+
+//     Elf64_Sym *syms = (Elf64_Sym *)(parser->block + symtab->sh_offset);
+//     const char *strs = (const char *)(parser->block + strtab.sh_offset);
+
+
+//     printf(COLOR_YELLOW "\n=== Relocation Entries (%s) -> symtab (%s) -> strtab (%s) ===\n" COLOR_RESET, relname, symname, strname);
+//     printf(COLOR_WHITE "%-6s %-14s %-14s %-14s %-10s %-10s\n" COLOR_RESET,
+//             "Index", "Offset", "Info", "Addend", "Sym", "Type");
+//     printf(COLOR_WHITE "--------------------------------------------------------------------------\n" COLOR_RESET);
+
+//     for (size_t i = 0; i < count; i++) {
+//         uint64_t r_info   = rela[i].r_info;
+//         uint64_t sym_idx  = ELF64_R_SYM(r_info);
+//         uint64_t type     = ELF64_R_TYPE(r_info);
+//         // uint64_t info     = ELF64_R_INFO(sym_idx,type);
+
+
+//         const char *name = strs + syms[sym_idx].st_name;
+//         // unsigned char type = ELF64_ST_TYPE(syms[i].st_info);
+//         // if(syms[i].st_size > 0){
+//         //     if(type == STT_FUNC) {
+//         //         unsigned char* ptr = (unsigned char*)parser->block + syms[i].st_value;
+//         //         printf("\n");
+//         //         printf(COLOR_WHITE "|-- %s:" COLOR_RESET "\n", name);
+//         //         print_disasm(ptr, syms[i].st_size, syms[i].st_value, ELFCLASS64);
+//         //     }
+//         // }
+
+//         printf("%-6zu 0x%012lx 0x%012lx %-14ld %-1s %-10s\n",
+//                 i,
+//                 rela[i].r_offset,
+//                 r_info,
+//                 rela[i].r_addend,
+//                 name,
+//                 rel_R_X86_64_type_to_str(type));
+//     }
+
+// }
 
 
 /**

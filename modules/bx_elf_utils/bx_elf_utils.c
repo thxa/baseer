@@ -899,7 +899,8 @@ void print_symbols_64bit(bparser* parser, Elf64_Ehdr* elf, Elf64_Shdr* shdrs, El
  * printf("Relocation type: %s\n", rel_R_X86_64_type_to_str(type));
  * @endcode
  */
-const char* rel_R_X86_64_type_to_str(uint32_t type) {
+const char* rel_R_X86_64_type_to_str(uint32_t type) 
+{
     switch (type) {
         case R_X86_64_NONE:        return "R_X86_64_NONE";
         case R_X86_64_64:          return "R_X86_64_64";
@@ -945,6 +946,54 @@ const char* rel_R_X86_64_type_to_str(uint32_t type) {
         default:                   return "UNKNOWN";
     }
 }
+
+
+const char* dynamic_type(uint32_t type) 
+{
+    char* tag_name;
+    switch (type) {
+        case DT_NULL:            tag_name = "DT_NULL"; break;
+        case DT_NEEDED:          tag_name = "DT_NEEDED"; break;
+        case DT_PLTRELSZ:        tag_name = "DT_PLTRELSZ"; break;
+        case DT_PLTGOT:          tag_name = "DT_PLTGOT"; break;
+        case DT_HASH:            tag_name = "DT_HASH"; break;
+        case DT_STRTAB:          tag_name = "DT_STRTAB"; break;
+        case DT_SYMTAB:          tag_name = "DT_SYMTAB"; break;
+        case DT_RELA:            tag_name = "DT_RELA"; break;
+        case DT_RELASZ:          tag_name = "DT_RELASZ"; break;
+        case DT_RELAENT:         tag_name = "DT_RELAENT"; break;
+        case DT_STRSZ:           tag_name = "DT_STRSZ"; break;
+        case DT_SYMENT:          tag_name = "DT_SYMENT"; break;
+        case DT_INIT:            tag_name = "DT_INIT"; break;
+        case DT_FINI:            tag_name = "DT_FINI"; break;
+        case DT_SONAME:          tag_name = "DT_SONAME"; break;
+        case DT_RPATH:           tag_name = "DT_RPATH"; break;
+        case DT_SYMBOLIC:        tag_name = "DT_SYMBOLIC"; break;
+        case DT_REL:             tag_name = "DT_REL"; break;
+        case DT_RELSZ:           tag_name = "DT_RELSZ"; break;
+        case DT_RELENT:          tag_name = "DT_RELENT"; break;
+        case DT_PLTREL:          tag_name = "DT_PLTREL"; break;
+        case DT_DEBUG:           tag_name = "DT_DEBUG"; break;
+        case DT_TEXTREL:         tag_name = "DT_TEXTREL"; break;
+        case DT_JMPREL:          tag_name = "DT_JMPREL"; break;
+        case DT_BIND_NOW:        tag_name = "DT_BIND_NOW"; break;
+        case DT_INIT_ARRAY:      tag_name = "DT_INIT_ARRAY"; break;
+        case DT_FINI_ARRAY:      tag_name = "DT_FINI_ARRAY"; break;
+        case DT_INIT_ARRAYSZ:    tag_name = "DT_INIT_ARRAYSZ"; break;
+        case DT_FINI_ARRAYSZ:    tag_name = "DT_FINI_ARRAYSZ"; break;
+        case DT_RUNPATH:         tag_name = "DT_RUNPATH"; break;
+        case DT_FLAGS:           tag_name = "DT_FLAGS"; break;
+        case DT_PREINIT_ARRAY:   tag_name = "DT_PREINIT_ARRAY"; break;
+        case DT_PREINIT_ARRAYSZ: tag_name = "DT_PREINIT_ARRAYSZ"; break;
+        case DT_SYMTAB_SHNDX:    tag_name = "DT_SYMTAB_SHNDX"; break;
+        case DT_RELRSZ:          tag_name = "DT_RELRSZ"; break;
+        case DT_RELR:            tag_name = "DT_RELR"; break;
+        case DT_RELRENT:         tag_name = "DT_RELRENT"; break;
+        default:                 tag_name = "UNKNOWN"; break;    
+    }
+    return tag_name;
+}
+
 
 void print_rela_32bit(bparser* parser, Elf32_Ehdr* elf, Elf32_Shdr* shdrs, Elf32_Shdr *reltab, Elf32_Shdr *symtab) 
 {
@@ -1059,59 +1108,78 @@ void print_rela_64bit(bparser* parser, Elf64_Ehdr* elf, Elf64_Shdr* shdrs,
     printf("\n\n");
 }
 
+void print_dynamic_table_32bit(bparser* parser, Elf32_Ehdr* elf, Elf32_Shdr* shdrs,
+                               Elf32_Shdr *dynmaictab, Elf32_Shdr *strtab)
+{
+    Elf32_Shdr shstr = shdrs[elf->e_shstrndx];
+    const char* shstrtab = (const char*)(parser->block + shstr.sh_offset);
 
-// void print_rela_64bit(bparser* parser, Elf64_Ehdr* elf, Elf64_Shdr* shdrs, Elf64_Shdr *reltab, Elf64_Shdr *symtab) 
-// {
-//     Elf64_Shdr shstr = shdrs[elf->e_shstrndx];
-//     Elf64_Shdr strtab = shdrs[symtab->sh_link];
+    const char* dynname = &shstrtab[dynmaictab -> sh_name];
+    const char* strname = &shstrtab[strtab -> sh_name];
 
-//     const char* shstrtab = (const char*)(parser->block + shstr.sh_offset);
+    Elf32_Dyn *dyns = (Elf32_Dyn *)(parser->block + dynmaictab->sh_offset);
+    const char *strs = (const char *)(parser->block + strtab->sh_offset);
+    unsigned int count = dynmaictab->sh_size / sizeof(Elf32_Dyn);
 
-//     const char* relname = &shstrtab[reltab->sh_name];
-//     const char* symname = &shstrtab[symtab->sh_name];
-//     const char* strname = &shstrtab[strtab.sh_name];
+    printf(COLOR_YELLOW "\n=== Dynamic (%s + %s) ===\n" COLOR_RESET, dynname, strname);
 
-//     Elf64_Rela *rela = (Elf64_Rela *)(parser->block + reltab->sh_offset);
-//     size_t count = reltab->sh_size / sizeof(Elf64_Rela);
+    printf("%-20s %-18s %s\n", "Tag", "Value", "Interpretation");
+    printf("-------------------------------------------------------------\n");
 
-//     Elf64_Sym *syms = (Elf64_Sym *)(parser->block + symtab->sh_offset);
-//     const char *strs = (const char *)(parser->block + strtab.sh_offset);
+    for (size_t i = 0; i < count; i++) {
+        Elf32_Dyn *dyn = &dyns[i];
 
+        if (dyn->d_tag == DT_NULL)
+            break;  // End of table
 
-//     printf(COLOR_YELLOW "\n=== Relocation Entries (%s) -> symtab (%s) -> strtab (%s) ===\n" COLOR_RESET, relname, symname, strname);
-//     printf(COLOR_WHITE "%-6s %-14s %-14s %-14s %-10s %-10s\n" COLOR_RESET,
-//             "Index", "Offset", "Info", "Addend", "Sym", "Type");
-//     printf(COLOR_WHITE "--------------------------------------------------------------------------\n" COLOR_RESET);
+        const char *tag_name = dynamic_type(dyn->d_tag);
+        printf("%-20s 0x%016lx ", tag_name, (unsigned long)dyn->d_un.d_val);
 
-//     for (size_t i = 0; i < count; i++) {
-//         uint64_t r_info   = rela[i].r_info;
-//         uint64_t sym_idx  = ELF64_R_SYM(r_info);
-//         uint64_t type     = ELF64_R_TYPE(r_info);
-//         // uint64_t info     = ELF64_R_INFO(sym_idx,type);
+        // Interpretation
+        if (dyn->d_tag == DT_NEEDED || dyn->d_tag == DT_SONAME ||
+                dyn->d_tag == DT_RPATH || dyn->d_tag == DT_RUNPATH) {
+            printf("%s", strs + dyn->d_un.d_val);
+        }
 
+        printf("\n");
+    }
+}
 
-//         const char *name = strs + syms[sym_idx].st_name;
-//         // unsigned char type = ELF64_ST_TYPE(syms[i].st_info);
-//         // if(syms[i].st_size > 0){
-//         //     if(type == STT_FUNC) {
-//         //         unsigned char* ptr = (unsigned char*)parser->block + syms[i].st_value;
-//         //         printf("\n");
-//         //         printf(COLOR_WHITE "|-- %s:" COLOR_RESET "\n", name);
-//         //         print_disasm(ptr, syms[i].st_size, syms[i].st_value, ELFCLASS64);
-//         //     }
-//         // }
+void print_dynamic_table_64bit(bparser* parser, Elf64_Ehdr* elf, Elf64_Shdr* shdrs, 
+                               Elf64_Shdr *dynmaictab, Elf64_Shdr *strtab)
+{
+    Elf64_Shdr shstr = shdrs[elf->e_shstrndx];
+    const char* shstrtab = (const char*)(parser->block + shstr.sh_offset);
 
-//         printf("%-6zu 0x%012lx 0x%012lx %-14ld %-1s %-10s\n",
-//                 i,
-//                 rela[i].r_offset,
-//                 r_info,
-//                 rela[i].r_addend,
-//                 name,
-//                 rel_R_X86_64_type_to_str(type));
-//     }
+    const char* dynname = &shstrtab[dynmaictab -> sh_name];
+    const char* strname = &shstrtab[strtab -> sh_name];
 
-// }
+    Elf64_Dyn *dyns = (Elf64_Dyn *)(parser->block + dynmaictab->sh_offset);
+    const char *strs = (const char *)(parser->block + strtab->sh_offset);
+    unsigned int count = dynmaictab->sh_size / sizeof(Elf64_Dyn);
 
+    printf(COLOR_YELLOW "\n=== Dynamic (%s + %s) ===\n" COLOR_RESET, dynname, strname);
+
+    printf("%-20s %-18s %s\n", "Tag", "Value", "Interpretation");
+    printf("-------------------------------------------------------------\n");
+
+    for (size_t i = 0; i < count; i++) {
+        Elf64_Dyn *dyn = &dyns[i];
+
+        if (dyn->d_tag == DT_NULL)
+            break;  // End of table
+
+        const char *tag_name = dynamic_type(dyn->d_tag);
+        printf("%-20s 0x%016lx ", tag_name, (unsigned long)dyn->d_un.d_val);
+
+        // Interpretation
+        if (dyn->d_tag == DT_NEEDED || dyn->d_tag == DT_SONAME ||
+                dyn->d_tag == DT_RPATH || dyn->d_tag == DT_RUNPATH) {
+            printf("%s", strs + dyn->d_un.d_val);
+        }
+        printf("\n");
+    }
+}
 
 /**
  * @brief Print ELF32 symbols along with disassembly for functions.

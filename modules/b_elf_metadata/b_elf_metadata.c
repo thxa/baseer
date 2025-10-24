@@ -159,7 +159,7 @@ void dump_elf32_shdr(Elf32_Ehdr* elf, Elf32_Shdr* shdrs, bparser* parser, void* 
         
 
         // ============================ BEGIN SECTION BODY =============================
-        long long int offset = shdrs[i].sh_offset;
+        long int offset = shdrs[i].sh_offset;
         if (shdrs[i].sh_size > 0) {
             void* block = malloc(shdrs[i].sh_size);
             bparser_read(parser, block, shdrs[i].sh_offset, shdrs[i].sh_size);
@@ -176,8 +176,6 @@ void dump_elf32_shdr(Elf32_Ehdr* elf, Elf32_Shdr* shdrs, bparser* parser, void* 
         if(curr_shd.sh_link == 0) continue;
         Elf32_Shdr linked_shd = shdrs[curr_shd.sh_link];
 
-        // Section name
-        const char* name = &shstrtab[curr_shd.sh_name];
         // check is it table type and have like `SYMTAB` `DYNSYMTAB` `REL` `RELA` and so on... and there LINK section for names.
         if (curr_shd.sh_type == SHT_SYMTAB && linked_shd.sh_type == SHT_STRTAB) {
             print_symbols_32bit(parser, elf, shdrs, &curr_shd, &linked_shd);
@@ -198,6 +196,7 @@ void dump_elf32_shdr(Elf32_Ehdr* elf, Elf32_Shdr* shdrs, bparser* parser, void* 
         } else if(curr_shd.sh_type == SHT_DYNAMIC){
             // TODO
             // print_symbols_32bit(parser, elf, shdrs, &curr_shd, &linked_shd);
+            print_dynamic_table_32bit(parser, elf, shdrs, &curr_shd, &linked_shd);
         }
     }
 
@@ -329,8 +328,6 @@ void dump_elf64_shdr(Elf64_Ehdr* elf , Elf64_Shdr* shdrs, bparser* parser, void*
         if(curr_shd.sh_link == 0) continue;
         Elf64_Shdr linked_shd = shdrs[curr_shd.sh_link];
 
-        // Section name
-        const char* name = &shstrtab[curr_shd.sh_name];
         // check is it table type and have like `SYMTAB` `DYNSYMTAB` `REL` `RELA` and so on... and there LINK section for names.
         if (curr_shd.sh_type == SHT_SYMTAB && linked_shd.sh_type == SHT_STRTAB) {
             print_symbols_64bit(parser, elf, shdrs, &curr_shd, &linked_shd);
@@ -344,13 +341,11 @@ void dump_elf64_shdr(Elf64_Ehdr* elf , Elf64_Shdr* shdrs, bparser* parser, void*
             print_rela_64bit(parser, elf, shdrs, &curr_shd, &linked_shd);
         } else if(curr_shd.sh_type == SHT_RELA){
             print_rela_64bit(parser, elf, shdrs, &curr_shd, &linked_shd);
-
         } else if(curr_shd.sh_type == SHT_RELR){
-            // TODO: need to make print_rela ...
+            // TODO: need to make print_relr ...
             print_rela_64bit(parser, elf, shdrs, &curr_shd, &linked_shd);
         } else if(curr_shd.sh_type == SHT_DYNAMIC){
-            // TODO
-            // print_symbols_64bit(parser, elf, shdrs, &curr_shd, &linked_shd);
+            print_dynamic_table_64bit(parser, elf, shdrs, &curr_shd, &linked_shd);
         }
     }
 

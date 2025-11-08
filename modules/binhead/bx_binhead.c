@@ -6,6 +6,7 @@
 #include "bx_binhead.h"
 #include "../bx_elf/bx_elf.h"
 #include "../bx_tar/bx_tar.h"
+#include "../bx_macho/bx_macho.h"
 
 unsigned int count_bits(unsigned long long int n)
 {
@@ -40,6 +41,26 @@ unsigned long long int reverse_bytes(unsigned long long int n)
     return result;
 }
 
+unsigned int NXSwapInt(unsigned int inv) 
+{
+    return ((inv & 0x000000FF) << 24) |
+           ((inv & 0x0000FF00) << 8)  |
+           ((inv & 0x00FF0000) >> 8)  |
+           ((inv & 0xFF000000) >> 24);
+}
+
+unsigned long NXSwapLong(unsigned long inv) 
+{
+    return ((inv & 0x00000000000000FFUL) << 56) |
+           ((inv & 0x000000000000FF00UL) << 40) |
+           ((inv & 0x0000000000FF0000UL) << 24) |
+           ((inv & 0x00000000FF000000UL) << 8)  |
+           ((inv & 0x000000FF00000000UL) >> 8)  |
+           ((inv & 0x0000FF0000000000UL) >> 24) |
+           ((inv & 0x00FF000000000000UL) >> 40) |
+           ((inv & 0xFF00000000000000UL) >> 56);
+}
+
 bool bx_binhead(baseer_target_t *target, void *arg)
 {   
 
@@ -54,10 +75,11 @@ bool bx_binhead(baseer_target_t *target, void *arg)
     bmagic magics[] = {
         {"ELF", ELF_MAGIC, reverse_bytes(ELF_MAGIC), bx_elf, 0},
         {"TAR", TAR_MAGIC, reverse_bytes(TAR_MAGIC), bx_tar, 257},
+        {"Mach-o", MH_MAGIC, NXSwapInt(MH_MAGIC), bx_macho, 0},
+        {"Mach-o", MH_MAGIC_64, NXSwapInt(MH_MAGIC_64), bx_macho, 0},
         // {"PDF", PDF_MAGIC, reverse_bytes(PDF_MAGIC), NULL, 0},
         // {"PNG", PNG_MAGIC, reverse_bytes(PNG_MAGIC), NULL, 0},
         // {"ZIP", ZIP_MAGIC, reverse_bytes(ZIP_MAGIC), NULL, 0},
-        // {"Mach-o", MACHO_MAGIC, reverse_bytes(MACHO_MAGIC), NULL, 0},
         // { NULL, 0,         0,                 NULL }
     };
 

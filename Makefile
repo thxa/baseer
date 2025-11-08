@@ -11,13 +11,23 @@ DEFAULT         = modules/default/bx_default.c
 BX_BINHEAD      = modules/binhead/bx_binhead.c
 BPARSER         = modules/bparser/bparser.c
 B_HASHMAP 	= modules/b_hashmap/b_hashmap.c
+
+# ELF
 BX_ELF          = modules/bx_elf/bx_elf.c
 BX_ELF_UTILS    = modules/bx_elf_utils/bx_elf_utils.c
 B_ELF_METADATA  = modules/b_elf_metadata/b_elf_metadata.c
 BX_ELF_DISASM   = modules/bx_elf_disasm/bx_elf_disasm.c
 B_DEBUG         = modules/b_debugger/debugger.c
-BX_TAR          = modules/bx_tar/bx_tar.c
 BX_deElf        = modules/bx_deElf/bx_deElf.c
+
+# TAR 
+BX_TAR          = modules/bx_tar/bx_tar.c
+
+
+# MACH-O
+BX_MACHO       		= modules/bx_macho/bx_macho.c
+B_MACHO_METADATA        = modules/b_macho_metadata/b_macho_metadata.c
+BX_MACHO_UTILS          = modules/bx_macho_utils/bx_macho_utils.c
 
 
 
@@ -71,9 +81,8 @@ $(BUILDDIR) $(MODULEDIR):
 	mkdir -p $@
 
 # Core executable
-$(TARGET): $(CORE) $(DEFAULT) $(BX_BINHEAD) $(BPARSER) $(B_HASHMAP) $(BX_ELF) $(BX_ELF_UTILS) $(B_ELF_METADATA) $(B_DEBUG) $(BX_TAR) $(BX_deElf) baseer.h | $(BUILDDIR)
-
-	$(CC) $(CFLAGS) $(CORE) $(DEFAULT) $(BPARSER) $(B_HASHMAP) $(BX_BINHEAD) $(BX_ELF) $(BX_ELF_UTILS) $(B_ELF_METADATA) $(B_DEBUG) $(BX_TAR) $(BX_deElf) $(BX_ELF_DISASM) $(UDIS86_SRC) -o $@
+$(TARGET): $(CORE) $(DEFAULT) $(BX_BINHEAD) $(BPARSER) $(B_HASHMAP) $(BX_ELF) $(BX_ELF_UTILS) $(B_ELF_METADATA) $(B_DEBUG) $(BX_TAR) $(BX_deElf) $(BX_MACHO) $(BX_MACHO_UTILS) $(B_MACHO_METADATA) baseer.h | $(BUILDDIR)
+	$(CC) $(CFLAGS) $(CORE) $(DEFAULT) $(BPARSER) $(B_HASHMAP) $(BX_BINHEAD) $(BX_ELF) $(BX_ELF_UTILS) $(B_ELF_METADATA) $(B_DEBUG) $(BX_TAR) $(BX_deElf) $(BX_ELF_DISASM) $(BX_MACHO) $(BX_MACHO_UTILS) $(B_MACHO_METADATA) $(UDIS86_SRC) -o $@
 	# $(CC) $(CORE) $(DEFAULT) $(BPARSER) $(BX_BINHEAD) $(BX_ELF) $(B_ELF_METADATA) $(B_DEBUG) $(BX_TAR) $(BX_deElf) -ludis86 -o $@
 
 # Shared libraries

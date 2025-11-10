@@ -64,6 +64,7 @@ b_macho_metadata(bparser* parser, void* arg)
 
             if(command->cmd == LC_SEGMENT_64) {
                 segment_command_64  *seg_cmd = (segment_command_64*)offset_of_load_command;
+                unsigned char *seg_cmd_base = (unsigned char*) offset_of_load_command + sizeof(segment_command_64);
                 // seg_cmd->segname;	/* segment name */
                 // seg_cmd->vmaddr;		/* memory address of this segment */
                 // seg_cmd->vmsize;		/* memory size of this segment */
@@ -76,7 +77,7 @@ b_macho_metadata(bparser* parser, void* arg)
                 
                 printf(COLOR_GREEN "Seg name:"COLOR_RESET" %s \n", seg_cmd->segname);	/* segment name */
                 printf(COLOR_GREEN"VM address:"COLOR_RESET" 0x%llx\n", seg_cmd->vmaddr);		/* memory address of this segment */
-                printf(COLOR_GREEN"VM size:"COLOR_RESET" %lld\n", seg_cmd->vmsize);		/* memory size of this segment */
+                printf(COLOR_GREEN"VM size:"COLOR_RESET" 0x%llx\n", seg_cmd->vmsize);		/* memory size of this segment */
                 printf(COLOR_GREEN"File offset:"COLOR_RESET" 0x%llx\n", seg_cmd->fileoff);	/* file offset of this segment */
                 printf(COLOR_GREEN"File size:"COLOR_RESET" %lld\n", seg_cmd->filesize);	/* amount to map from the file */
                 printf(COLOR_GREEN"Max VM Protection:"COLOR_RESET" %x\n", seg_cmd->maxprot);	/* maximum VM protection */
@@ -85,13 +86,29 @@ b_macho_metadata(bparser* parser, void* arg)
                 printf(COLOR_GREEN"Segment Flags"COLOR_RESET" (0x%08x):\n", seg_cmd->flags);		/* flags */     
                 print_segment_flags(seg_cmd->flags);
 
-                // for(char* sec_offset = block+seg_cmd->fileoff; sec_offset < block + seg_cmd->fileoff + seg_cmd->filesize;) {
-                //     section_64* sec = (section_64*)
+                printf("\n");
+                if(seg_cmd->nsects > 0)
+                    printf(COLOR_BLUE "Sections:\n" COLOR_RESET);
 
-                //     // sec_offset += ;
-                // }
+                for(unsigned char* sec = seg_cmd_base; sec < seg_cmd_base + seg_cmd->cmdsize && seg_cmd->nsects > 0; ) { 
+                    section_64* sec_cmd = (section_64*) sec;
+                    printf(COLOR_GREEN "Section name:"COLOR_RESET" %s\n", sec_cmd->sectname);
+                    printf(COLOR_GREEN "Segment name:"COLOR_RESET" %s\n" , sec_cmd->segname);
+                    printf(COLOR_GREEN "Memory Address:"COLOR_RESET" 0x%lx\n", sec_cmd->addr);
+                    printf(COLOR_GREEN "file Offset:"COLOR_RESET" 0x%x\n", sec_cmd->offset);
+                    printf(COLOR_GREEN "Size:"COLOR_RESET" %ld\n", sec_cmd->size);
+                    printf(COLOR_GREEN "Section Alignment(x**2):"COLOR_RESET" %d\n", sec_cmd->align);
+                    printf(COLOR_GREEN "File offset relocation entries:"COLOR_RESET" 0x%x\n", sec_cmd->reloff);
+                    printf(COLOR_GREEN "Number of relocation entries:"COLOR_RESET" %d\n" , sec_cmd->nreloc);
+                    printf(COLOR_GREEN "[TODO print flags]Flags:"COLOR_RESET" %x\n", sec_cmd->flags);
+                    printf(COLOR_GREEN "reserved for (offset or index):"COLOR_RESET" %d\n", sec_cmd->reserved1);	/* reserved (for offset or index) */
+                    printf(COLOR_GREEN "reserved for (count and sizeof):"COLOR_RESET" %d\n", sec_cmd->reserved2);	/* reserved (for count or sizeof) */
+                    printf(COLOR_GREEN "reserved: "COLOR_RESET"%d\n", sec_cmd->reserved3);	/* reserved */
+                    printf("\n");
 
-
+                    sec += sizeof(section_64);
+                }
+                printf("\n");
             }
             printf("\n");
 

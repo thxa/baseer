@@ -21,7 +21,7 @@
  */
 #include "b_elf_metadata.h"
 #include "../b_hashmap/b_hashmap.h"
-#include <elf.h>
+#include "elf.h"
 
 // ========================= BEGIN ELF HEADER ==================================
 /**

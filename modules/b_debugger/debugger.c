@@ -1,6 +1,6 @@
 #define _GNU_SOURCE
 #include <stdint.h>
-#include <elf.h>
+#include "elf.h"
 #include <stdio.h>
 #include <ctype.h>
 #include "udis86.h"

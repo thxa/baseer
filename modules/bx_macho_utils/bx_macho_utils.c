@@ -124,22 +124,115 @@ void print_load_command_info(uint32_t cmd)
 
 void print_segment_flags(uint32_t flags)
 {
+    int x = 4;
     if (flags & SG_HIGHVM)
-        printf(" - SG_HIGHVM: File contents map to high VM space; low part is zero-filled.\n");
+        printf("%*s- SG_HIGHVM: File contents map to high VM space; low part is zero-filled.\n", x, "");
 
     if (flags & SG_FVMLIB)
-        printf(" - SG_FVMLIB: Segment allocated by a fixed VM library (used for overlap checking).\n");
+        printf("%*s- SG_FVMLIB: Segment allocated by a fixed VM library (used for overlap checking).\n", x, "");
 
     if (flags & SG_NORELOC)
-        printf(" - SG_NORELOC: Segment has no relocations; safe to replace without relocation.\n");
+        printf("%*s- SG_NORELOC: Segment has no relocations; safe to replace without relocation.\n", x, "");
 
     if (flags & SG_PROTECTED_VERSION_1)
-        printf(" - SG_PROTECTED_VERSION_1: Protected segment; only first page may be unprotected.\n");
+        printf("%*s- SG_PROTECTED_VERSION_1: Protected segment; only first page may be unprotected.\n", x, "");
 
     if (flags & SG_READ_ONLY)
-        printf(" - SG_READ_ONLY: Segment is made read-only after fixups.\n");
+        printf("%*s- SG_READ_ONLY: Segment is made read-only after fixups.\n", x, "");
 
     if (!(flags & (SG_HIGHVM | SG_FVMLIB | SG_NORELOC | SG_PROTECTED_VERSION_1 | SG_READ_ONLY)))
-        printf(" - No special segment flags set.\n");
+        printf("%*s- No special segment flags set.\n", x, "");
 }
+
+void print_macho_segment64_metadata(segment_command_64  *seg_cmd)
+{
+    printf(COLOR_GREEN "Segment Command (LC_SEGMENT_64):" COLOR_RESET "\n");
+    printf(COLOR_GREEN "  Segment Name:  " COLOR_RESET "%s\n", seg_cmd->segname);
+    printf(COLOR_GREEN "  VM Address:    " COLOR_RESET "0x%lx\n", seg_cmd->vmaddr);
+    printf(COLOR_GREEN "  VM Size:       " COLOR_RESET "0x%lx\n", seg_cmd->vmsize);
+    printf(COLOR_GREEN "  File Offset:   " COLOR_RESET "%lu\n", seg_cmd->fileoff);
+    printf(COLOR_GREEN "  File Size:     " COLOR_RESET "%lu\n", seg_cmd->filesize);
+    printf(COLOR_GREEN "  Max Prot:      " COLOR_RESET "0x%x\n", seg_cmd->maxprot);
+    printf(COLOR_GREEN "  Init Prot:     " COLOR_RESET "0x%x\n", seg_cmd->initprot);
+    printf(COLOR_GREEN "  Num Sections:  " COLOR_RESET "%u\n", seg_cmd->nsects);
+    printf(COLOR_GREEN "  Flags:         " COLOR_RESET "0x%x\n", seg_cmd->flags);
+    print_segment_flags(seg_cmd->flags);
+}
+
+void print_macho_section64_metadata(section_64* sec_cmd)
+{
+    printf(COLOR_GREEN "  Section name:"COLOR_RESET" %s\n", sec_cmd->sectname);
+    printf(COLOR_GREEN "  Segment name:"COLOR_RESET" %s\n" , sec_cmd->segname);
+    printf(COLOR_GREEN "  Memory Address:"COLOR_RESET" 0x%lx\n", sec_cmd->addr);
+    printf(COLOR_GREEN "  File Offset:"COLOR_RESET" 0x%x\n", sec_cmd->offset);
+    printf(COLOR_GREEN "  Size:"COLOR_RESET" %ld\n", sec_cmd->size);
+    printf(COLOR_GREEN "  Section Alignment(x**2):"COLOR_RESET" %d\n", sec_cmd->align);
+    printf(COLOR_GREEN "  File offset relocation entries:"COLOR_RESET" 0x%x\n", sec_cmd->reloff);
+    printf(COLOR_GREEN "  Number of relocation entries:"COLOR_RESET" %d\n" , sec_cmd->nreloc);
+    printf(COLOR_GREEN "  Flags:"COLOR_RESET" %x\n", sec_cmd->flags);
+    printf(COLOR_GREEN "  reserved for (offset or index):"COLOR_RESET" %d\n", sec_cmd->reserved1);	/* reserved (for offset or index) */
+    printf(COLOR_GREEN "  reserved for (count and sizeof):"COLOR_RESET" %d\n", sec_cmd->reserved2);	/* reserved (for count or sizeof) */
+    printf(COLOR_GREEN "  reserved: "COLOR_RESET"%d\n", sec_cmd->reserved3);	/* reserved */
+}
+
+const char* platform_to_string(int platform) 
+{
+    switch (platform) {
+        case PLATFORM_MACOS: return "macOS";
+        case PLATFORM_IOS: return "iOS";
+        case PLATFORM_TVOS: return "tvOS";
+        case PLATFORM_WATCHOS: return "watchOS";
+        case PLATFORM_BRIDGEOS: return "bridgeOS";
+        case PLATFORM_MACCATALYST: return "Mac Catalyst";
+        case PLATFORM_IOSSIMULATOR: return "iOS Simulator";
+        case PLATFORM_TVOSSIMULATOR: return "tvOS Simulator";
+        case PLATFORM_WATCHOSSIMULATOR: return "watchOS Simulator";
+        case PLATFORM_DRIVERKIT: return "DriverKit";
+        default: return "Unknown Platform";
+    }
+}
+
+const char* tool_to_string(int tool) 
+{
+    switch (tool) {
+        case TOOL_CLANG: return "Clang";
+        case TOOL_SWIFT: return "Swift";
+        case TOOL_LD:    return "LD (Linker)";
+        default:         return "Unknown Tool";
+    }
+}
+
+/* Helper to decode version numbers (e.g. 0x0e050000 → 14.5.0) */
+void print_tool_version(uint32_t version)
+{
+    printf("%u.%u.%u",
+           (version >> 16) & 0xffff,
+           (version >> 8) & 0xff,
+           version & 0xff);
+}
+
+
+/* Helper to decode uuid 128 bit*/
+void print_uuid(const uint8_t uuid[16]) 
+{
+    printf("%02X%02X%02X%02X-%02X%02X-%02X%02X-%02X%02X-%02X%02X%02X%02X%02X%02X",
+        uuid[0], uuid[1], uuid[2], uuid[3],
+        uuid[4], uuid[5],
+        uuid[6], uuid[7],
+        uuid[8], uuid[9],
+        uuid[10], uuid[11], uuid[12], uuid[13], uuid[14], uuid[15]);
+}
+
+/* Helper to decode source version */
+void print_source_version(uint64_t packed_version) 
+{
+    uint64_t A = (packed_version >> 40) & 0xFFFFFF;  // top 24 bits
+    uint64_t B = (packed_version >> 30) & 0x3FF;
+    uint64_t C = (packed_version >> 20) & 0x3FF;
+    uint64_t D = (packed_version >> 10) & 0x3FF;
+    uint64_t E =  packed_version        & 0x3FF;
+    printf("%lu.%lu.%lu.%lu.%lu",  A, B, C, D, E);
+}
+
+
 

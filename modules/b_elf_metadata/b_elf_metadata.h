@@ -21,7 +21,7 @@
 #define B_ELF_METADATA
 #include "../bparser/bparser.h"
 #include "../../baseer.h"
-#include <elf.h>
+#include "elf.h"
 #include<string.h>
 #include "../bx_elf_utils/bx_elf_utils.h"
 #include "udis86.h"

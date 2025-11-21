@@ -11,7 +11,6 @@
 #ifndef BX_DEFAULT_H
 #define BX_DEFAULT_H
 #include <stdbool.h>
-// #include <elf.h>
 #include "../../baseer.h"
 #include "../bparser/bparser.h"
 

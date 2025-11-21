@@ -3,7 +3,7 @@
 CC      = gcc
 CFLAGS  = -Wall -fPIC
 LDFLAGS = -ldl
-CFLAGS += -Ilibs/libudis86 -Ilibs/linenoise 
+CFLAGS += -Ilibs/libudis86 -Ilibs/linenoise -Ilibs/elf -Ilibs/macho
 
 # Source Files
 CORE            = main.c baseer.c utils/ui.c utils/b_CLI.c libs/linenoise/linenoise.c
@@ -28,9 +28,6 @@ BX_TAR          = modules/bx_tar/bx_tar.c
 BX_MACHO       		= modules/bx_macho/bx_macho.c
 B_MACHO_METADATA        = modules/b_macho_metadata/b_macho_metadata.c
 BX_MACHO_UTILS          = modules/bx_macho_utils/bx_macho_utils.c
-
-
-
 
 
 # Udis86 sources

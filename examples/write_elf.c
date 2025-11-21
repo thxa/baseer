@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <elf.h>
+#include "elf.h"
 
 int main() {
     const char msg[] = "Hello\n";

@@ -2,7 +2,7 @@
 #define BX_ELF_H
 #include "../bparser/bparser.h"
 #include "../../baseer.h"
-#include <elf.h>
+#include "elf.h"
 #include <string.h>
 #include "../b_debugger/debugger.h"
 #include "../b_elf_metadata/b_elf_metadata.h"

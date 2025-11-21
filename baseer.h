@@ -33,7 +33,7 @@
     TOSTRING(BASEER_VERSION_MINOR) "." \
     TOSTRING(BASEER_VERSION_MICRO)
 
-#define BASEER_MAX_FILE_SIZE 1024 * 1024 * 4 /**< Max file size for memory mode */
+#define BASEER_MAX_FILE_SIZE 1024 * 1024 * 512 /**< Max file size for memory mode */
 #define RETURN_NULL_IF(con) \
     if ((con))              \
     {                       \

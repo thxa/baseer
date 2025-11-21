@@ -261,6 +261,7 @@ Use this checklist to see which file types Baseer can currently handle:
 
 - [x] **ELF** - `7F 45 4C 46` (Executable and Linkable Format)
 - [x] **TAR** - `75 73 74 61 72` (TAR archive)
+- [x] **Mach-O** - `CF FA ED FE` (Mac OS X executable)
 - [ ] **PDF** - `25 50 44 46` (Portable Document Format)
 - [ ] **PNG** - `89 50 4E 47 0D 0A 1A 0A` (Portable Network Graphics)
 - [ ] **JPEG** - `FF D8 FF` (JPEG image)
@@ -269,7 +270,6 @@ Use this checklist to see which file types Baseer can currently handle:
 - [ ] **RAR** - `52 61 72 21 1A 07 00` (RAR archive)
 - [ ] **7Z** - `37 7A BC AF 27 1C` (7-Zip archive)
 - [ ] **EXE/DOS MZ** - `4D 5A` (Windows executable)
-- [ ] **Mach-O** - `CF FA ED FE` (Mac OS X executable)
 - [ ] **TIFF** - `49 49 2A 00` / `4D 4D 00 2A` (Tagged Image File Format)
 - [ ] **MP3** - `49 44 33` (MP3 audio)
 - [ ] **WAV** - `52 49 46 46` (Waveform Audio File)

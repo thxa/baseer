@@ -608,8 +608,8 @@ struct fvmlib_command {
  * at runtime is exactly the same as used to built the program.
  */
 typedef struct dylib {
-    // union lc_str  name;			/* library's path name */
-    char* name;			/* library's path name */
+    uint32_t name_offset;		/* offset of library's path name from
+					   start of dylib_command */
     uint32_t timestamp;			/* library's build time stamp */
     uint32_t current_version;		/* library's current version number */
     uint32_t compatibility_version;	/* library's compatibility vers number*/
@@ -723,8 +723,8 @@ typedef struct dylinker_command {
 	uint32_t	cmd;		/* LC_ID_DYLINKER, LC_LOAD_DYLINKER or
 					   LC_DYLD_ENVIRONMENT */
 	uint32_t	cmdsize;	/* includes pathname string */
-        char *name;
-	// union lc_str    name;		/* dynamic linker's path name */
+	uint32_t	name_offset;	/* offset of dynamic linker's path name
+					   from start of this command */
 } dylinker_command;
 /*
  * Thread commands contain machine-specific data structures suitable for
@@ -1455,6 +1455,79 @@ struct note_command {
     uint64_t	offset;		/* file offset of this data */
     uint64_t	size;		/* length of data region */
 };
+
+/*
+ * Symbol table entry structures (nlist).
+ * These are used by LC_SYMTAB to describe symbol table entries.
+ */
+struct nlist {
+    uint32_t n_strx;   /* index into the string table */
+    uint8_t  n_type;   /* type flag */
+    uint8_t  n_sect;   /* section number or NO_SECT */
+    int16_t  n_desc;   /* see stab.h or mach-o/loader.h */
+    uint32_t n_value;  /* value of this symbol (or stab offset) */
+};
+
+struct nlist_64 {
+    uint32_t n_strx;   /* index into the string table */
+    uint8_t  n_type;   /* type flag */
+    uint8_t  n_sect;   /* section number or NO_SECT */
+    uint16_t n_desc;   /* description */
+    uint64_t n_value;  /* value of this symbol (or stab offset) */
+};
+
+/* Masks for n_type */
+#define N_STAB  0xe0  /* stab debugging entry */
+#define N_PEXT  0x10  /* private external */
+#define N_TYPE  0x0e  /* type mask */
+#define N_EXT   0x01  /* external (public) */
+
+/* Values for N_TYPE bits */
+#define N_UNDF  0x0   /* undefined, n_sect == NO_SECT */
+#define N_ABS   0x2   /* absolute, n_sect == NO_SECT */
+#define N_SECT  0xe   /* defined in section n_sect */
+#define N_PBUD  0xc   /* prebound undefined */
+#define N_INDR  0xa   /* indirect */
+
+#define NO_SECT 0     /* symbol not in any section */
+#define MAX_SECT 255  /* maximum section number */
+
+/* Reference type flags for n_desc */
+#define REFERENCE_TYPE              0x7
+#define REFERENCE_FLAG_UNDEFINED_NON_LAZY 0
+#define REFERENCE_FLAG_UNDEFINED_LAZY     1
+#define REFERENCE_FLAG_DEFINED            2
+#define REFERENCE_FLAG_PRIVATE_DEFINED     3
+#define REFERENCE_FLAG_PRIVATE_UNDEFINED_NON_LAZY 4
+#define REFERENCE_FLAG_PRIVATE_UNDEFINED_LAZY     5
+
+/* CPU type constants */
+#define CPU_TYPE_ANY       -1
+#define CPU_TYPE_X86       7
+#define CPU_TYPE_X86_64    (CPU_TYPE_X86 | 0x01000000)
+#define CPU_TYPE_ARM       12
+#define CPU_TYPE_ARM64     (CPU_TYPE_ARM | 0x01000000)
+#define CPU_TYPE_POWERPC   18
+#define CPU_TYPE_POWERPC64 (CPU_TYPE_POWERPC | 0x01000000)
+
+/* CPU subtype constants for x86 */
+#define CPU_SUBTYPE_X86_ALL    3
+#define CPU_SUBTYPE_X86_64_ALL 3
+#define CPU_SUBTYPE_X86_64_H   8
+
+/* CPU subtype constants for ARM */
+#define CPU_SUBTYPE_ARM_ALL    0
+#define CPU_SUBTYPE_ARM64_ALL  0
+#define CPU_SUBTYPE_ARM64E     2
+
+/* Byte swap helper (guard against redefinition) */
+#ifndef NXSwapInt
+#define NXSwapInt(x) ((uint32_t)( \
+    (((uint32_t)(x) & 0xff000000u) >> 24) | \
+    (((uint32_t)(x) & 0x00ff0000u) >>  8) | \
+    (((uint32_t)(x) & 0x0000ff00u) <<  8) | \
+    (((uint32_t)(x) & 0x000000ffu) << 24)))
+#endif
 
 #endif	/* macho.h */
 

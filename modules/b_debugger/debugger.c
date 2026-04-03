@@ -683,11 +683,128 @@ void dis_ctx(context *ctx){
 
 
 /**
- * @brief Initialize the debugger context from a parsed ELF binary.
+ * @brief Load symbols from a Mach-O binary into the debugger context.
+ */
+static void init_macho_symbols(bparser *target, context *ctx)
+{
+	unsigned char *block = (unsigned char *)target->block;
+	uint32_t magic = *(uint32_t *)block;
+	bool is_64 = (magic == 0xfeedfacf);
+	size_t hdr_size = is_64 ? sizeof(Elf64_Ehdr) : sizeof(Elf32_Ehdr); /* placeholder for header skip */
+
+	/* Parse Mach-O header to get ncmds and sizeofcmds */
+	uint32_t ncmds, sizeofcmds;
+	unsigned char *cmd_ptr;
+	if (is_64) {
+		hdr_size = 32; /* sizeof(mach_header_64) */
+		ncmds = *(uint32_t *)(block + 16);
+		sizeofcmds = *(uint32_t *)(block + 20);
+		ctx->arch = 64;
+	} else {
+		hdr_size = 28; /* sizeof(mach_header) */
+		ncmds = *(uint32_t *)(block + 12);
+		sizeofcmds = *(uint32_t *)(block + 16);
+		ctx->arch = 32;
+	}
+
+	if (hdr_size + sizeofcmds > target->size) return;
+	cmd_ptr = block + hdr_size;
+	unsigned char *end_ptr = block + target->size;
+
+	/* Find LC_SYMTAB (cmd=0x2) and LC_MAIN (cmd=0x80000028) for entry point */
+	uint32_t symoff = 0, nsyms = 0, stroff = 0, strsize = 0;
+	uint64_t entry_off = 0;
+
+	for (uint32_t i = 0; i < ncmds; i++) {
+		if (cmd_ptr + 8 > end_ptr) break;
+		uint32_t cmd = *(uint32_t *)cmd_ptr;
+		uint32_t cmdsize = *(uint32_t *)(cmd_ptr + 4);
+		if (cmdsize < 8 || cmd_ptr + cmdsize > end_ptr) break;
+
+		if (cmd == 0x2) { /* LC_SYMTAB */
+			symoff  = *(uint32_t *)(cmd_ptr + 8);
+			nsyms   = *(uint32_t *)(cmd_ptr + 12);
+			stroff  = *(uint32_t *)(cmd_ptr + 16);
+			strsize = *(uint32_t *)(cmd_ptr + 20);
+		} else if (cmd == (0x28 | 0x80000000)) { /* LC_MAIN */
+			entry_off = *(uint64_t *)(cmd_ptr + 8);
+		}
+		cmd_ptr += cmdsize;
+	}
+
+	/* Set entry to base + entry offset (Mach-O is always PIE on modern systems) */
+	ctx->entry = ctx->base + entry_off;
+	ctx->pie = false;
+
+	/* Load symbols from nlist */
+	if (nsyms == 0 || symoff == 0 || stroff == 0) return;
+
+	if (is_64) {
+		size_t nlist_size = 16; /* sizeof(nlist_64) */
+		if (symoff + nsyms * nlist_size > target->size) return;
+		if (stroff + strsize > target->size) return;
+
+		unsigned char *nl = block + symoff;
+		char *strs = (char *)(block + stroff);
+
+		for (uint32_t j = 0; j < nsyms; j++) {
+			uint32_t n_strx = *(uint32_t *)(nl + j * nlist_size);
+			uint8_t  n_type = *(uint8_t  *)(nl + j * nlist_size + 4);
+			uint64_t n_value = *(uint64_t *)(nl + j * nlist_size + 8);
+
+			/* Only defined symbols (N_SECT=0xe, not stab) */
+			if ((n_type & 0xe0) != 0 || (n_type & 0x0e) != 0x0e || n_value == 0)
+				continue;
+
+			if (n_strx >= strsize) continue;
+			char *name = strs + n_strx;
+			if (*name == '\0') continue;
+
+			sym_list *sym = malloc(sizeof(sym_list));
+			if (!sym) break;
+			sym->name = strdup(name);
+			sym->addr = ctx->base + n_value; /* relocated */
+			sym->next = NULL;
+			if (ctx->sym == NULL) { ctx->sym = sym; }
+			else { sym_list *l = ctx->sym; while (l->next) l = l->next; l->next = sym; }
+		}
+	} else {
+		size_t nlist_size = 12; /* sizeof(nlist) */
+		if (symoff + nsyms * nlist_size > target->size) return;
+		if (stroff + strsize > target->size) return;
+
+		unsigned char *nl = block + symoff;
+		char *strs = (char *)(block + stroff);
+
+		for (uint32_t j = 0; j < nsyms; j++) {
+			uint32_t n_strx = *(uint32_t *)(nl + j * nlist_size);
+			uint8_t  n_type = *(uint8_t  *)(nl + j * nlist_size + 4);
+			uint32_t n_value = *(uint32_t *)(nl + j * nlist_size + 8);
+
+			if ((n_type & 0xe0) != 0 || (n_type & 0x0e) != 0x0e || n_value == 0)
+				continue;
+
+			if (n_strx >= strsize) continue;
+			char *name = strs + n_strx;
+			if (*name == '\0') continue;
+
+			sym_list *sym = malloc(sizeof(sym_list));
+			if (!sym) break;
+			sym->name = strdup(name);
+			sym->addr = ctx->base + n_value;
+			sym->next = NULL;
+			if (ctx->sym == NULL) { ctx->sym = sym; }
+			else { sym_list *l = ctx->sym; while (l->next) l = l->next; l->next = sym; }
+		}
+	}
+}
+
+/**
+ * @brief Initialize the debugger context from a parsed binary.
  *
- * Reads ELF headers and symbol tables to populate context values.
+ * Reads ELF or Mach-O headers and symbol tables to populate context values.
  *
- * @param target Pointer to binary parser structure with ELF data.
+ * @param target Pointer to binary parser structure with file data.
  * @param ctx Pointer to debugger context to initialize.
  */
 void init_values(bparser *target, context *ctx){
@@ -700,13 +817,30 @@ void init_values(bparser *target, context *ctx){
 	memset(list, 0, sizeof(bp_list));
 	list->counter = 0;
 	ctx->list = list;
-	Elf64_Ehdr *ehdr = (Elf64_Ehdr*)target->block;
+
 	snprintf(mmaps, sizeof(mmaps), "/proc/%d/maps", ctx->pid);
 	FILE *file = fopen(mmaps,"r");
+	if (!file) {
+		fprintf(stderr, "failed to open process maps\n");
+		return;
+	}
 	size_t size = 0;
 	getdelim(&ctx->mmaps,&size,'\0' , file);
 	fclose(file);
 	sscanf(ctx->mmaps, "%lx", &ctx->base);
+
+	/* Detect file format by magic bytes */
+	if (target->size >= 4) {
+		uint32_t magic = *(uint32_t *)target->block;
+		if (magic == 0xfeedface || magic == 0xfeedfacf) {
+			/* Mach-O binary */
+			init_macho_symbols(target, ctx);
+			return;
+		}
+	}
+
+	/* ELF binary */
+	Elf64_Ehdr *ehdr = (Elf64_Ehdr*)target->block;
 	if(ehdr->e_type == ET_EXEC){
 		ctx->entry = ehdr->e_entry;
 		ctx->pie = true ;

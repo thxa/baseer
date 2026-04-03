@@ -1,472 +1,436 @@
+/**
+ * @file b_macho_metadata.c
+ * @brief Mach-O metadata parser and pretty-printer.
+ *
+ * Parses and displays full metadata for Mach-O binaries including:
+ * - Header (magic, CPU type, file type, flags)
+ * - All load commands with detailed output
+ * - Segments and their sections
+ * - Symbol tables (LC_SYMTAB)
+ * - Dynamic symbol table summary (LC_DYSYMTAB)
+ * - Shared libraries (LC_LOAD_DYLIB)
+ * - Dynamic linker (LC_LOAD_DYLINKER)
+ * - Entry point (LC_MAIN)
+ * - UUID, build version, source version
+ * - Code signature and function starts info
+ * - Section hex dumps
+ *
+ * Supports both 32-bit and 64-bit Mach-O files with full input validation.
+ */
 #include "./b_macho_metadata.h"
-#include "../b_hashmap/b_hashmap.h"
 #include "../bparser/bparser.h"
 #include "../../baseer.h"
 #include "../bx_macho_utils/bx_macho_utils.h"
+#include "../../utils/ui.h"
+#include <stdio.h>
+#include <string.h>
 
-bool
-b_macho_metadata(bparser* parser, void* arg)
+/* =================== Validation helpers =================== */
+
+/**
+ * @brief Validate a Mach-O header's fields against the file size.
+ * @return true if the header appears sane, false otherwise.
+ */
+static bool validate_macho_header(const unsigned char *block, size_t file_size,
+                                  uint32_t ncmds, uint32_t sizeofcmds,
+                                  size_t header_size)
 {
-    unsigned char *block = (unsigned char*) parser->block;
-    mach_header *m_header = (mach_header*) block;
+    if (file_size < header_size) {
+        fprintf(stderr, COLOR_RED "[!] File too small for Mach-O header\n" COLOR_RESET);
+        return false;
+    }
+    if ((size_t)sizeofcmds + header_size > file_size) {
+        fprintf(stderr, COLOR_RED "[!] Load commands extend beyond file bounds "
+                "(header=%zu + cmds=%u > size=%zu)\n" COLOR_RESET,
+                header_size, sizeofcmds, file_size);
+        return false;
+    }
+    if (ncmds > 10000) {
+        fprintf(stderr, COLOR_RED "[!] Suspicious number of load commands: %u\n" COLOR_RESET, ncmds);
+        return false;
+    }
+    return true;
+}
 
-    if (m_header->magic == MH_MAGIC) {
-        mach_header *m_header = (mach_header*) block;
-        printf("32 bit mach-o binary file\n");
-        printf("Cpu Type: %d", m_header->cputype);             /* cpu specifier */
-        printf("cpusubtype: %d", m_header->cpusubtype);        /* machine specifier */
-        printf("filetype: %d", m_header->filetype);            /* type of file */
-        printf("ncmds: %d", m_header->ncmds);                  /* number of load commands */
-        printf("sizeofcmds: %d", m_header->sizeofcmds);        /* the size of all the load commands */
-        printf("flags: %d", m_header->flags);                  /* flags */
+/**
+ * @brief Check if a load command's size is valid.
+ */
+static bool validate_load_command(const load_command *lc, const unsigned char *cmd_ptr,
+                                  const unsigned char *end_ptr, uint32_t cmd_idx)
+{
+    if (lc->cmdsize < sizeof(load_command)) {
+        fprintf(stderr, COLOR_RED "[!] Load command %u has invalid size %u\n" COLOR_RESET,
+                cmd_idx, lc->cmdsize);
+        return false;
+    }
+    if (cmd_ptr + lc->cmdsize > end_ptr) {
+        fprintf(stderr, COLOR_RED "[!] Load command %u extends beyond file bounds\n" COLOR_RESET,
+                cmd_idx);
+        return false;
+    }
+    return true;
+}
 
-    } else if (m_header->magic == MH_MAGIC_64) {
-        mach_header_64 *m_header = (mach_header_64*) block;
+/* =================== Load command handlers =================== */
 
-        printf("================= Mach-O Header ====================\n");
-        printf(COLOR_GREEN "Class: " COLOR_RESET "64-bit\n");
-        printf(COLOR_GREEN "Cpu Type: " COLOR_RESET  "%d\n", m_header->cputype); /* cpu specifier */
-        printf(COLOR_GREEN "Machine: " COLOR_RESET "%d\n", m_header->cpusubtype);/* machine specifier */
-        printf(COLOR_GREEN "File Type: " COLOR_RESET "%s\n",  get_mach_o_type(m_header->filetype)); /* type of file */
-        printf(COLOR_GREEN "Number of load commands: " COLOR_RESET "%d\n", m_header->ncmds); /* number of load commands */
-        printf(COLOR_GREEN "Size of all the load commands: " COLOR_RESET "%d\n", m_header->sizeofcmds); /* the size of all the load commands */
-        printf(COLOR_GREEN"Flags: "COLOR_RESET"\n", m_header->flags);  /* flags */ 
-        print_mach_o_flags(m_header->flags);
-        printf(COLOR_GREEN"Reserved: "COLOR_RESET"%d\n", m_header->reserved); /* reserved */ 
-        printf("================= Load Commands ====================\n");
-        unsigned char *base_of_load_commands =  block + sizeof(mach_header_64);
-        // printf("%p\n", &block);
-        // printf("%p\n", &m_header);
-        // printf("%p\n", &base_of_load_commands);
+static void handle_segment_64(const unsigned char *cmd_ptr, const unsigned char *block,
+                              size_t file_size)
+{
+    segment_command_64 *seg = (segment_command_64 *)cmd_ptr;
+    print_macho_segment64_metadata(seg);
 
+    if (seg->nsects > 0) {
+        const unsigned char *sec_ptr = cmd_ptr + sizeof(segment_command_64);
+        for (uint32_t s = 0; s < seg->nsects; s++) {
+            if (sec_ptr + sizeof(section_64) > block + file_size) break;
+            section_64 *sec = (section_64 *)sec_ptr;
+            print_macho_section64_metadata(sec);
+            sec_ptr += sizeof(section_64);
+        }
+    }
+}
 
-        unsigned char *offset_of_load_command =  base_of_load_commands;
-        for (uint cmd_i =0; cmd_i< m_header->sizeofcmds;) {
-            load_command *command = (load_command*)offset_of_load_command;
-            // printf("Command: %d\n",command ->cmd);
-            print_load_command_info(command->cmd);
-            printf(COLOR_GREEN "Cmd Size:" COLOR_RESET " %d\n", command->cmdsize); 
+static void handle_segment_32(const unsigned char *cmd_ptr, const unsigned char *block,
+                              size_t file_size)
+{
+    segment_command *seg = (segment_command *)cmd_ptr;
+    print_macho_segment32_metadata(seg);
 
-            if(command->cmd == LC_SEGMENT_64) {
+    if (seg->nsects > 0) {
+        const unsigned char *sec_ptr = cmd_ptr + sizeof(segment_command);
+        for (uint32_t s = 0; s < seg->nsects; s++) {
+            if (sec_ptr + sizeof(section) > block + file_size) break;
+            section *sec = (section *)sec_ptr;
+            print_macho_section32_metadata(sec);
+            sec_ptr += sizeof(section);
+        }
+    }
+}
 
-                segment_command_64  *seg_cmd = (segment_command_64*)offset_of_load_command;
-                print_macho_segment64_metadata(seg_cmd);
-                unsigned char *seg_cmd_base = (unsigned char*) offset_of_load_command;
-                if(seg_cmd_base + seg_cmd->cmdsize >=  parser->block+parser->size) {
-                    puts("Out of bound attack detected\n");
-                    break;
-                }
+static void handle_symtab(const unsigned char *cmd_ptr, const unsigned char *block,
+                          size_t file_size, bool is_64bit)
+{
+    struct symtab_command *sym = (struct symtab_command *)cmd_ptr;
+    printf(COLOR_GREEN "    Symbol offset: " COLOR_RESET "0x%x\n", sym->symoff);
+    printf(COLOR_GREEN "    Num symbols:   " COLOR_RESET "%u\n", sym->nsyms);
+    printf(COLOR_GREEN "    String offset: " COLOR_RESET "0x%x\n", sym->stroff);
+    printf(COLOR_GREEN "    String size:   " COLOR_RESET "%u bytes\n", sym->strsize);
 
-                printf("\n");
-                if(seg_cmd->nsects > 0) {
-                    printf(COLOR_BLUE "Sections:\n" COLOR_RESET);
-                    for(unsigned char* sec = seg_cmd_base + sizeof(segment_command_64); sec < seg_cmd_base + seg_cmd->cmdsize;
-                                                           sec += sizeof(section_64)) { 
-                        section_64* sec_cmd = (section_64*) sec;
-                        print_macho_section64_metadata(sec_cmd);
-                        printf("\n");
-                    }
-                    printf("\n");
-                }
+    if (is_64bit)
+        print_macho_symbols_64(block, file_size, sym->symoff, sym->nsyms, sym->stroff, sym->strsize);
+    else
+        print_macho_symbols_32(block, file_size, sym->symoff, sym->nsyms, sym->stroff, sym->strsize);
+}
 
-            } else if(command->cmd == LC_DYLD_CHAINED_FIXUPS) {
-                /*
-                 * The linkedit_data_command contains the offsets and sizes of a blob
-                 * of data in the __LINKEDIT segment.  
-                 */
-                // print_linkedit_data_command_metadata()
-                linkedit_data_command *led_cmd = (linkedit_data_command*)offset_of_load_command;
-                printf(COLOR_GREEN "  Data offset:" COLOR_RESET " 0x%x\n", led_cmd->dataoff); 
-                printf(COLOR_GREEN "  Data size:" COLOR_RESET " %d\n", led_cmd->datasize); 
-                // struct linkedit_data_command {
-                //     uint32_t	cmd;		/* LC_CODE_SIGNATURE, LC_SEGMENT_SPLIT_INFO,
-                //                                    LC_FUNCTION_STARTS, LC_DATA_IN_CODE,
-                //                                    LC_DYLIB_CODE_SIGN_DRS,
-                //                                    LC_LINKER_OPTIMIZATION_HINT,
-                //                                    LC_DYLD_EXPORTS_TRIE, or
-                //                                    LC_DYLD_CHAINED_FIXUPS. */
-                //     uint32_t	cmdsize;	/* sizeof(struct linkedit_data_command) */
-                //     uint32_t	dataoff;	/* file offset of data in __LINKEDIT segment */
-                //     uint32_t	datasize;	/* file size of data in __LINKEDIT segment  */
-                // };
+static void handle_dysymtab(const unsigned char *cmd_ptr)
+{
+    struct dysymtab_command *dys = (struct dysymtab_command *)cmd_ptr;
+    printf(COLOR_GREEN "    Local symbols:      " COLOR_RESET "%u (index %u)\n", dys->nlocalsym, dys->ilocalsym);
+    printf(COLOR_GREEN "    External symbols:   " COLOR_RESET "%u (index %u)\n", dys->nextdefsym, dys->iextdefsym);
+    printf(COLOR_GREEN "    Undefined symbols:  " COLOR_RESET "%u (index %u)\n", dys->nundefsym, dys->iundefsym);
+    if (dys->nindirectsyms > 0)
+        printf(COLOR_GREEN "    Indirect symbols:   " COLOR_RESET "%u (offset 0x%x)\n", dys->nindirectsyms, dys->indirectsymoff);
+    if (dys->nextrel > 0)
+        printf(COLOR_GREEN "    External relocs:    " COLOR_RESET "%u (offset 0x%x)\n", dys->nextrel, dys->extreloff);
+    if (dys->nlocrel > 0)
+        printf(COLOR_GREEN "    Local relocs:       " COLOR_RESET "%u (offset 0x%x)\n", dys->nlocrel, dys->locreloff);
+}
 
-            } else if (command->cmd == LC_DYLD_EXPORTS_TRIE) {
-                linkedit_data_command *led_cmd = (linkedit_data_command*)offset_of_load_command;
-                printf(COLOR_GREEN "  Data offset:" COLOR_RESET " 0x%x\n", led_cmd->dataoff); 
-                printf(COLOR_GREEN "  Data size:" COLOR_RESET " %d\n", led_cmd->datasize); 
-            } else if(command->cmd == LC_SYMTAB) {
+static void handle_dylib(const unsigned char *cmd_ptr, uint32_t cmdsize)
+{
+    dylib_command *dl = (dylib_command *)cmd_ptr;
+    uint32_t name_off = dl->dylib.name_offset;
 
-                /*
-                 * The symtab_command contains the offsets and sizes of the link-edit 4.3BSD
-                 * "stab" style symbol table information as described in the header files
-                 * <nlist.h> and <stab.h>.
-                 */
-                // struct symtab_command {
-                //     uint32_t	cmd;		/* LC_SYMTAB */
-                //     uint32_t	cmdsize;	/* sizeof(struct symtab_command) */
-                //     uint32_t	symoff;		/* symbol table offset */
-                //     uint32_t	nsyms;		/* number of symbol table entries */
-                //     uint32_t	stroff;		/* string table offset */
-                //     uint32_t	strsize;	/* string table size in bytes */
-                // };
+    const char *name = "(invalid offset)";
+    if (name_off < cmdsize)
+        name = (const char *)cmd_ptr + name_off;
 
+    printf(COLOR_GREEN "    Library:       " COLOR_RESET "%s\n", name);
+    printf(COLOR_GREEN "    Version:       " COLOR_RESET);
+    print_version_xyz(dl->dylib.current_version);
+    printf("\n");
+    printf(COLOR_GREEN "    Compat:        " COLOR_RESET);
+    print_version_xyz(dl->dylib.compatibility_version);
+    printf("\n");
+}
 
-            } else if(command->cmd == LC_DYSYMTAB) {
+static void handle_dylinker(const unsigned char *cmd_ptr, uint32_t cmdsize)
+{
+    dylinker_command *dl = (dylinker_command *)cmd_ptr;
+    uint32_t name_off = dl->name_offset;
 
-                /*
-                 * This is the second set of the symbolic information which is used to support
-                 * the data structures for the dynamically link editor.
-                 *
-                 * The original set of symbolic information in the symtab_command which contains
-                 * the symbol and string tables must also be present when this load command is
-                 * present.  When this load command is present the symbol table is organized
-                 * into three groups of symbols:
-                 *	local symbols (static and debugging symbols) - grouped by module
-                 *	defined external symbols - grouped by module (sorted by name if not lib)
-                 *	undefined external symbols (sorted by name if MH_BINDATLOAD is not set,
-                 *	     			    and in order the were seen by the static
-                 *				    linker if MH_BINDATLOAD is set)
-                 * In this load command there are offsets and counts to each of the three groups
-                 * of symbols.
-                 *
-                 * This load command contains a the offsets and sizes of the following new
-                 * symbolic information tables:
-                 *	table of contents
-                 *	module table
-                 *	reference symbol table
-                 *	indirect symbol table
-                 * The first three tables above (the table of contents, module table and
-                 * reference symbol table) are only present if the file is a dynamically linked
-                 * shared library.  For executable and object modules, which are files
-                 * containing only one module, the information that would be in these three
-                 * tables is determined as follows:
-                 * 	table of contents - the defined external symbols are sorted by name
-                 *	module table - the file contains only one module so everything in the
-                 *		       file is part of the module.
-                 *	reference symbol table - is the defined and undefined external symbols
-                 *
-                 * For dynamically linked shared library files this load command also contains
-                 * offsets and sizes to the pool of relocation entries for all sections
-                 * separated into two groups:
-                 *	external relocation entries
-                 *	local relocation entries
-                 * For executable and object modules the relocation entries continue to hang
-                 * off the section structures.
-                 */
-                // struct dysymtab_command {
-                //     uint32_t cmd;	/* LC_DYSYMTAB */
-                //     uint32_t cmdsize;	/* sizeof(struct dysymtab_command) */
-                //     /*
-                //      * The symbols indicated by symoff and nsyms of the LC_SYMTAB load command
-                //      * are grouped into the following three groups:
-                //      *    local symbols (further grouped by the module they are from)
-                //      *    defined external symbols (further grouped by the module they are from)
-                //      *    undefined symbols
-                //      *
-                //      * The local symbols are used only for debugging.  The dynamic binding
-                //      * process may have to use them to indicate to the debugger the local
-                //      * symbols for a module that is being bound.
-                //      *
-                //      * The last two groups are used by the dynamic binding process to do the
-                //      * binding (indirectly through the module table and the reference symbol
-                //      * table when this is a dynamically linked shared library file).
-                //      */
-                //     uint32_t ilocalsym;	/* index to local symbols */
-                //     uint32_t nlocalsym;	/* number of local symbols */
-                //     uint32_t iextdefsym;/* index to externally defined symbols */
-                //     uint32_t nextdefsym;/* number of externally defined symbols */
-                //     uint32_t iundefsym;	/* index to undefined symbols */
-                //     uint32_t nundefsym;	/* number of undefined symbols */
-                //     /*
-                //      * For the for the dynamic binding process to find which module a symbol
-                //      * is defined in the table of contents is used (analogous to the ranlib
-                //      * structure in an archive) which maps defined external symbols to modules
-                //      * they are defined in.  This exists only in a dynamically linked shared
-                //      * library file.  For executable and object modules the defined external
-                //      * symbols are sorted by name and is use as the table of contents.
-                //      */
-                //     uint32_t tocoff;	/* file offset to table of contents */
-                //     uint32_t ntoc;	/* number of entries in table of contents */
-                //     /*
-                //      * To support dynamic binding of "modules" (whole object files) the symbol
-                //      * table must reflect the modules that the file was created from.  This is
-                //      * done by having a module table that has indexes and counts into the merged
-                //      * tables for each module.  The module structure that these two entries
-                //      * refer to is described below.  This exists only in a dynamically linked
-                //      * shared library file.  For executable and object modules the file only
-                //      * contains one module so everything in the file belongs to the module.
-                //      */
-                //     uint32_t modtaboff;	/* file offset to module table */
-                //     uint32_t nmodtab;	/* number of module table entries */
-                //     /*
-                //      * To support dynamic module binding the module structure for each module
-                //      * indicates the external references (defined and undefined) each module
-                //      * makes.  For each module there is an offset and a count into the
-                //      * reference symbol table for the symbols that the module references.
-                //      * This exists only in a dynamically linked shared library file.  For
-                //      * executable and object modules the defined external symbols and the
-                //      * undefined external symbols indicates the external references.
-                //      */
-                //     uint32_t extrefsymoff;	/* offset to referenced symbol table */
-                //     uint32_t nextrefsyms;	/* number of referenced symbol table entries */
-                //     /*
-                //      * The sections that contain "symbol pointers" and "routine stubs" have
-                //      * indexes and (implied counts based on the size of the section and fixed
-                //      * size of the entry) into the "indirect symbol" table for each pointer
-                //      * and stub.  For every section of these two types the index into the
-                //      * indirect symbol table is stored in the section header in the field
-                //      * reserved1.  An indirect symbol table entry is simply a 32bit index into
-                //      * the symbol table to the symbol that the pointer or stub is referring to.
-                //      * The indirect symbol table is ordered to match the entries in the section.
-                //      */
-                //     uint32_t indirectsymoff; /* file offset to the indirect symbol table */
-                //     uint32_t nindirectsyms;  /* number of indirect symbol table entries */
-                //     /*
-                //      * To support relocating an individual module in a library file quickly the
-                //      * external relocation entries for each module in the library need to be
-                //      * accessed efficiently.  Since the relocation entries can't be accessed
-                //      * through the section headers for a library file they are separated into
-                //      * groups of local and external entries further grouped by module.  In this
-                //      * case the presents of this load command who's extreloff, nextrel,
-                //      * locreloff and nlocrel fields are non-zero indicates that the relocation
-                //      * entries of non-merged sections are not referenced through the section
-                //      * structures (and the reloff and nreloc fields in the section headers are
-                //      * set to zero).
-                //      *
-                //      * Since the relocation entries are not accessed through the section headers
-                //      * this requires the r_address field to be something other than a section
-                //      * offset to identify the item to be relocated.  In this case r_address is
-                //      * set to the offset from the vmaddr of the first LC_SEGMENT command.
-                //      * For MH_SPLIT_SEGS images r_address is set to the the offset from the
-                //      * vmaddr of the first read-write LC_SEGMENT command.
-                //      *
-                //      * The relocation entries are grouped by module and the module table
-                //      * entries have indexes and counts into them for the group of external
-                //      * relocation entries for that the module.
-                //      *
-                //      * For sections that are merged across modules there must not be any
-                //      * remaining external relocation entries for them (for merged sections
-                //      * remaining relocation entries must be local).
-                //      */
-                //     uint32_t extreloff;	/* offset to external relocation entries */
-                //     uint32_t nextrel;	/* number of external relocation entries */
-                //     /*
-                //      * All the local relocation entries are grouped together (they are not
-                //      * grouped by their module since they are only used if the object is moved
-                //      * from it staticly link edited address).
-                //      */
-                //     uint32_t locreloff;	/* offset to local relocation entries */
-                //     uint32_t nlocrel;	/* number of local relocation entries */
-                // };
+    const char *name = "(invalid offset)";
+    if (name_off < cmdsize)
+        name = (const char *)cmd_ptr + name_off;
 
+    printf(COLOR_GREEN "    Dynamic Linker: " COLOR_RESET "%s\n", name);
+}
 
-            // } else if(command->cmd == LC_LOAD_DYLINKER) {
-            } else if(command->cmd == LC_ID_DYLINKER || command->cmd ==  LC_LOAD_DYLINKER || command->cmd == LC_DYLD_ENVIRONMENT  ) {
-                dylinker_command *dyld_cmd = (dylinker_command*)offset_of_load_command;
-                printf("====================hello\n");
-                // printf(COLOR_GREEN "  " COLOR_RESET " %s\n", dyld_cmd->name);
-                /*
-                 * A program that uses a dynamic linker contains a dylinker_command to identify
-                 * the name of the dynamic linker (LC_LOAD_DYLINKER).  And a dynamic linker
-                 * contains a dylinker_command to identify the dynamic linker (LC_ID_DYLINKER).
-                 * A file can have at most one of these.
-                 * This struct is also used for the LC_DYLD_ENVIRONMENT load command and
-                 * contains string for dyld to treat like environment variable.
-                 */
-                // struct dylinker_command {
-                //     uint32_t	cmd;		/* LC_ID_DYLINKER, LC_LOAD_DYLINKER or
-                //                                    LC_DYLD_ENVIRONMENT */
-                //     uint32_t	cmdsize;	/* includes pathname string */
-                //     union lc_str    name;		/* dynamic linker's path name */
-                // };
+static void handle_uuid(const unsigned char *cmd_ptr)
+{
+    uuid_command *uc = (uuid_command *)cmd_ptr;
+    printf(COLOR_GREEN "    UUID: " COLOR_RESET);
+    print_uuid(uc->uuid);
+    printf("\n");
+}
 
+static void handle_main(const unsigned char *cmd_ptr)
+{
+    entry_point_command *ep = (entry_point_command *)cmd_ptr;
+    printf(COLOR_GREEN "    Entry offset:  " COLOR_RESET "0x%lx\n", (unsigned long)ep->entryoff);
+    if (ep->stacksize > 0)
+        printf(COLOR_GREEN "    Stack size:    " COLOR_RESET "0x%lx\n", (unsigned long)ep->stacksize);
+}
 
-            } else if(command->cmd == LC_UUID) {
+static void handle_build_version(const unsigned char *cmd_ptr)
+{
+    build_version_command *bv = (build_version_command *)cmd_ptr;
+    printf(COLOR_GREEN "    Platform:      " COLOR_RESET "%s\n", platform_to_string(bv->platform));
+    printf(COLOR_GREEN "    Min OS:        " COLOR_RESET);
+    print_tool_version(bv->minos); printf("\n");
+    printf(COLOR_GREEN "    SDK:           " COLOR_RESET);
+    print_tool_version(bv->sdk); printf("\n");
 
-                /*
-                 * The uuid load command contains a single 128-bit unique random number that
-                 * identifies an object produced by the static link editor.
-                 */
-                // struct uuid_command {
-                //     uint32_t	cmd;		/* LC_UUID */
-                //     uint32_t	cmdsize;	/* sizeof(struct uuid_command) */
-                //     uint8_t	uuid[16];	/* the 128-bit uuid */
-                // };
-
-                uuid_command *uuid_cmd = (uuid_command*)offset_of_load_command;
-                printf(COLOR_GREEN"UUID: "COLOR_RESET);
-                print_uuid(uuid_cmd->uuid);
-                printf("\n");
-
-            } else if(command->cmd == LC_BUILD_VERSION) {
-
-                /*
-                 * The build_version_command contains the min OS version on which this
-                 * binary was built to run for its platform.  The list of known platforms and
-                 * tool values following it.
-                 */
-                // struct build_version_command {
-                //     uint32_t	cmd;		/* LC_BUILD_VERSION */
-                //     uint32_t	cmdsize;	/* sizeof(struct build_version_command) plus */
-                //     /* ntools * sizeof(struct build_tool_version) */
-                //     uint32_t	platform;	/* platform */
-                //     uint32_t	minos;		/* X.Y.Z is encoded in nibbles xxxx.yy.zz */
-                //     uint32_t	sdk;		/* X.Y.Z is encoded in nibbles xxxx.yy.zz */
-                //     uint32_t	ntools;		/* number of tool entries following this */
-                // };
-                //
-                //typedef struct build_tool_version {
-                // uint32_t	tool;		/* enum for the tool */
-                // uint32_t	version;	/* version number of the tool */
-                // } build_tool_version ;
-
-                void *build_v_cmd_tools_ptr = (void*)offset_of_load_command + sizeof(build_version_command);
-                build_version_command *build_v_cmd = (build_version_command*)offset_of_load_command;
-
-                printf(COLOR_GREEN "Platform: " COLOR_RESET "%s\n", platform_to_string(build_v_cmd->platform));
-                printf(COLOR_GREEN "Min OS: " COLOR_RESET); print_tool_version(build_v_cmd->minos); printf("\n");
-                printf(COLOR_GREEN "SDK: " COLOR_RESET); print_tool_version(build_v_cmd->sdk); printf("\n");
-
-                if (build_v_cmd -> ntools > 0) {
-                    build_tool_version *tools = (build_tool_version *)build_v_cmd_tools_ptr;
-                    for (int i = 0; i < build_v_cmd -> ntools; i++) {
-                        printf(COLOR_GREEN "Tool: " COLOR_RESET "%s, "COLOR_GREEN"Version: " COLOR_RESET, tool_to_string(tools[i].tool));
-                        print_tool_version(tools[i].version);
-                        printf("\n");
-                    }
-                }
-
-            } else if(command->cmd == LC_SOURCE_VERSION) {
-
-                /*
-                 * The source_version_command is an optional load command containing
-                 * the version of the sources used to build the binary.
-                 */
-                // struct source_version_command {
-                //     uint32_t  cmd;	/* LC_SOURCE_VERSION */
-                //     uint32_t  cmdsize;	/* 16 */
-                //     uint64_t  version;	/* A.B.C.D.E packed as a24.b10.c10.d10.e10 */
-                // };
-                source_version_command * svc = (source_version_command *) offset_of_load_command;
-                
-                //
-                printf(COLOR_GREEN "Version: " COLOR_RESET);
-                print_source_version(svc->version);
-                printf("\n");
-                // printf(COLOR_GREEN "version: " COLOR_RESET "%s\n", svc->version) ;
-
-
-            } else if(command->cmd == LC_MAIN) {
-
-
-                /*
-                 * The entry_point_command is a replacement for thread_command.
-                 * It is used for main executables to specify the location (file offset)
-                 * of main().  If -stack_size was used at link time, the stacksize
-                 * field will contain the stack size need for the main thread.
-                 */
-                // struct entry_point_command {
-                //     uint32_t  cmd;	/* LC_MAIN only used in MH_EXECUTE filetypes */
-                //     uint32_t  cmdsize;	/* 24 */
-                //     uint64_t  entryoff;	/* file (__TEXT) offset of main() */
-                //     uint64_t  stacksize;/* if not zero, initial stack size */
-                // };
-                
-                entry_point_command* epc = (entry_point_command*) offset_of_load_command;
-                printf(COLOR_GREEN "Entry offset: " COLOR_RESET "0x%08lx\n", epc->entryoff );
-                printf(COLOR_GREEN "Stack size: " COLOR_RESET "0x%ld\n", epc->stacksize);
-
-            } else if(command->cmd == LC_LOAD_DYLIB) {
-
-                /*
-                 * A dynamically linked shared library (filetype == MH_DYLIB in the mach header)
-                 * contains a dylib_command (cmd == LC_ID_DYLIB) to identify the library.
-                 * An object that uses a dynamically linked shared library also contains a
-                 * dylib_command (cmd == LC_LOAD_DYLIB, LC_LOAD_WEAK_DYLIB, or
-                 * LC_REEXPORT_DYLIB) for each library it uses.
-                 */
-                // struct dylib_command {
-                //     uint32_t	cmd;		/* LC_ID_DYLIB, LC_LOAD_{,WEAK_}DYLIB,
-                //                                    LC_REEXPORT_DYLIB */
-                //     uint32_t	cmdsize;	/* includes pathname string */
-                //     struct dylib	dylib;		/* the library identification */
-                // };
-                //
-
-                dylib_command *dylib_cmd = (dylib_command *) offset_of_load_command;
-                // struct dylib dylib = &dylib_cmd->dylib;
-                // printf("dylib: %s\n", dylib->name);
-                // printf("%d\n", dylib.current_version);
-                // printf("%d\n", dylib.compatibility_version);
-                // printf("%d\n", dylib.timestamp);
-
-
-
-
-            } else if(command->cmd == LC_FUNCTION_STARTS) {
-
-                /*
-                 * The linkedit_data_command contains the offsets and sizes of a blob
-                 * of data in the __LINKEDIT segment.  
-                 */
-                // struct linkedit_data_command {
-                //     uint32_t	cmd;		/* LC_CODE_SIGNATURE, LC_SEGMENT_SPLIT_INFO,
-                //                                    LC_FUNCTION_STARTS, LC_DATA_IN_CODE,
-                //                                    LC_DYLIB_CODE_SIGN_DRS,
-                //                                    LC_LINKER_OPTIMIZATION_HINT,
-                //                                    LC_DYLD_EXPORTS_TRIE, or
-                //                                    LC_DYLD_CHAINED_FIXUPS. */
-                //     uint32_t	cmdsize;	/* sizeof(struct linkedit_data_command) */
-                //     uint32_t	dataoff;	/* file offset of data in __LINKEDIT segment */
-                //     uint32_t	datasize;	/* file size of data in __LINKEDIT segment  */
-                // };
-
-
-            } else if(command->cmd == LC_DATA_IN_CODE) {
-
-                /*
-                 * The LC_DATA_IN_CODE load commands uses a linkedit_data_command 
-                 * to point to an array of data_in_code_entry entries. Each entry
-                 * describes a range of data in a code section.
-                 */
-                // struct data_in_code_entry {
-                //     uint32_t	offset;  /* from mach_header to start of data range*/
-                //     uint16_t	length;  /* number of bytes in data range */
-                //     uint16_t	kind;    /* a DICE_KIND_* value  */
-                // };
-
-            } else if(command->cmd == LC_CODE_SIGNATURE) {
-                
-                // /*
-                //  * The linkedit_data_command contains the offsets and sizes of a blob
-                //  * of data in the __LINKEDIT segment.  
-                //  */
-                // struct linkedit_data_command {
-                //     uint32_t	cmd;		/* LC_CODE_SIGNATURE, LC_SEGMENT_SPLIT_INFO,
-                //                                    LC_FUNCTION_STARTS, LC_DATA_IN_CODE,
-                // 				   LC_DYLIB_CODE_SIGN_DRS,
-                // 				   LC_LINKER_OPTIMIZATION_HINT,
-                // 				   LC_DYLD_EXPORTS_TRIE, or
-                // 				   LC_DYLD_CHAINED_FIXUPS. */
-                //     uint32_t	cmdsize;	/* sizeof(struct linkedit_data_command) */
-                //     uint32_t	dataoff;	/* file offset of data in __LINKEDIT segment */
-                //     uint32_t	datasize;	/* file size of data in __LINKEDIT segment  */
-                // };
-
-            }
+    if (bv->ntools > 0) {
+        build_tool_version *tools = (build_tool_version *)(cmd_ptr + sizeof(build_version_command));
+        for (uint32_t i = 0; i < bv->ntools; i++) {
+            printf(COLOR_GREEN "    Tool:          " COLOR_RESET "%s ", tool_to_string(tools[i].tool));
+            print_tool_version(tools[i].version);
             printf("\n");
+        }
+    }
+}
 
-            cmd_i += command->cmdsize;
-            offset_of_load_command += command->cmdsize;
-        } 
+static void handle_source_version(const unsigned char *cmd_ptr)
+{
+    source_version_command *sv = (source_version_command *)cmd_ptr;
+    printf(COLOR_GREEN "    Version:       " COLOR_RESET);
+    print_source_version(sv->version);
+    printf("\n");
+}
 
+static void handle_linkedit_data(const unsigned char *cmd_ptr)
+{
+    linkedit_data_command *led = (linkedit_data_command *)cmd_ptr;
+    printf(COLOR_GREEN "    Data offset:   " COLOR_RESET "0x%x\n", led->dataoff);
+    printf(COLOR_GREEN "    Data size:     " COLOR_RESET "%u bytes\n", led->datasize);
+}
 
-        printf("================= DATA ====================\n");
+/* =================== Main metadata function =================== */
 
+/**
+ * @brief Parse and print metadata for a 64-bit Mach-O file.
+ */
+static bool parse_macho_64(const unsigned char *block, size_t file_size)
+{
+    mach_header_64 *hdr = (mach_header_64 *)block;
 
-    } else {
+    if (!validate_macho_header(block, file_size, hdr->ncmds, hdr->sizeofcmds,
+                               sizeof(mach_header_64)))
+        return false;
+
+    /* Print header */
+    printf(COLOR_BLUE "================= Mach-O Header ====================\n" COLOR_RESET);
+    printf(COLOR_GREEN "Class:             " COLOR_RESET "64-bit\n");
+    printf(COLOR_GREEN "CPU Type:          " COLOR_RESET "%s\n", cpu_type_to_string(hdr->cputype));
+    printf(COLOR_GREEN "CPU Subtype:       " COLOR_RESET "%s\n", cpu_subtype_to_string(hdr->cputype, hdr->cpusubtype));
+    printf(COLOR_GREEN "File Type:         " COLOR_RESET "%s\n", get_mach_o_type(hdr->filetype));
+    printf(COLOR_GREEN "Load Commands:     " COLOR_RESET "%u (%u bytes)\n", hdr->ncmds, hdr->sizeofcmds);
+    printf(COLOR_GREEN "Flags:             " COLOR_RESET "0x%08x\n", hdr->flags);
+    print_mach_o_flags(hdr->flags);
+    printf(COLOR_GREEN "Reserved:          " COLOR_RESET "0x%x\n", hdr->reserved);
+
+    /* Iterate load commands */
+    printf(COLOR_BLUE "\n================= Load Commands (%u) ====================\n" COLOR_RESET,
+           hdr->ncmds);
+
+    const unsigned char *cmd_ptr = block + sizeof(mach_header_64);
+    const unsigned char *end_ptr = block + file_size;
+
+    for (uint32_t i = 0; i < hdr->ncmds; i++) {
+        if (cmd_ptr + sizeof(load_command) > end_ptr) break;
+        load_command *lc = (load_command *)cmd_ptr;
+
+        if (!validate_load_command(lc, cmd_ptr, end_ptr, i)) break;
+
+        printf("\n" COLOR_BLUE "[%u/%u] " COLOR_RESET, i + 1, hdr->ncmds);
+        print_load_command_info(lc->cmd);
+        printf(COLOR_GREEN "    Cmd Size:      " COLOR_RESET "%u bytes\n", lc->cmdsize);
+
+        switch (lc->cmd) {
+            case LC_SEGMENT_64:
+                handle_segment_64(cmd_ptr, block, file_size);
+                break;
+            case LC_SYMTAB:
+                handle_symtab(cmd_ptr, block, file_size, true);
+                break;
+            case LC_DYSYMTAB:
+                handle_dysymtab(cmd_ptr);
+                break;
+            case LC_LOAD_DYLIB:
+            case LC_LOAD_WEAK_DYLIB:
+            case LC_REEXPORT_DYLIB:
+            case LC_LAZY_LOAD_DYLIB:
+            case LC_ID_DYLIB:
+                handle_dylib(cmd_ptr, lc->cmdsize);
+                break;
+            case LC_LOAD_DYLINKER:
+            case LC_ID_DYLINKER:
+            case LC_DYLD_ENVIRONMENT:
+                handle_dylinker(cmd_ptr, lc->cmdsize);
+                break;
+            case LC_UUID:
+                handle_uuid(cmd_ptr);
+                break;
+            case LC_MAIN:
+                handle_main(cmd_ptr);
+                break;
+            case LC_BUILD_VERSION:
+                handle_build_version(cmd_ptr);
+                break;
+            case LC_SOURCE_VERSION:
+                handle_source_version(cmd_ptr);
+                break;
+            case LC_CODE_SIGNATURE:
+            case LC_FUNCTION_STARTS:
+            case LC_DATA_IN_CODE:
+            case LC_DYLD_EXPORTS_TRIE:
+            case LC_DYLD_CHAINED_FIXUPS:
+            case LC_SEGMENT_SPLIT_INFO:
+            case LC_DYLIB_CODE_SIGN_DRS:
+            case LC_LINKER_OPTIMIZATION_HINT:
+                handle_linkedit_data(cmd_ptr);
+                break;
+            case LC_RPATH: {
+                /* rpath_command has name offset at byte 8 */
+                uint32_t off = *(uint32_t *)(cmd_ptr + 8);
+                if (off < lc->cmdsize)
+                    printf(COLOR_GREEN "    Path:          " COLOR_RESET "%s\n", (const char*)cmd_ptr + off);
+                break;
+            }
+            default:
+                break;
+        }
+
+        cmd_ptr += lc->cmdsize;
+    }
+
+    printf("\n");
+    return true;
+}
+
+/**
+ * @brief Parse and print metadata for a 32-bit Mach-O file.
+ */
+static bool parse_macho_32(const unsigned char *block, size_t file_size)
+{
+    mach_header *hdr = (mach_header *)block;
+
+    if (!validate_macho_header(block, file_size, hdr->ncmds, hdr->sizeofcmds,
+                               sizeof(mach_header)))
+        return false;
+
+    /* Print header */
+    printf(COLOR_BLUE "================= Mach-O Header ====================\n" COLOR_RESET);
+    printf(COLOR_GREEN "Class:             " COLOR_RESET "32-bit\n");
+    printf(COLOR_GREEN "CPU Type:          " COLOR_RESET "%s\n", cpu_type_to_string(hdr->cputype));
+    printf(COLOR_GREEN "CPU Subtype:       " COLOR_RESET "%s\n", cpu_subtype_to_string(hdr->cputype, hdr->cpusubtype));
+    printf(COLOR_GREEN "File Type:         " COLOR_RESET "%s\n", get_mach_o_type(hdr->filetype));
+    printf(COLOR_GREEN "Load Commands:     " COLOR_RESET "%u (%u bytes)\n", hdr->ncmds, hdr->sizeofcmds);
+    printf(COLOR_GREEN "Flags:             " COLOR_RESET "0x%08x\n", hdr->flags);
+    print_mach_o_flags(hdr->flags);
+
+    /* Iterate load commands */
+    printf(COLOR_BLUE "\n================= Load Commands (%u) ====================\n" COLOR_RESET,
+           hdr->ncmds);
+
+    const unsigned char *cmd_ptr = block + sizeof(mach_header);
+    const unsigned char *end_ptr = block + file_size;
+
+    for (uint32_t i = 0; i < hdr->ncmds; i++) {
+        if (cmd_ptr + sizeof(load_command) > end_ptr) break;
+        load_command *lc = (load_command *)cmd_ptr;
+
+        if (!validate_load_command(lc, cmd_ptr, end_ptr, i)) break;
+
+        printf("\n" COLOR_BLUE "[%u/%u] " COLOR_RESET, i + 1, hdr->ncmds);
+        print_load_command_info(lc->cmd);
+        printf(COLOR_GREEN "    Cmd Size:      " COLOR_RESET "%u bytes\n", lc->cmdsize);
+
+        switch (lc->cmd) {
+            case LC_SEGMENT:
+                handle_segment_32(cmd_ptr, block, file_size);
+                break;
+            case LC_SYMTAB:
+                handle_symtab(cmd_ptr, block, file_size, false);
+                break;
+            case LC_DYSYMTAB:
+                handle_dysymtab(cmd_ptr);
+                break;
+            case LC_LOAD_DYLIB:
+            case LC_LOAD_WEAK_DYLIB:
+            case LC_REEXPORT_DYLIB:
+            case LC_LAZY_LOAD_DYLIB:
+            case LC_ID_DYLIB:
+                handle_dylib(cmd_ptr, lc->cmdsize);
+                break;
+            case LC_LOAD_DYLINKER:
+            case LC_ID_DYLINKER:
+            case LC_DYLD_ENVIRONMENT:
+                handle_dylinker(cmd_ptr, lc->cmdsize);
+                break;
+            case LC_UUID:
+                handle_uuid(cmd_ptr);
+                break;
+            case LC_BUILD_VERSION:
+                handle_build_version(cmd_ptr);
+                break;
+            case LC_SOURCE_VERSION:
+                handle_source_version(cmd_ptr);
+                break;
+            case LC_CODE_SIGNATURE:
+            case LC_FUNCTION_STARTS:
+            case LC_DATA_IN_CODE:
+            case LC_DYLD_EXPORTS_TRIE:
+            case LC_DYLD_CHAINED_FIXUPS:
+                handle_linkedit_data(cmd_ptr);
+                break;
+            default:
+                break;
+        }
+
+        cmd_ptr += lc->cmdsize;
+    }
+
+    printf("\n");
+    return true;
+}
+
+/* =================== Public entry point =================== */
+
+bool b_macho_metadata(bparser *parser, void *arg)
+{
+    if (!parser || !parser->block) {
+        fprintf(stderr, COLOR_RED "[!] Invalid parser state\n" COLOR_RESET);
         return false;
     }
 
-    return true;
+    const unsigned char *block = (const unsigned char *)parser->block;
+    size_t file_size = parser->size;
+
+    if (file_size < sizeof(uint32_t)) {
+        fprintf(stderr, COLOR_RED "[!] File too small to be a Mach-O binary\n" COLOR_RESET);
+        return false;
+    }
+
+    uint32_t magic = *(const uint32_t *)block;
+
+    if (magic == MH_MAGIC_64) {
+        return parse_macho_64(block, file_size);
+    } else if (magic == MH_MAGIC) {
+        return parse_macho_32(block, file_size);
+    } else {
+        fprintf(stderr, COLOR_RED "[!] Unknown Mach-O magic: 0x%08x\n" COLOR_RESET, magic);
+        return false;
+    }
 }

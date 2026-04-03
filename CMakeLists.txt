@@ -50,6 +50,7 @@ set(BX_deElf_SRC modules/bx_deElf/bx_deElf.c)
 set(BX_MACHO_SRC modules/bx_macho/bx_macho.c)
 set(BX_MACHO_UTILS_SRC modules/bx_macho_utils/bx_macho_utils.c)
 set(B_MACHO_METADATA_SRC modules/b_macho_metadata/b_macho_metadata.c)
+set(BX_MACHO_DISASM_SRC modules/bx_macho_disasm/bx_macho_disasm.c)
 
 # Main executable
 add_executable(baseer
@@ -68,6 +69,7 @@ add_executable(baseer
     ${BX_MACHO_SRC}
     ${BX_MACHO_UTILS_SRC}
     ${B_MACHO_METADATA_SRC}
+    ${BX_MACHO_DISASM_SRC}
     ${UDIS86_SRC}
 )
 
@@ -138,10 +140,21 @@ add_executable(test_bparser
 target_include_directories(test_bparser PRIVATE libs/linenoise)
 add_test(NAME test_bparser COMMAND test_bparser WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
+# Test: Mach-O
+add_executable(test_macho
+    tests/test_macho.c
+    modules/bparser/bparser.c
+    baseer.c
+    libs/linenoise/linenoise.c
+    ${B_HASHMAP_SRC}
+)
+target_include_directories(test_macho PRIVATE libs/linenoise)
+add_test(NAME test_macho COMMAND test_macho WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
 # Custom target to run all tests
 add_custom_target(check
     COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
-    DEPENDS test_hashmap test_baseer_core test_bparser
+    DEPENDS test_hashmap test_baseer_core test_bparser test_macho
     COMMENT "Running all tests"
 )
 

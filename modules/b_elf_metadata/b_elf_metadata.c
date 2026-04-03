@@ -113,54 +113,51 @@ void dump_elf64hdr(Elf64_Ehdr *elf)
  */
 void dump_elf32_shdr(Elf32_Ehdr* elf, Elf32_Shdr* shdrs, bparser* parser, void* arg) 
 {
+    /* Validate string table section bounds */
     Elf32_Shdr shstr = shdrs[elf->e_shstrndx];
+    if (shstr.sh_offset + shstr.sh_size > parser->size) {
+        fprintf(stderr, COLOR_RED "[!] Section string table extends beyond file bounds\n" COLOR_RESET);
+        return;
+    }
     const char* shstrtab = (const char*)(parser->block + shstr.sh_offset);
 
     printf(COLOR_BLUE "\n=== Section Headers ===\n" COLOR_RESET);
     print_section_header_legend();
 
-    // ======================================= init maps  =================================================
-    // create hashmap of section headers to retreve the specifa name of section header needed
-    // hashmap_t *map = create_map();
+    /* Initialize section and symbol hashmaps */
     hashmap_t *maps = ((inputs*)arg) -> map;
     if((hashmap_t*)get(maps, "sections") == NULL){
         insert(maps, "sections", create_map());
     }
-
     if((hashmap_t*)get(maps, "symbols") == NULL){
         insert(maps, "symbols", create_map());
     }
-
-    // ======================================= init maps  =================================================
 
     hashmap_t *map = (hashmap_t*)get(maps, "sections");
     hashmap_t *symbols = (hashmap_t*)get(maps, "symbols");
 
     for (int i = 0; i < elf->e_shnum; i++) {
-        // ============================ BEGIN SECTION METADATA =============================
-        // Section name
         const char* name = &shstrtab[shdrs[i].sh_name];
-
-        // Type
         const char* type_str = sh_type_to_str(shdrs[i].sh_type);
 
-        // Insert section header pointers into a hashmap for quick retrieval by name
         if((Elf32_Shdr*)get(map, name) == NULL){
             insert(map, name, &shdrs[i]);
         }
 
-        // Flags
         char flags[64] = "";
         format_sh_flags(shdrs[i].sh_flags, flags, sizeof(flags));
         printf("\n");
 
         print_section_header_metadata_32bit(i, name, type_str, flags, shdrs);
-        // ============================ END SECTION METADATA =============================
-        
-
-        // ============================ BEGIN SECTION BODY =============================
-        long int offset = shdrs[i].sh_offset;
         if (shdrs[i].sh_size > 0) {
+
+            if(shdrs[i].sh_offset > parser->size) {
+                shdrs[i].sh_offset = 0;
+            }
+            if(shdrs[i].sh_size > parser->size) {
+                shdrs[i].sh_size = parser->size;
+            }
+
             void* block = malloc(shdrs[i].sh_size);
             bparser_read(parser, block, shdrs[i].sh_offset, shdrs[i].sh_size);
             unsigned char* ptr = (unsigned char*)block;
@@ -174,6 +171,7 @@ void dump_elf32_shdr(Elf32_Ehdr* elf, Elf32_Shdr* shdrs, bparser* parser, void* 
     for (int i = 0; i < elf->e_shnum; i++) {
         Elf32_Shdr curr_shd = shdrs[i];
         if(curr_shd.sh_link == 0) continue;
+        if(curr_shd.sh_link >= elf->e_shnum) continue;
         Elf32_Shdr linked_shd = shdrs[curr_shd.sh_link];
 
         // check is it table type and have like `SYMTAB` `DYNSYMTAB` `REL` `RELA` and so on... and there LINK section for names.
@@ -203,14 +201,7 @@ void dump_elf32_shdr(Elf32_Ehdr* elf, Elf32_Shdr* shdrs, bparser* parser, void* 
 
 
     Elf32_Shdr *symtab, *strtab;
-    // if((symtab = (Elf32_Shdr*)get(map, ".dynsym")) != NULL && (strtab = (Elf32_Shdr*)get(map, ".dynstr")) != NULL) {
-    //     print_symbols_32bit(parser, elf, shdrs, symtab, strtab);
-    //     printf("\n\n");
-    // }
-
     if((symtab = (Elf32_Shdr*)get(map, ".symtab")) != NULL && (strtab = (Elf32_Shdr*)get(map, ".strtab")) != NULL) {
-
-        // Insert symbols in hashmap
         Elf32_Sym *syms = (Elf32_Sym *)(parser->block + symtab->sh_offset);
         const char *strs = (const char *)(parser->block + strtab->sh_offset);
         unsigned int count = symtab->sh_size / sizeof(Elf32_Sym);
@@ -220,21 +211,8 @@ void dump_elf32_shdr(Elf32_Ehdr* elf, Elf32_Shdr* shdrs, bparser* parser, void* 
                 insert(symbols, name, &syms[i]);
             }
         }
-        // print_symbols_32bit(parser, elf, shdrs, symtab, strtab);
         printf("\n\n");
     }
-
-    // if((symtab = (Elf32_Shdr*)get(map, ".rel.plt")) != NULL) {
-    //     print_rela_32bit(parser, elf, shdrs, symtab, strtab);
-    //     printf("\n\n");
-    // }
-
-    // if((symtab = (Elf32_Shdr*)get(map, ".rela.plt")) != NULL) {
-    //     print_rela_32bit(parser, elf, shdrs, symtab, strtab);
-    //     printf("\n\n");
-    // }
-
-    // free_map(map);
 }
 
 /**
@@ -264,53 +242,52 @@ void dump_elf32_shdr(Elf32_Ehdr* elf, Elf32_Shdr* shdrs, bparser* parser, void* 
  */
 void dump_elf64_shdr(Elf64_Ehdr* elf , Elf64_Shdr* shdrs, bparser* parser, void* arg) 
 {
+    /* Validate string table section bounds */
     Elf64_Shdr shstr = shdrs[elf->e_shstrndx];
+    if (shstr.sh_offset + shstr.sh_size > parser->size) {
+        fprintf(stderr, COLOR_RED "[!] Section string table extends beyond file bounds\n" COLOR_RESET);
+        return;
+    }
     const char* shstrtab = (const char*)(parser->block + shstr.sh_offset);
     printf(COLOR_BLUE "\n=== Section Headers ===\n" COLOR_RESET);
     print_section_header_legend();
 
 
-    // ======================================= init maps  =================================================
-    // create hashmap of section headers to retreve the specifa name of section header needed
-    // hashmap_t *map = create_map();
+    /* Initialize section and symbol hashmaps */
     hashmap_t *maps = ((inputs*)arg) -> map;
     if((hashmap_t*)get(maps, "sections") == NULL){
         insert(maps, "sections", create_map());
     }
-
     if((hashmap_t*)get(maps, "symbols") == NULL){
         insert(maps, "symbols", create_map());
     }
 
-    // ======================================= init maps  =================================================
-
     hashmap_t *map = (hashmap_t*)get(maps, "sections");
     hashmap_t *symbols = (hashmap_t*)get(maps, "symbols");
 
-
     for (int i = 0; i < elf->e_shnum; i++) {
-        // ============================ BEGIN SECTION METADATA =============================
-        // Section name
         const char* name = &shstrtab[shdrs[i].sh_name];
-
-        // Type
         const char* type_str = sh_type_to_str(shdrs[i].sh_type);
 
-        // Insert section header pointers into a hashmap for quick retrieval by name
         if((Elf64_Shdr*)get(map, name) == NULL){
             insert(map, name, &shdrs[i]);
         }
 
-        // Flags
         char flags[64] = "";
         format_sh_flags(shdrs[i].sh_flags, flags, sizeof(flags));
         printf("\n");       
 
         print_section_header_metadata_64bit(i, name, type_str, flags, shdrs);
-        // ============================ END SECTION METADATA =============================
-
-        // ============================ BEGIN SECTION BODY =============================
         if (shdrs[i].sh_size > 0) {
+
+            if(shdrs[i].sh_offset > parser->size) {
+                shdrs[i].sh_offset = 0;
+            }
+            if(shdrs[i].sh_size > parser->size) {
+                shdrs[i].sh_size = parser->size;
+            }
+
+
             void* block = malloc(shdrs[i].sh_size);
             bparser_read(parser, block, shdrs[i].sh_offset, shdrs[i].sh_size);
             unsigned char* ptr = (unsigned char*)block;
@@ -326,6 +303,7 @@ void dump_elf64_shdr(Elf64_Ehdr* elf , Elf64_Shdr* shdrs, bparser* parser, void*
     for (int i = 0; i < elf->e_shnum; i++) {
         Elf64_Shdr curr_shd = shdrs[i];
         if(curr_shd.sh_link == 0) continue;
+        if(curr_shd.sh_link >= elf->e_shnum) continue;
         Elf64_Shdr linked_shd = shdrs[curr_shd.sh_link];
 
         // check is it table type and have like `SYMTAB` `DYNSYMTAB` `REL` `RELA` and so on... and there LINK section for names.
@@ -425,6 +403,14 @@ void dump_elf32_phdr(Elf32_Ehdr *elf, Elf32_Phdr* phdr, bparser*parser)
 
         // ============================ BEGIN PROGRAM BODY =============================
         if (phdr[i].p_filesz > 0) {
+
+            if(phdr[i].p_offset > parser->size) {
+                phdr[i].p_offset = 0;
+            }
+            if(phdr[i].p_filesz > parser->size) {
+                phdr[i].p_filesz = parser->size;
+            }
+
             void *block = malloc(phdr[i].p_filesz);
             bparser_read(parser, block, phdr[i].p_offset, phdr[i].p_filesz);
             unsigned char* ptr = (unsigned char*)block;
@@ -489,6 +475,14 @@ void dump_elf64_phdr(Elf64_Ehdr *elf, Elf64_Phdr* phdr, bparser*parser)
         
         // ============================ BEGIN PROGRAM BODY =============================
         if (phdr[i].p_filesz > 0) {
+
+            if(phdr[i].p_offset > parser->size) {
+                phdr[i].p_offset = 0;
+            }
+            if(phdr[i].p_filesz > parser->size) {
+                phdr[i].p_filesz = parser->size;
+            }
+
             void *block = malloc(phdr[i].p_filesz);
             bparser_read(parser, block, phdr[i].p_offset, phdr[i].p_filesz);
             unsigned char* ptr = (unsigned char*)block;
@@ -525,14 +519,16 @@ void dump_elf64_phdr(Elf64_Ehdr *elf, Elf64_Phdr* phdr, bparser*parser)
  *      dump_elf64hdr(), dump_elf64_shdr(), dump_elf64_phdr()
  */
 
-// #define (n, pfsz, value) \
-//     Elf##pfsz_Shdr *n = #value;
-// READ_BYTES(md, 64)
-
-
 bool print_meta_data(bparser* parser, void* arg) 
 {
     unsigned char *data = (unsigned char*) parser->block;
+
+    /* Minimum size: ELF identification bytes (EI_NIDENT = 16) */
+    if (!data || parser->size < EI_NIDENT) {
+        fprintf(stderr, COLOR_RED "[!] File too small to be a valid ELF binary\n" COLOR_RESET);
+        return false;
+    }
+
     char bit_type = data[EI_CLASS];
     char endian   = data[EI_DATA];
 
@@ -548,7 +544,28 @@ bool print_meta_data(bparser* parser, void* arg)
     }
 
     if (bit_type == ELFCLASS32) {
+        if (parser->size < sizeof(Elf32_Ehdr)) {
+            fprintf(stderr, COLOR_RED "[!] File too small for 32-bit ELF header\n" COLOR_RESET);
+            return false;
+        }
         Elf32_Ehdr* elf = (Elf32_Ehdr*) data;
+
+        /* Validate section header table bounds */
+        if (elf->e_shoff > 0 && (elf->e_shoff + (size_t)elf->e_shnum * elf->e_shentsize > parser->size)) {
+            fprintf(stderr, COLOR_RED "[!] Section header table extends beyond file bounds\n" COLOR_RESET);
+            elf->e_shnum = 0;
+        }
+        /* Validate program header table bounds */
+        if (elf->e_phoff > 0 && (elf->e_phoff + (size_t)elf->e_phnum * elf->e_phentsize > parser->size)) {
+            fprintf(stderr, COLOR_RED "[!] Program header table extends beyond file bounds\n" COLOR_RESET);
+            elf->e_phnum = 0;
+        }
+        /* Validate string table index */
+        if (elf->e_shstrndx >= elf->e_shnum && elf->e_shnum > 0) {
+            fprintf(stderr, COLOR_RED "[!] Invalid section string table index\n" COLOR_RESET);
+            elf->e_shnum = 0;
+        }
+
         Elf32_Phdr* phdr = (Elf32_Phdr*) (data + elf->e_phoff);
         Elf32_Shdr* shdrs = (Elf32_Shdr*)(data + elf->e_shoff);
         dump_elf32hdr(elf);
@@ -560,7 +577,28 @@ bool print_meta_data(bparser* parser, void* arg)
             dump_elf32_phdr(elf, phdr, parser);
 
     } else if (bit_type == ELFCLASS64) {
+        if (parser->size < sizeof(Elf64_Ehdr)) {
+            fprintf(stderr, COLOR_RED "[!] File too small for 64-bit ELF header\n" COLOR_RESET);
+            return false;
+        }
         Elf64_Ehdr* elf = (Elf64_Ehdr*) data;
+
+        /* Validate section header table bounds */
+        if (elf->e_shoff > 0 && (elf->e_shoff + (size_t)elf->e_shnum * elf->e_shentsize > parser->size)) {
+            fprintf(stderr, COLOR_RED "[!] Section header table extends beyond file bounds\n" COLOR_RESET);
+            elf->e_shnum = 0;
+        }
+        /* Validate program header table bounds */
+        if (elf->e_phoff > 0 && (elf->e_phoff + (size_t)elf->e_phnum * elf->e_phentsize > parser->size)) {
+            fprintf(stderr, COLOR_RED "[!] Program header table extends beyond file bounds\n" COLOR_RESET);
+            elf->e_phnum = 0;
+        }
+        /* Validate string table index */
+        if (elf->e_shstrndx >= elf->e_shnum && elf->e_shnum > 0) {
+            fprintf(stderr, COLOR_RED "[!] Invalid section string table index\n" COLOR_RESET);
+            elf->e_shnum = 0;
+        }
+
         Elf64_Phdr* phdr = (Elf64_Phdr*) (data + elf->e_phoff);
         Elf64_Shdr* shdrs = (Elf64_Shdr*)(data + elf->e_shoff);
         dump_elf64hdr(elf);
@@ -575,7 +613,6 @@ bool print_meta_data(bparser* parser, void* arg)
         return false;
     }
 
-    // printf(COLOR_BLUE "=========================\n" COLOR_RESET);
     return true;
 }
 

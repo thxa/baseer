@@ -15,8 +15,6 @@
 baseer_target_t *baseer_open(char *file_path, baseer_mode_t mode)
 {
     baseer_target_t *target = NULL;
-    size_t read;
-
     FILE *handler = NULL;
     RETURN_NULL_IF(file_path == NULL)
 
@@ -63,7 +61,7 @@ baseer_target_t *baseer_open(char *file_path, baseer_mode_t mode)
     return target;
 }
 
-/* =================== Closeing =================== */
+/* =================== Closing =================== */
 void baseer_close(baseer_target_t *target)
 {
     if(!target) return;
@@ -92,7 +90,7 @@ void baseer_close(baseer_target_t *target)
             }
             break;
         default:
-            fprintf(stderr, "[!] Failed in closeing \n");
+            fprintf(stderr, "[!] Failed in closing\n");
             break;
     }
     free(target);

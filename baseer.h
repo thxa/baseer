@@ -88,8 +88,6 @@ static inline int get_block_length(void)
     return DEFAULT_BLOCK_LENGTH;
 }
 
-
-
 /**
  * @brief Struct representing command-line inputs
  */

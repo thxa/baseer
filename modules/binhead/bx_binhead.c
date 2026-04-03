@@ -64,23 +64,16 @@ unsigned long NXSwapLong(unsigned long inv)
 bool bx_binhead(baseer_target_t *target, void *arg)
 {   
 
-    // printf("This is from binhead: %p\n", ((inputs*)arg));
     if (target == NULL || target->block == NULL)
         return false;
 
-    bparser* bp = NULL;
-    // printf("%d\n", target->size);
-    bp = bparser_load(target);
+    bparser* bp = bparser_load(target);
 
     bmagic magics[] = {
         {"ELF", ELF_MAGIC, reverse_bytes(ELF_MAGIC), bx_elf, 0},
         {"TAR", TAR_MAGIC, reverse_bytes(TAR_MAGIC), bx_tar, 257},
         {"Mach-o", MH_MAGIC, NXSwapInt(MH_MAGIC), bx_macho, 0},
         {"Mach-o", MH_MAGIC_64, NXSwapInt(MH_MAGIC_64), bx_macho, 0},
-        // {"PDF", PDF_MAGIC, reverse_bytes(PDF_MAGIC), NULL, 0},
-        // {"PNG", PNG_MAGIC, reverse_bytes(PNG_MAGIC), NULL, 0},
-        // {"ZIP", ZIP_MAGIC, reverse_bytes(ZIP_MAGIC), NULL, 0},
-        // { NULL, 0,         0,                 NULL }
     };
 
 

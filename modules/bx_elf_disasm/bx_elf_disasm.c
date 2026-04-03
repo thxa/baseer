@@ -45,16 +45,32 @@
  * @param shdrs Pointer to the array of ELF32 section headers.
  * @param parser Pointer to a bparser structure for reading binary data.
  */
-void dump_disasm_elf32_shdr(Elf32_Ehdr* elf , Elf32_Shdr* shdrs, bparser* parser)
+void  dump_disasm_elf32_shdr(Elf32_Ehdr* elf, Elf32_Shdr* shdrs, bparser* parser, void* arg) 
 {
+    if(shdrs == NULL) return;
+
     Elf32_Shdr shstr = shdrs[elf->e_shstrndx];
     const char* shstrtab = (const char*)(parser->block + shstr.sh_offset);
 
     printf(COLOR_BLUE "\n=== Sections ===\n" COLOR_RESET);
     // print_section_header_legend();
 
+    // ======================================= init maps  =================================================
     // create hashmap of section headers to retreve the specifa name of section header needed
-    hashmap_t *map = create_map();
+    // hashmap_t *map = create_map();
+    hashmap_t *maps = ((inputs*)arg) -> map;
+    if((hashmap_t*)get(maps, "sections") == NULL){
+        insert(maps, "sections", create_map());
+    }
+
+    if((hashmap_t*)get(maps, "symbols") == NULL){
+        insert(maps, "symbols", create_map());
+    }
+
+    // ======================================= init maps  =================================================
+
+    hashmap_t *map = (hashmap_t*)get(maps, "sections");
+    hashmap_t *symbols = (hashmap_t*)get(maps, "symbols");
     
     for (int i = 0; i < elf->e_shnum; i++) {
 
@@ -66,7 +82,9 @@ void dump_disasm_elf32_shdr(Elf32_Ehdr* elf , Elf32_Shdr* shdrs, bparser* parser
         const char* type_str = sh_type_to_str(shdrs[i].sh_type);
 
         // Insert section header pointers into a hashmap for quick retrieval by name
-        insert(map, name, &shdrs[i]);
+        if((Elf32_Shdr*)get(map, name) == NULL){
+            insert(map, name, &shdrs[i]);
+        }
 
         if(shdrs[i].sh_flags & SHF_EXECINSTR) {
             // Flags
@@ -97,11 +115,41 @@ void dump_disasm_elf32_shdr(Elf32_Ehdr* elf , Elf32_Shdr* shdrs, bparser* parser
     //     printf("\n\n");
     // }
 
+    // ================ print tables ==================
+    for (int i = 0; i < elf->e_shnum; i++) {
+        Elf32_Shdr curr_shd = shdrs[i];
+        if(curr_shd.sh_link == 0) continue;
+        Elf32_Shdr linked_shd = shdrs[curr_shd.sh_link];
+
+        // check is it table type and have like `SYMTAB` `DYNSYMTAB` `REL` `RELA` and so on... and there LINK section for names.
+        if (curr_shd.sh_type == SHT_SYMTAB && linked_shd.sh_type == SHT_STRTAB) {
+            print_symbols_32bit(parser, elf, shdrs, &curr_shd, &linked_shd);
+
+        } else if(curr_shd.sh_type == SHT_DYNSYM && linked_shd.sh_type == SHT_STRTAB){
+            // TODO: need to make print_dynmaic_symbols ...
+            print_symbols_32bit(parser, elf, shdrs, &curr_shd, &linked_shd);
+
+        } else if(curr_shd.sh_type == SHT_REL){
+            // TODO: need to make print_rel ...
+            print_rela_32bit(parser, elf, shdrs, &curr_shd, &linked_shd);
+        } else if(curr_shd.sh_type == SHT_RELA){
+            print_rela_32bit(parser, elf, shdrs, &curr_shd, &linked_shd);
+
+        } else if(curr_shd.sh_type == SHT_RELR){
+            // TODO: need to make print_rela ...
+            print_rela_32bit(parser, elf, shdrs, &curr_shd, &linked_shd);
+        } else if(curr_shd.sh_type == SHT_DYNAMIC){
+            // TODO
+            // print_symbols_32bit(parser, elf, shdrs, &curr_shd, &linked_shd);
+            print_dynamic_table_32bit(parser, elf, shdrs, &curr_shd, &linked_shd);
+        }
+    }
+
+
     if((symtab = (Elf32_Shdr*)get(map, ".symtab")) != NULL && (strtab = (Elf32_Shdr*)get(map, ".strtab")) != NULL) {
         print_symbols_with_disasm_32bit(parser, elf, shdrs, symtab, strtab);
     }
 
-    free_map(map);
 }
 
 /**
@@ -350,6 +398,7 @@ bool print_elf_disasm(bparser* parser, void* args) {
         Elf32_Shdr* shdrs = (Elf32_Shdr*)(data + elf->e_shoff);
 
         printf(COLOR_GREEN "Entry point: " COLOR_RESET "0x%x\n", elf->e_entry);
+        printf(COLOR_GREEN "Program headers: " COLOR_RESET "%d (offset: 0x%x)\n", elf->e_phnum, elf->e_phoff);
         printf(COLOR_GREEN "Section headers: " COLOR_RESET "%d (offset: 0x%x)\n", elf->e_shnum, elf->e_shoff);
         printf(COLOR_GREEN "Section header string table index: " COLOR_RESET "%d\n", elf->e_shstrndx);
         printf(COLOR_GREEN "File Type: " COLOR_RESET "%s (%d)\n",
@@ -366,8 +415,14 @@ bool print_elf_disasm(bparser* parser, void* args) {
             return false;
         }
       
-        dump_disasm_elf32_shdr(elf, shdrs, parser);
-        dump_disasm_elf32_phdr(elf, phdr, parser);
+
+        if(elf->e_shnum > 0)
+            dump_disasm_elf32_shdr(elf, shdrs, parser, args);
+
+        if(elf->e_phnum > 0)
+            dump_disasm_elf32_phdr(elf, phdr, parser);
+
+
 
     } else if (bit_type == ELFCLASS64) {
         Elf64_Ehdr* elf = (Elf64_Ehdr*) data;
@@ -375,6 +430,7 @@ bool print_elf_disasm(bparser* parser, void* args) {
         Elf64_Shdr* shdrs = (Elf64_Shdr*)(data + elf->e_shoff);
 
         printf(COLOR_GREEN "Entry point: " COLOR_RESET "0x%lx\n", elf->e_entry);
+        printf(COLOR_GREEN "Program headers: " COLOR_RESET "%d (offset: 0x%lx)\n", elf->e_phnum, elf->e_phoff);
         printf(COLOR_GREEN "Section headers: " COLOR_RESET "%d (offset: 0x%lx)\n", elf->e_shnum, elf->e_shoff);
         printf(COLOR_GREEN "Section header string table index: " COLOR_RESET "%d\n", elf->e_shstrndx);
         printf(COLOR_GREEN "File Type: " COLOR_RESET "%s (%d)\n",
@@ -389,8 +445,11 @@ bool print_elf_disasm(bparser* parser, void* args) {
             return false;
         }
 
-        dump_disasm_elf64_shdr(elf, shdrs, parser);
-        dump_disasm_elf64_phdr(elf, phdr, parser);
+        if(elf->e_shnum > 0)
+            dump_disasm_elf64_shdr(elf, shdrs, parser);
+
+        if(elf->e_phnum > 0)
+            dump_disasm_elf64_phdr(elf, phdr, parser);
 
     } else {
         printf(COLOR_RED "Unknown ELF class: %d\n" COLOR_RESET, bit_type);

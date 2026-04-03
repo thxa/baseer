@@ -193,66 +193,6 @@ bool handle_action(context *ctx, void *args);
  * @brief Parse and dispatch a command from the user.
  */
 void parse_cmd(context *ctx);
-static func_list cmds[] = {
-    {"bp",setBP},
-    {"dp",delBP},
-    {"lp",listBP},
-    {"so",step_over},
-    {"x",examin_mem},
-    {"set",set_mem_reg},
-    {"h",handle_action},
-    {"c",handle_action},
-    {"q",handle_action},
-    {"si",handle_action},
-    {"vmmap",handle_action},
-    {"i",handle_action},
-};
-static pos_name flags[] = {
-    {"CF",0},
-    {"PF",2},
-    {"AF",4},
-    {"ZF",6},
-    {"SF",7},
-    {"DF",10},
-    {"OF",11},
-};
-static pos_name regs_64[] = {
-{"RAX ",0x50},
-{"RDX ",0x60},
-{"RCX ",0x58},
-{"RBX ",0x28},
-{"RDI ",0x80},
-{"RSI ",0x68},
-{"R8  ",0x48},
-{"R9  ",0x40},
-{"R10 ",0x38},
-{"R11 ",0x30},
-{"R12 ",0x18},
-{"R13 ",0x10},
-{"R14 ",0x8},
-{"R15 ",0},
-{"RSP ",0x98},
-{"RBP ",0x20},
-{"RIP ",0x80},
-};
-static pos_name regs_32[] = {
-{"EAX ",0x50},
-{"EDX ",0x60},
-{"ECX ",0x58},
-{"EBX ",0x28},
-{"EDI ",0x80},
-{"ESI ",0x68},
-{"R8d  ",0x48},
-{"R9d  ",0x40},
-{"R10d ",0x38},
-{"R11d ",0x30},
-{"R12d ",0x18},
-{"R13d ",0x10},
-{"R14d ",0x8},
-{"R15d ",0},
-{"ESP ",0x98},
-{"EBP ",0x20},
-{"EIP ",0x80},
-};
+
 #endif /* DEBUG_H */
 

@@ -13,6 +13,76 @@
 #include "debugger.h"
 #include <sys/ptrace.h>
 #include "../bx_elf_utils/bx_elf_utils.h"
+
+/* Command dispatch table */
+static func_list cmds[] = {
+    {"bp",setBP},
+    {"dp",delBP},
+    {"lp",listBP},
+    {"so",step_over},
+    {"x",examin_mem},
+    {"set",set_mem_reg},
+    {"h",handle_action},
+    {"c",handle_action},
+    {"q",handle_action},
+    {"si",handle_action},
+    {"vmmap",handle_action},
+    {"i",handle_action},
+};
+
+/* CPU flags bit positions */
+static pos_name flags[] = {
+    {"CF",0},
+    {"PF",2},
+    {"AF",4},
+    {"ZF",6},
+    {"SF",7},
+    {"DF",10},
+    {"OF",11},
+};
+
+/* 64-bit register name-to-offset mappings */
+static pos_name regs_64[] = {
+    {"RAX ",0x50},
+    {"RDX ",0x60},
+    {"RCX ",0x58},
+    {"RBX ",0x28},
+    {"RDI ",0x80},
+    {"RSI ",0x68},
+    {"R8  ",0x48},
+    {"R9  ",0x40},
+    {"R10 ",0x38},
+    {"R11 ",0x30},
+    {"R12 ",0x18},
+    {"R13 ",0x10},
+    {"R14 ",0x8},
+    {"R15 ",0},
+    {"RSP ",0x98},
+    {"RBP ",0x20},
+    {"RIP ",0x80},
+};
+
+/* 32-bit register name-to-offset mappings */
+static pos_name regs_32[] = {
+    {"EAX ",0x50},
+    {"EDX ",0x60},
+    {"ECX ",0x58},
+    {"EBX ",0x28},
+    {"EDI ",0x80},
+    {"ESI ",0x68},
+    {"R8d  ",0x48},
+    {"R9d  ",0x40},
+    {"R10d ",0x38},
+    {"R11d ",0x30},
+    {"R12d ",0x18},
+    {"R13d ",0x10},
+    {"R14d ",0x8},
+    {"R15d ",0},
+    {"ESP ",0x98},
+    {"EBP ",0x20},
+    {"EIP ",0x80},
+};
+
 /**
  * @file debugger.c
  * @brief Implementation of a lightweight debugger for ELF binaries using ptrace.
@@ -60,8 +130,10 @@ void parse_cmd(context *ctx){
 	uint32_t len = sizeof(cmds)/sizeof(func_list); 
 	for (int i = 0; i< len ; i++) {
 		if(strcmp(ctx->cmd.op,cmds[i].cmd) == 0){
-			if(ctx->base == 0 && (strcmp(ctx->cmd.op,"q") != 0) )
+			if(ctx->base == 0 && (strcmp(ctx->cmd.op,"q") != 0) ){
+				free(cmd);
 				return;
+			}
 			flag = cmds[i].func(ctx,(void*)args);
 			break;
 
@@ -97,13 +169,20 @@ bool handle_action(context *ctx,void *args){
 		return true;
 	}else if (strcmp(ctx->cmd.op,"vmmap") == 0) {
 		free(ctx->mmaps);
+		ctx->mmaps = NULL;
 		char mmaps[512] = {0};
-		sprintf(mmaps, "/proc/%d/maps", ctx->pid);
+		snprintf(mmaps, sizeof(mmaps), "/proc/%d/maps", ctx->pid);
 		FILE *file = fopen(mmaps,"r");
+		if (!file) {
+			ERROR("failed to open process maps\n");
+			ctx->do_wait = false;
+			return true;
+		}
 		size_t size = 0;
 		getdelim(&ctx->mmaps,&size,'\0' , file);
 		fclose(file);
-		printf("%s\n",ctx->mmaps);
+		if (ctx->mmaps)
+			printf("%s\n",ctx->mmaps);
 		ctx->do_wait = false;
 		return true;
 	}else if (strcmp(ctx->cmd.op,"c") == 0) {
@@ -130,6 +209,7 @@ bool handle_action(context *ctx,void *args){
 		return true;
 	}
 
+	return false;
 }
 
 /**
@@ -163,9 +243,9 @@ void print_helpCMD(){
 bool set_mem_reg(context *ctx,void *args){
 	ctx->do_wait = false;
 	char *arg = (char*)args;
-	if(arg == '\0')
+	if(!arg || *arg == '\0')
 		return false;
-	while(arg != '\0' && isspace((unsigned char)*arg))arg++;
+	while(*arg != '\0' && isspace((unsigned char)*arg))arg++;
 	uint32_t counter = 0 ;
 	char *tokens[2] = {0};
 	char *token = strtok(arg,"=");
@@ -405,9 +485,9 @@ bool setBP(context *ctx, void* args){
 	char *arg = (char*)args;
 	ctx->do_wait = false;
 
-	if(arg == '\0')
+	if(!arg || *arg == '\0')
 		return false;
-	while(arg != '\0' && isspace((unsigned char)*arg))arg++;
+	while(*arg != '\0' && isspace((unsigned char)*arg))arg++;
 
 	char *token = strtok(arg, " ");
 	if(token == NULL){
@@ -603,11 +683,128 @@ void dis_ctx(context *ctx){
 
 
 /**
- * @brief Initialize the debugger context from a parsed ELF binary.
+ * @brief Load symbols from a Mach-O binary into the debugger context.
+ */
+static void init_macho_symbols(bparser *target, context *ctx)
+{
+	unsigned char *block = (unsigned char *)target->block;
+	uint32_t magic = *(uint32_t *)block;
+	bool is_64 = (magic == 0xfeedfacf);
+	size_t hdr_size = is_64 ? sizeof(Elf64_Ehdr) : sizeof(Elf32_Ehdr); /* placeholder for header skip */
+
+	/* Parse Mach-O header to get ncmds and sizeofcmds */
+	uint32_t ncmds, sizeofcmds;
+	unsigned char *cmd_ptr;
+	if (is_64) {
+		hdr_size = 32; /* sizeof(mach_header_64) */
+		ncmds = *(uint32_t *)(block + 16);
+		sizeofcmds = *(uint32_t *)(block + 20);
+		ctx->arch = 64;
+	} else {
+		hdr_size = 28; /* sizeof(mach_header) */
+		ncmds = *(uint32_t *)(block + 12);
+		sizeofcmds = *(uint32_t *)(block + 16);
+		ctx->arch = 32;
+	}
+
+	if (hdr_size + sizeofcmds > target->size) return;
+	cmd_ptr = block + hdr_size;
+	unsigned char *end_ptr = block + target->size;
+
+	/* Find LC_SYMTAB (cmd=0x2) and LC_MAIN (cmd=0x80000028) for entry point */
+	uint32_t symoff = 0, nsyms = 0, stroff = 0, strsize = 0;
+	uint64_t entry_off = 0;
+
+	for (uint32_t i = 0; i < ncmds; i++) {
+		if (cmd_ptr + 8 > end_ptr) break;
+		uint32_t cmd = *(uint32_t *)cmd_ptr;
+		uint32_t cmdsize = *(uint32_t *)(cmd_ptr + 4);
+		if (cmdsize < 8 || cmd_ptr + cmdsize > end_ptr) break;
+
+		if (cmd == 0x2) { /* LC_SYMTAB */
+			symoff  = *(uint32_t *)(cmd_ptr + 8);
+			nsyms   = *(uint32_t *)(cmd_ptr + 12);
+			stroff  = *(uint32_t *)(cmd_ptr + 16);
+			strsize = *(uint32_t *)(cmd_ptr + 20);
+		} else if (cmd == (0x28 | 0x80000000)) { /* LC_MAIN */
+			entry_off = *(uint64_t *)(cmd_ptr + 8);
+		}
+		cmd_ptr += cmdsize;
+	}
+
+	/* Set entry to base + entry offset (Mach-O is always PIE on modern systems) */
+	ctx->entry = ctx->base + entry_off;
+	ctx->pie = false;
+
+	/* Load symbols from nlist */
+	if (nsyms == 0 || symoff == 0 || stroff == 0) return;
+
+	if (is_64) {
+		size_t nlist_size = 16; /* sizeof(nlist_64) */
+		if (symoff + nsyms * nlist_size > target->size) return;
+		if (stroff + strsize > target->size) return;
+
+		unsigned char *nl = block + symoff;
+		char *strs = (char *)(block + stroff);
+
+		for (uint32_t j = 0; j < nsyms; j++) {
+			uint32_t n_strx = *(uint32_t *)(nl + j * nlist_size);
+			uint8_t  n_type = *(uint8_t  *)(nl + j * nlist_size + 4);
+			uint64_t n_value = *(uint64_t *)(nl + j * nlist_size + 8);
+
+			/* Only defined symbols (N_SECT=0xe, not stab) */
+			if ((n_type & 0xe0) != 0 || (n_type & 0x0e) != 0x0e || n_value == 0)
+				continue;
+
+			if (n_strx >= strsize) continue;
+			char *name = strs + n_strx;
+			if (*name == '\0') continue;
+
+			sym_list *sym = malloc(sizeof(sym_list));
+			if (!sym) break;
+			sym->name = strdup(name);
+			sym->addr = ctx->base + n_value; /* relocated */
+			sym->next = NULL;
+			if (ctx->sym == NULL) { ctx->sym = sym; }
+			else { sym_list *l = ctx->sym; while (l->next) l = l->next; l->next = sym; }
+		}
+	} else {
+		size_t nlist_size = 12; /* sizeof(nlist) */
+		if (symoff + nsyms * nlist_size > target->size) return;
+		if (stroff + strsize > target->size) return;
+
+		unsigned char *nl = block + symoff;
+		char *strs = (char *)(block + stroff);
+
+		for (uint32_t j = 0; j < nsyms; j++) {
+			uint32_t n_strx = *(uint32_t *)(nl + j * nlist_size);
+			uint8_t  n_type = *(uint8_t  *)(nl + j * nlist_size + 4);
+			uint32_t n_value = *(uint32_t *)(nl + j * nlist_size + 8);
+
+			if ((n_type & 0xe0) != 0 || (n_type & 0x0e) != 0x0e || n_value == 0)
+				continue;
+
+			if (n_strx >= strsize) continue;
+			char *name = strs + n_strx;
+			if (*name == '\0') continue;
+
+			sym_list *sym = malloc(sizeof(sym_list));
+			if (!sym) break;
+			sym->name = strdup(name);
+			sym->addr = ctx->base + n_value;
+			sym->next = NULL;
+			if (ctx->sym == NULL) { ctx->sym = sym; }
+			else { sym_list *l = ctx->sym; while (l->next) l = l->next; l->next = sym; }
+		}
+	}
+}
+
+/**
+ * @brief Initialize the debugger context from a parsed binary.
  *
- * Reads ELF headers and symbol tables to populate context values.
+ * Reads ELF or Mach-O headers and symbol tables to populate context values.
  *
- * @param target Pointer to binary parser structure with ELF data.
+ * @param target Pointer to binary parser structure with file data.
  * @param ctx Pointer to debugger context to initialize.
  */
 void init_values(bparser *target, context *ctx){
@@ -616,16 +813,34 @@ void init_values(bparser *target, context *ctx){
 	ctx->do_wait = false;
 	ctx->do_exit = false;
 	ctx->sym = NULL;
+	ctx->mmaps = NULL;
 	memset(list, 0, sizeof(bp_list));
 	list->counter = 0;
 	ctx->list = list;
-	Elf64_Ehdr *ehdr = (Elf64_Ehdr*)target->block;
-	sprintf(mmaps, "/proc/%d/maps", ctx->pid);
+
+	snprintf(mmaps, sizeof(mmaps), "/proc/%d/maps", ctx->pid);
 	FILE *file = fopen(mmaps,"r");
+	if (!file) {
+		fprintf(stderr, "failed to open process maps\n");
+		return;
+	}
 	size_t size = 0;
 	getdelim(&ctx->mmaps,&size,'\0' , file);
 	fclose(file);
 	sscanf(ctx->mmaps, "%lx", &ctx->base);
+
+	/* Detect file format by magic bytes */
+	if (target->size >= 4) {
+		uint32_t magic = *(uint32_t *)target->block;
+		if (magic == 0xfeedface || magic == 0xfeedfacf) {
+			/* Mach-O binary */
+			init_macho_symbols(target, ctx);
+			return;
+		}
+	}
+
+	/* ELF binary */
+	Elf64_Ehdr *ehdr = (Elf64_Ehdr*)target->block;
 	if(ehdr->e_type == ET_EXEC){
 		ctx->entry = ehdr->e_entry;
 		ctx->pie = true ;
@@ -722,8 +937,9 @@ void destroy_bp_sym(context *ctx){
 
 	sym_list *ptr1 = ctx->sym;
 	sym_list *temp = NULL;
-	while (ptr != NULL) {
+	while (ptr1 != NULL) {
 		temp = ptr1->next;
+		free(ptr1->name);
 		free(ptr1);
 		ptr1 = temp;
 	}
@@ -756,44 +972,19 @@ void destroy_all(context *ctx){
  */
 bool b_debugger(bparser *target, void *arg){
 
-    // printf("from debugger...\n");
-    // hashmap_t *maps = ((inputs*)arg) -> map;
-    // if((hashmap_t*)get(maps, "sections") != NULL){
-    //     hashmap_t *map = (hashmap_t*)get(maps, "sections");
-    //     printf("there are sections...\n");
-    // }
-
-    // // 64 bit
-    // if((hashmap_t*)get(maps, "symbols") != NULL){
-    //     hashmap_t *symbols = (hashmap_t*)get(maps, "symbols");
-    //     printf("there are symbols...\n");
-    //     // for (int i = 0; i < TABLE_SIZE; i++) {
-    //     //     bht_node_t *bht_node = symbols->buckets[i];
-    //     //     while (bht_node != NULL) {
-    //     //         bht_node_t *temp = bht_node;
-    //     //         bht_node = bht_node->next;
-    //     //         printf("symbol name: %s\n", temp -> name);
-    //     //     }
-    //     // }
-        
-    //     if((Elf64_Sym*)get(symbols, "main") != NULL){
-    //         Elf64_Sym* func = (Elf64_Sym*)get(symbols, "main");
-    //         printf("offset: %llx\n size: %d\n", func->st_value, func->st_size);
-    //     }
-    // }
-
-
-
-
 	setbuf(stdout, NULL);
 	int argc = *((inputs*)arg) -> argc;
 	char** args = ((inputs*)arg) -> args;
 	context *ctx  = malloc(sizeof(context));
-	memset(ctx, 0, sizeof(ctx));
+	if (!ctx) {
+		fprintf(stderr, "failed to allocate debugger context\n");
+		return false;
+	}
+	memset(ctx, 0, sizeof(context));
 	int stats = 0;
 	int pid = fork();
 	if (pid < 0 ){
-		printf("faild to fork");
+		fprintf(stderr, "failed to fork\n");
 		return false;
 	}else if (pid == 0) {
 		int fd = memfd_create(args[1], MFD_CLOEXEC);

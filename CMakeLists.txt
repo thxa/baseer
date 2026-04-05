@@ -13,6 +13,7 @@ set(LIBDIR "${CMAKE_INSTALL_PREFIX}/modules")
 include_directories(
     libs/libudis86
     libs/linenoise
+    libs/macho
 )
 
 # Udis86 sources
@@ -46,6 +47,10 @@ set(BX_ELF_DISASM_SRC modules/bx_elf_disasm/bx_elf_disasm.c)
 set(B_DEBUG_SRC modules/b_debugger/debugger.c)
 set(BX_TAR_SRC modules/bx_tar/bx_tar.c)
 set(BX_deElf_SRC modules/bx_deElf/bx_deElf.c)
+set(BX_MACHO_SRC modules/bx_macho/bx_macho.c)
+set(BX_MACHO_UTILS_SRC modules/bx_macho_utils/bx_macho_utils.c)
+set(B_MACHO_METADATA_SRC modules/b_macho_metadata/b_macho_metadata.c)
+set(BX_MACHO_DISASM_SRC modules/bx_macho_disasm/bx_macho_disasm.c)
 
 # Main executable
 add_executable(baseer
@@ -61,6 +66,10 @@ add_executable(baseer
     ${BX_TAR_SRC}
     ${BX_deElf_SRC}
     ${BX_ELF_DISASM_SRC}
+    ${BX_MACHO_SRC}
+    ${BX_MACHO_UTILS_SRC}
+    ${B_MACHO_METADATA_SRC}
+    ${BX_MACHO_DISASM_SRC}
     ${UDIS86_SRC}
 )
 
@@ -99,6 +108,55 @@ install(PROGRAMS install_decompiler.sh DESTINATION ${BINDIR})
 
 # Create symlink (custom command)
 install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ${BINDIR}/baseer /usr/bin/baseer)")
+
+# ========================= Tests =========================
+enable_testing()
+
+# Test: hashmap
+add_executable(test_hashmap
+    tests/test_hashmap.c
+    ${B_HASHMAP_SRC}
+)
+add_test(NAME test_hashmap COMMAND test_hashmap WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
+# Test: baseer core
+add_executable(test_baseer_core
+    tests/test_baseer_core.c
+    baseer.c
+    libs/linenoise/linenoise.c
+    ${B_HASHMAP_SRC}
+)
+target_include_directories(test_baseer_core PRIVATE libs/linenoise)
+add_test(NAME test_baseer_core COMMAND test_baseer_core WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
+# Test: bparser
+add_executable(test_bparser
+    tests/test_bparser.c
+    modules/bparser/bparser.c
+    baseer.c
+    libs/linenoise/linenoise.c
+    ${B_HASHMAP_SRC}
+)
+target_include_directories(test_bparser PRIVATE libs/linenoise)
+add_test(NAME test_bparser COMMAND test_bparser WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
+# Test: Mach-O
+add_executable(test_macho
+    tests/test_macho.c
+    modules/bparser/bparser.c
+    baseer.c
+    libs/linenoise/linenoise.c
+    ${B_HASHMAP_SRC}
+)
+target_include_directories(test_macho PRIVATE libs/linenoise)
+add_test(NAME test_macho COMMAND test_macho WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
+# Custom target to run all tests
+add_custom_target(check
+    COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
+    DEPENDS test_hashmap test_baseer_core test_bparser test_macho
+    COMMENT "Running all tests"
+)
 
 # Uninstall target
 add_custom_target(uninstall

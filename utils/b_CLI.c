@@ -63,7 +63,6 @@ void baseer_CLI(void) {
     int cli_argc = 3;
     char *cli_args[4] = {"baseer", NULL, NULL, NULL};
     inputs input = {&cli_argc, cli_args};
-    // create hashmap of any hashmaps needed by baseer extentions to used it for other extentions...
     input.map = create_map();
     linenoiseSetCompletionCallback(completion);
 
@@ -94,6 +93,7 @@ void baseer_CLI(void) {
             char *fname = line + 5;
             if (target){
                 printf(COLOR_RED"[!] There is a file already open. Use 'close' first.\n"COLOR_RESET);
+                free(line);
                 continue;
             } else {
                 target = baseer_open(fname, BASEER_MODE_BOTH);
@@ -103,12 +103,14 @@ void baseer_CLI(void) {
         } else if (strcmp(line, "stored-args") == 0) {
             if (input.input_argc == 0) {
                 printf(COLOR_YELLOW"[!] No arguments stored.\n"COLOR_RESET);
+                free(line);
                 continue;
             } else {
                 printf("Stored arguments:\n");
                 for (int i = 0; i < input.input_argc; i++) {
                     printf("  [%d] %s\n", i, input.input_args[i]);
                 }
+                free(line);
                 continue;
             }
         } else if (strncmp(line, "metadata", 8) == 0) {
@@ -116,10 +118,12 @@ void baseer_CLI(void) {
             cli_args[2] = "-m";
             if (!target){
                 printf(COLOR_RED"[!] No file opened. use 'open <file>' first.\n"COLOR_RESET);
+                free(line);
                 continue;
             }
             if (!baseer_execute(target, bx_binhead, &input)) {
                 fprintf(stderr, "[!] Execution error\n");
+                free(line);
                 continue;
             }
         } else if (strncmp(line, "disassembler", 12) == 0) {
@@ -127,10 +131,12 @@ void baseer_CLI(void) {
             cli_args[2] = "-a";
             if (!target){
                 printf(COLOR_RED"[!] No file opened. use 'open <file>' first.\n"COLOR_RESET);
+                free(line);
                 continue;
             }
             if (!baseer_execute(target, bx_binhead, &input)) {
                 fprintf(stderr, "[!] Execution error\n");
+                free(line);
                 continue;
             }
         } else if (strncmp(line, "decompiler", 10) == 0) {
@@ -138,10 +144,12 @@ void baseer_CLI(void) {
             cli_args[2] = "-c";
             if (!target){
                 printf(COLOR_RED"[!] No file opened. use 'open <file>' first.\n"COLOR_RESET);
+                free(line);
                 continue;
             }
             if (!baseer_execute(target, bx_binhead, &input)) {
                 fprintf(stderr, "[!] Execution error\n");
+                free(line);
                 continue;
             }
         } else if (strncmp(line, "debugger", 8) == 0) {
@@ -149,14 +157,21 @@ void baseer_CLI(void) {
             cli_args[2] = "-d";
             if (!target){
                 printf(COLOR_RED"[!] No file opened. use 'open <file>' first.\n"COLOR_RESET);
+                free(line);
                 continue;
             }
             if (!baseer_execute(target, bx_binhead, &input)) {
                 fprintf(stderr, "[!] Execution error\n");
+                free(line);
                 continue;
             }
         } else if (strncmp(line, "args ", 5) == 0) {
             char *argline = line + 5;
+            // Free previously stored args before overwriting
+            for (int i = 0; i < input.input_argc; i++) {
+                free(input.input_args[i]);
+                input.input_args[i] = NULL;
+            }
             input.input_argc = 0;
 
             char *tok = strtok(argline, " ");
@@ -167,11 +182,13 @@ void baseer_CLI(void) {
             }
             if (input.input_argc == 0) {
                 printf(COLOR_RED"[!] No arguments entered.\n"COLOR_RESET);
+                free(line);
                 continue;
              } else {
                 for (int i = 0; i < input.input_argc; i++) {
                     printf("  [%d] %s\n", i, input.input_args[i]);
                 }
+                free(line);
                 continue;
             }
         } else if (strcmp(line, "close") == 0) {
@@ -179,15 +196,22 @@ void baseer_CLI(void) {
                 baseer_close(target);
                 target = NULL;
                 printf("Closed.\n");
+                free(line);
                 continue;
             } else {
                 printf(COLOR_YELLOW"[!] No file is currently open.\n"COLOR_RESET);
+                free(line);
                 continue;
             }
         } else {
             printf(COLOR_YELLOW"Unknown command: %s\n"COLOR_RESET, line);
         }
         free(line);
+    }
+    // Free stored args on exit
+    for (int i = 0; i < input.input_argc; i++) {
+        free(input.input_args[i]);
+        input.input_args[i] = NULL;
     }
     if (target){
         free_map(input.map);

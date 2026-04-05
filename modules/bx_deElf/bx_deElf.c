@@ -5,7 +5,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <sys/wait.h>
+#include <sys/types.h>
 #include <stdint.h>
 
 #ifndef RETDEC_DEFAULT_BIN
@@ -259,25 +261,48 @@ static int dump_to_temp_file(bparser *parser, const char *path) {
 }
 
 static bool run_retdec(const char *in_path, const char *out_path) {
-    char cmd[2048];
-    const char *retdec_bin = RETDEC_DEFAULT_BIN;
+    /* Allow overriding the decompiler path via environment variable */
+    const char *retdec_bin = getenv("BASEER_RETDEC_BIN");
+    if (!retdec_bin || *retdec_bin == '\0') {
+        retdec_bin = RETDEC_DEFAULT_BIN;
+    }
 
-    int n = snprintf(cmd, sizeof(cmd), "%s --cleanup -s %s -o %s > /dev/null 2>&1", retdec_bin, in_path, out_path);
-    if (n < 0 || n >= (size_t)sizeof(cmd)) {
-        fprintf(stderr, "[!] command too long or snprintf error\n");
+    pid_t pid = fork();
+    if (pid == -1) {
+        perror("fork");
         return false;
     }
 
-    int ret = system(cmd);
-    if (ret == -1) {
-        perror("system");
+    if (pid == 0) {
+        /* Child process: redirect stdout/stderr to /dev/null */
+        int devnull = open("/dev/null", O_WRONLY);
+        if (devnull != -1) {
+            dup2(devnull, STDOUT_FILENO);
+            dup2(devnull, STDERR_FILENO);
+            close(devnull);
+        }
+        execl(retdec_bin, retdec_bin, "--cleanup", "-s", in_path, "-o", out_path, (char *)NULL);
+        /* execl only returns on failure */
+        _exit(127);
+    }
+
+    /* Parent process: wait for child */
+    int status;
+    if (waitpid(pid, &status, 0) == -1) {
+        perror("waitpid");
         return false;
     }
 
-    if (WIFEXITED(ret)){
-        int exit_status = WEXITSTATUS(ret);
+    if (WIFEXITED(status)) {
+        int exit_status = WEXITSTATUS(status);
+        if (exit_status == 127) {
+            fprintf(stderr, "[!] Failed to execute retdec-decompiler at: %s\n"
+                            "[!] Install it with: sudo /opt/baseer/install_decompiler.sh\n"
+                            "[!] Or set BASEER_RETDEC_BIN environment variable\n", retdec_bin);
+            return false;
+        }
         if (exit_status != 0) {
-            fprintf(stderr, "[!] retdec-decompiler exited with status %d\n[!] you need to install decompiler using this command:\nsudo /opt/baseer/install_decompiler.sh\n", exit_status);
+            fprintf(stderr, "[!] retdec-decompiler exited with status %d\n", exit_status);
             return false;
         }
     } else {

@@ -1,5 +1,4 @@
 #include "baseer.h"
-// #include "modules/default/bx_default.h"
 #include "modules/binhead/bx_binhead.h"
 #include "utils/ui.h"
 #include "utils/b_CLI.h"
@@ -39,7 +38,6 @@ int main(int argc, char** args)
 
 
         inputs input = {&argc, args};
-        // create hashmap of any hashmaps needed by baseer extentions to used it for other extentions...
         input.map = create_map();
  
         parse_args(&input);

@@ -1,10 +1,15 @@
 # بصير (Baseer)
 
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Version](https://img.shields.io/badge/version-0.3.0-green.svg)
+![Language](https://img.shields.io/badge/language-C99-orange.svg)
+![Platform](https://img.shields.io/badge/platform-Linux-lightgrey.svg)
+
 **بصير (Baseer)** is a modular, extensible binary analysis framework written in C.
 It allows developers to inspect, disassemble, debug, and decompile binary files using a flexible callback system.
 Baseer identifies file formats using magic numbers and executes corresponding handlers dynamically.
 
-> ⚠️ Note: This project is still under development and may change frequently.
+> Note: This project is under active development. See [CHANGELOG.md](CHANGELOG.md) for recent changes.
 
 ---
 
@@ -98,8 +103,23 @@ cmake CMakeLists.txt && make && ./build/baseer examples/32bit_x86 -m | less -r
 
 ### Requirements
 - GCC
-- Linux environment (recommended)
-- make build system
+- CMake (>= 3.10)
+- Linux environment
+
+### Run Tests
+```bash
+cmake -S . -B build && cmake --build build --target check
+```
+
+--- 
+
+## Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `BASEER_RETDEC_BIN` | Path to RetDec decompiler binary | `/opt/baseer/decompiler/bin/retdec-decompiler` |
+| `BASEER_LOG_LEVEL` | Logging verbosity (0=error, 1=warn, 2=info, 3=debug) | `2` |
+| `BLOCK_LENGTH` | Number of bytes per hex dump line | `16` |
 
 --- 
 ## Install Baseer 

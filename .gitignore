@@ -45,6 +45,7 @@ a.out
 
 # CMake build directories
 build/
+build_*/
 cmake-build-*/
 */cmake-build-*/
 

@@ -28,13 +28,10 @@ size_t bparser_read(bparser* parser, void* buf, unsigned int pos, size_t size) {
 
     switch (parser->mode) {
         case BASEER_MODE_MEMORY:
-            unsigned int chunck_size=0;
-            if(pos + size > parser->size) {
-                return 0;
-            } else {
-                chunck_size = size;
+            if(parser->block && pos + size > parser->size) {
+                return parser->size;
             }
-            memcpy(buf, (unsigned char*)parser->block+pos, chunck_size);
+            memcpy(buf, parser->block+pos, size);
             return size;
 
         case BASEER_MODE_STREAM:
@@ -44,7 +41,7 @@ size_t bparser_read(bparser* parser, void* buf, unsigned int pos, size_t size) {
 
         case BASEER_MODE_BOTH:
             if (parser->block && pos + size < parser->size) {
-                memcpy(buf, (unsigned char*)parser->block + pos, size);
+                memcpy(buf, parser->block + pos, size);
                 return size;
             } else if (parser->fp) {
                 if (fseek(parser->fp, pos, SEEK_SET) != 0) return 0;

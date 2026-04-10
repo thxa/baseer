@@ -7,6 +7,7 @@
 #include "../bx_elf/bx_elf.h"
 #include "../bx_tar/bx_tar.h"
 #include "../bx_macho/bx_macho.h"
+#include "../bx_pdf/bx_pdf.h"
 
 unsigned int count_bits(unsigned long long int n)
 {
@@ -74,6 +75,7 @@ bool bx_binhead(baseer_target_t *target, void *arg)
         {"TAR", TAR_MAGIC, reverse_bytes(TAR_MAGIC), bx_tar, 257},
         {"Mach-o", MH_MAGIC, NXSwapInt(MH_MAGIC), bx_macho, 0},
         {"Mach-o", MH_MAGIC_64, NXSwapInt(MH_MAGIC_64), bx_macho, 0},
+        {"PDF", PDF_MAGIC, reverse_bytes(PDF_MAGIC), bx_pdf, 0},
     };
 
 

@@ -18,6 +18,34 @@
 *.app
 a.out
 
+# Node.js / Bun
+node_modules/
+dist/
+.pnp.*
+.yarn/
+
+# Lock files from other package managers (we use bun)
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Secrets / credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials*
+secrets*
+.npmrc
+.netrc
+*.p12
+*.pfx
+id_rsa
+id_dsa
+id_ecdsa
+id_ed25519
+
 # Debug / profiling
 *.dSYM/
 *.stackdump

@@ -72,39 +72,45 @@ Each branch in the diagram represents a callback path from the main function →
 ---
 ## Build Instructions
 
-Baseer uses a standard Makefile for compilation.
+Baseer uses CMake for compilation.
+
+### Requirements
+- GCC
+- CMake (>= 3.10)
+- Linux environment
 
 ### Clone the repository
 ```bash
 git clone https://github.com/thxa/baseer.git
 cd baseer
 ```
+
 ### Build Baseer
+Out-of-source build (recommended — keeps the repo clean):
 ```bash
-cmake CMakeLists.txt
-make
+cmake -S . -B build
+cmake --build build
 ```
 
 ### Run Baseer on a binary
-```
-./build/baseer <target-file> -m
+```bash
+./build/baseer <target-file> -m        # show metadata
+./build/baseer <target-file> -a        # disassemble
+./build/baseer <target-file> -d        # debugger
+./build/baseer <target-file> -c        # decompile
+./build/baseer -i                      # interactive REPL
 ```
 
 ### Compile and analyze file
 - 64 bit
-```bash 
-cmake CMakeLists.txt && make && ./build/baseer examples/64bit_x86_64 -m | less -r
+```bash
+cmake -S . -B build && cmake --build build && ./build/baseer examples/64bit_x86_64 -m | less -r
 ```
 
 - 32 bit
-```bash 
-cmake CMakeLists.txt && make && ./build/baseer examples/32bit_x86 -m | less -r
+```bash
+cmake -S . -B build && cmake --build build && ./build/baseer examples/32bit_x86 -m | less -r
 ```
-
-### Requirements
-- GCC
-- CMake (>= 3.10)
-- Linux environment
 
 ### Run Tests
 ```bash
@@ -142,12 +148,12 @@ pacman -Rs baseer
 ### Install from Source
 To install **Baseer** from source:
 ```bash
-cmake CMakeLists.txt && make install
+cmake -S . -B build && sudo cmake --build build --target install
 ```
 
 To uninstall:
 ```bash
-cmake CMakeLists.txt && make uninstall
+sudo cmake --build build --target uninstall
 ```
 ---
 

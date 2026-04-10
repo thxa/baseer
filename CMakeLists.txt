@@ -51,6 +51,8 @@ set(BX_MACHO_SRC modules/bx_macho/bx_macho.c)
 set(BX_MACHO_UTILS_SRC modules/bx_macho_utils/bx_macho_utils.c)
 set(B_MACHO_METADATA_SRC modules/b_macho_metadata/b_macho_metadata.c)
 set(BX_MACHO_DISASM_SRC modules/bx_macho_disasm/bx_macho_disasm.c)
+set(BX_PDF_SRC modules/bx_pdf/bx_pdf.c)
+set(B_PDF_METADATA_SRC modules/b_pdf_metadata/b_pdf_metadata.c)
 
 # Main executable
 add_executable(baseer
@@ -70,6 +72,8 @@ add_executable(baseer
     ${BX_MACHO_UTILS_SRC}
     ${B_MACHO_METADATA_SRC}
     ${BX_MACHO_DISASM_SRC}
+    ${BX_PDF_SRC}
+    ${B_PDF_METADATA_SRC}
     ${UDIS86_SRC}
 )
 
@@ -87,11 +91,14 @@ add_library(bx_deElf SHARED ${BX_deElf_SRC})
 # Modules that need udis86
 add_library(b_debugger SHARED ${B_DEBUG_SRC} ${UDIS86_SRC})
 add_library(bx_elf_disasm SHARED ${BX_ELF_DISASM_SRC} ${UDIS86_SRC})
+add_library(bx_pdf SHARED ${BX_PDF_SRC})
+add_library(b_pdf_metadata SHARED ${B_PDF_METADATA_SRC})
 
 # Set output directory for modules
 set_target_properties(
-    bx_binhead bparser b_hashmap bx_elf b_elf_metadata 
+    bx_binhead bparser b_hashmap bx_elf b_elf_metadata
     b_debugger bx_tar bx_deElf bx_elf_disasm
+    bx_pdf b_pdf_metadata
     PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/modules"
 )
@@ -99,8 +106,9 @@ set_target_properties(
 # Installation rules
 install(TARGETS baseer DESTINATION ${BINDIR})
 install(TARGETS 
-    bx_binhead bparser b_hashmap bx_elf b_elf_metadata 
+    bx_binhead bparser b_hashmap bx_elf b_elf_metadata
     b_debugger bx_tar bx_deElf bx_elf_disasm
+    bx_pdf b_pdf_metadata
     LIBRARY DESTINATION ${LIBDIR}
 )
 install(FILES README.md LICENSE DESTINATION ${BINDIR})
@@ -151,10 +159,21 @@ add_executable(test_macho
 target_include_directories(test_macho PRIVATE libs/linenoise)
 add_test(NAME test_macho COMMAND test_macho WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
+# Test: PDF
+add_executable(test_pdf
+    tests/test_pdf.c
+    modules/bparser/bparser.c
+    baseer.c
+    libs/linenoise/linenoise.c
+    ${B_HASHMAP_SRC}
+)
+target_include_directories(test_pdf PRIVATE libs/linenoise)
+add_test(NAME test_pdf COMMAND test_pdf WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
 # Custom target to run all tests
 add_custom_target(check
     COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
-    DEPENDS test_hashmap test_baseer_core test_bparser test_macho
+    DEPENDS test_hashmap test_baseer_core test_bparser test_macho test_pdf
     COMMENT "Running all tests"
 )
 

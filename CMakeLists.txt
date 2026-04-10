@@ -54,9 +54,8 @@ set(BX_MACHO_DISASM_SRC modules/bx_macho_disasm/bx_macho_disasm.c)
 set(BX_PDF_SRC modules/bx_pdf/bx_pdf.c)
 set(B_PDF_METADATA_SRC modules/b_pdf_metadata/b_pdf_metadata.c)
 
-# Main executable
-add_executable(baseer
-    ${CORE_SRC}
+# All module sources (shared between CLI and GUI targets)
+set(ALL_MODULE_SRC
     ${DEFAULT_SRC}
     ${BPARSER_SRC}
     ${B_HASHMAP_SRC}
@@ -75,6 +74,12 @@ add_executable(baseer
     ${BX_PDF_SRC}
     ${B_PDF_METADATA_SRC}
     ${UDIS86_SRC}
+)
+
+# Main executable
+add_executable(baseer
+    ${CORE_SRC}
+    ${ALL_MODULE_SRC}
 )
 
 target_link_libraries(baseer dl)
@@ -184,3 +189,49 @@ add_custom_target(uninstall
     COMMAND rm -f /usr/bin/baseer
     COMMENT "Uninstalling baseer"
 )
+
+# ========================= GUI (optional) =========================
+option(BUILD_GUI "Build GUI frontend with raylib + raygui" OFF)
+
+if(BUILD_GUI)
+    include(FetchContent)
+
+    # Raylib
+    set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+    set(BUILD_GAMES OFF CACHE BOOL "" FORCE)
+    set(CUSTOMIZE_BUILD OFF CACHE BOOL "" FORCE)
+    FetchContent_Declare(
+        raylib
+        GIT_REPOSITORY https://github.com/raysan5/raylib.git
+        GIT_TAG 5.5
+        GIT_SHALLOW TRUE
+        GIT_PROGRESS TRUE
+    )
+    FetchContent_MakeAvailable(raylib)
+
+    # Raygui (header-only)
+    FetchContent_Declare(
+        raygui
+        GIT_REPOSITORY https://github.com/raysan5/raygui.git
+        GIT_TAG 4.0
+        GIT_SHALLOW TRUE
+    )
+    FetchContent_MakeAvailable(raygui)
+
+    add_executable(baseer-gui
+        gui/baseer_gui.c
+        baseer.c
+        utils/ui.c
+        libs/linenoise/linenoise.c
+        ${ALL_MODULE_SRC}
+    )
+
+    target_include_directories(baseer-gui PRIVATE
+        ${raygui_SOURCE_DIR}/src
+    )
+
+    target_link_libraries(baseer-gui raylib dl m)
+
+    # Install GUI alongside CLI
+    install(TARGETS baseer-gui DESTINATION ${BINDIR})
+endif()

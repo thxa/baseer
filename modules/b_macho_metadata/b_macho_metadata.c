@@ -25,7 +25,6 @@
 #include "../../utils/ui.h"
 #include <stdio.h>
 #include <string.h>
-#include <stdlib.h>
 
 /* =================== Validation helpers =================== */
 
@@ -89,11 +88,10 @@ static void handle_segment_64(const unsigned char *cmd_ptr, const unsigned char 
             print_macho_section64_metadata(sec);
 
             /* Print hex dump of section contents */
-            if (sec->size > 0 && sec->offset + sec->size <= file_size) {
+            if (sec->size > 0 && (uint64_t)sec->offset + sec->size <= file_size) {
                 unsigned char *data = (unsigned char *)(block + sec->offset);
                 int flags = macho_section_is_executable(sec->flags) ? SHF_EXECINSTR : 0;
-                unsigned char bit_type = 2; /* ELFCLASS64 = 2, used for 64-bit disasm mode */
-                print_body_bytes(data, sec->size, sec->addr, flags, bit_type);
+                print_body_bytes(data, sec->size, sec->addr, flags, ELFCLASS64);
             }
 
             sec_ptr += sizeof(section_64);
@@ -115,11 +113,10 @@ static void handle_segment_32(const unsigned char *cmd_ptr, const unsigned char 
             print_macho_section32_metadata(sec);
 
             /* Print hex dump of section contents */
-            if (sec->size > 0 && sec->offset + sec->size <= file_size) {
+            if (sec->size > 0 && (uint64_t)sec->offset + sec->size <= file_size) {
                 unsigned char *data = (unsigned char *)(block + sec->offset);
                 int flags = macho_section_is_executable(sec->flags) ? SHF_EXECINSTR : 0;
-                unsigned char bit_type = 1; /* ELFCLASS32 = 1, used for 32-bit disasm mode */
-                print_body_bytes(data, sec->size, sec->addr, flags, bit_type);
+                print_body_bytes(data, sec->size, sec->addr, flags, ELFCLASS32);
             }
 
             sec_ptr += sizeof(section);

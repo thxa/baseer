@@ -94,7 +94,8 @@ typedef struct {
     DbgState dbg;
 } AppState;
 
-static void strip_ansi(char *s)
+/* Strip ANSI escape sequences in-place, return new length. */
+static int strip_ansi(char *s)
 {
     char *r = s, *w = s;
     while (*r) {
@@ -111,12 +112,14 @@ static void strip_ansi(char *s)
         }
     }
     *w = '\0';
+    return (int)(w - s);
 }
 
+/* Count newline characters in text. */
 static int count_lines(const char *text)
 {
     if (!text || !*text) return 0;
-    int n = 1;
+    int n = 0;
     for (const char *p = text; *p; p++)
         if (*p == '\n') n++;
     return n;
@@ -127,7 +130,7 @@ static void set_output(AppState *st, char *text, const char *tool_name)
 {
     free(st->output);
     st->output = text;
-    st->content_h = count_lines(st->output) * LINE_HEIGHT;
+    st->content_h = (count_lines(st->output) + 1) * LINE_HEIGHT;
     st->scroll = (Vector2){ 0, 0 };
     st->active_tool = tool_name;
 }
@@ -303,8 +306,23 @@ static void dbg_append(DbgState *d, const char *data, int len)
     }
 }
 
-/* Read any available output from the PTY master (non-blocking).
- * Caps reads per frame to avoid stalling the render loop. */
+/* Read available PTY output, strip ANSI, and append to debugger buffer.
+ * Returns total bytes appended.  Pass max_bytes <= 0 for unlimited. */
+static int dbg_drain_fd(DbgState *d, int fd, int max_bytes)
+{
+    char tmp[4096];
+    int total = 0;
+    while (max_bytes <= 0 || total < max_bytes) {
+        ssize_t n = read(fd, tmp, sizeof(tmp) - 1);
+        if (n <= 0) break;
+        tmp[n] = '\0';
+        int slen = strip_ansi(tmp);
+        dbg_append(d, tmp, slen);
+        total += slen;
+    }
+    return total;
+}
+
 #define DBG_MAX_READ_PER_FRAME (16 * 1024)
 
 static void dbg_poll(AppState *st)
@@ -312,18 +330,9 @@ static void dbg_poll(AppState *st)
     DbgState *d = &st->dbg;
     if (!d->running || d->master_fd < 0) return;
 
-    int wstatus;
-    pid_t w = waitpid(d->pid, &wstatus, WNOHANG);
+    pid_t w = waitpid(d->pid, NULL, WNOHANG);
     if (w > 0 || (w < 0 && errno == ECHILD)) {
-        /* Child exited — drain remaining output */
-        char tmp[4096];
-        for (;;) {
-            ssize_t n = read(d->master_fd, tmp, sizeof(tmp) - 1);
-            if (n <= 0) break;
-            tmp[n] = '\0';
-            strip_ansi(tmp);
-            dbg_append(d, tmp, (int)strlen(tmp));
-        }
+        dbg_drain_fd(d, d->master_fd, 0);
         close(d->master_fd);
         d->master_fd = -1;
         d->running = false;
@@ -334,18 +343,8 @@ static void dbg_poll(AppState *st)
         return;
     }
 
-    char tmp[4096];
-    int total = 0;
-    while (total < DBG_MAX_READ_PER_FRAME) {
-        ssize_t n = read(d->master_fd, tmp, sizeof(tmp) - 1);
-        if (n <= 0) break;
-        tmp[n] = '\0';
-        strip_ansi(tmp);
-        int slen = (int)strlen(tmp);
-        dbg_append(d, tmp, slen);
-        total += slen;
+    if (dbg_drain_fd(d, d->master_fd, DBG_MAX_READ_PER_FRAME) > 0)
         d->auto_scroll = true;
-    }
 }
 
 static void dbg_send(AppState *st, const char *cmd)
@@ -513,24 +512,34 @@ static void draw_output(const char *text, Font font, Rectangle view, Vector2 scr
 {
     if (!text || !*text) return;
 
-    int y = (int)(view.y + scroll.y);
+    int y_start = (int)(view.y + scroll.y);
+    int view_top = (int)view.y;
     int view_bottom = (int)(view.y + view.height);
     const char *line = text;
 
+    /* Skip lines above the viewport */
+    if (y_start < view_top) {
+        int skip = (view_top - y_start) / LINE_HEIGHT;
+        for (int i = 0; i < skip && *line; i++) {
+            const char *eol = strchr(line, '\n');
+            line = eol ? eol + 1 : line + strlen(line);
+        }
+        y_start += skip * LINE_HEIGHT;
+    }
+
+    int y = y_start;
     while (*line) {
+        if (y > view_bottom) break;
+
         const char *eol = strchr(line, '\n');
         int len = eol ? (int)(eol - line) : (int)strlen(line);
 
-        if (y > view_bottom) break;  /* all remaining lines are below viewport */
-
-        if (y + LINE_HEIGHT >= (int)view.y) {
-            char buf[2048];
-            int n = len < (int)sizeof(buf) - 1 ? len : (int)sizeof(buf) - 1;
-            memcpy(buf, line, n);
-            buf[n] = '\0';
-            DrawTextEx(font, buf, (Vector2){ view.x + 8 + scroll.x, (float)y },
-                       OUTPUT_FONT_SIZE, 1, COL_TEXT);
-        }
+        char buf[2048];
+        int n = len < (int)sizeof(buf) - 1 ? len : (int)sizeof(buf) - 1;
+        memcpy(buf, line, n);
+        buf[n] = '\0';
+        DrawTextEx(font, buf, (Vector2){ view.x + 8 + scroll.x, (float)y },
+                   OUTPUT_FONT_SIZE, 1, COL_TEXT);
 
         y += LINE_HEIGHT;
         line = eol ? eol + 1 : line + len;

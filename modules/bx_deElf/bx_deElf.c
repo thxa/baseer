@@ -238,8 +238,9 @@ static int dump_to_temp_file(bparser *parser, const char *path) {
         return -1;
     }
 
-    #define CHUNK_SIZE (4 * 1024 * 1024) /* 4 MB */
-    unsigned char buffer[CHUNK_SIZE];
+    #define CHUNK_SIZE (64 * 1024)
+    unsigned char *buffer = malloc(CHUNK_SIZE);
+    if (!buffer) { fclose(out); return -1; }
     size_t pos = 0;
 
     while (pos < parser->size) {
@@ -250,16 +251,19 @@ static int dump_to_temp_file(bparser *parser, const char *path) {
         if (bytes_read != to_read) {
             fprintf(stderr, "[!] Failed to read binary at offset %zu (%zu of %zu bytes)\n",
                     pos, bytes_read, to_read);
+            free(buffer);
             fclose(out);
             return -1;
         }
         if (fwrite(buffer, 1, bytes_read, out) != bytes_read) {
             perror("fwrite");
+            free(buffer);
             fclose(out);
             return -1;
         }
         pos += bytes_read;
     }
+    free(buffer);
     #undef CHUNK_SIZE
 
     fclose(out);

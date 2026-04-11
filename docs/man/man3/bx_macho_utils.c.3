@@ -1,0 +1,99 @@
+.TH "modules/bx_macho_utils/bx_macho_utils.c" 3 "Version 0.2.0" "Baseer" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+modules/bx_macho_utils/bx_macho_utils.c \- Utility functions for Mach-O binary analysis\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fR#include 'bx_macho_utils\&.h'\fP
+.br
+\fR#include '\&.\&./\&.\&./utils/ui\&.h'\fP
+.br
+\fR#include <stdio\&.h>\fP
+.br
+\fR#include <string\&.h>\fP
+.br
+
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "const char * \fBget_mach_o_type\fP (unsigned int type)"
+.br
+.ti -1c
+.RI "const char * \fBcpu_type_to_string\fP (cpu_type_t cputype)"
+.br
+.ti -1c
+.RI "const char * \fBcpu_subtype_to_string\fP (cpu_type_t cputype, cpu_subtype_t cpusubtype)"
+.br
+.ti -1c
+.RI "const char * \fBnlist_type_to_string\fP (uint8_t n_type)"
+.br
+.ti -1c
+.RI "const char * \fBnlist_section_to_string\fP (uint8_t n_sect)"
+.br
+.ti -1c
+.RI "void \fBprint_mach_o_flags\fP (unsigned int flags)"
+.br
+.ti -1c
+.RI "const char * \fBget_load_command_name\fP (uint32_t cmd)"
+.br
+.ti -1c
+.RI "void \fBprint_load_command_info\fP (uint32_t cmd)"
+.br
+.ti -1c
+.RI "void \fBprint_segment_flags\fP (uint32_t flags)"
+.br
+.ti -1c
+.RI "void \fBprint_macho_segment64_metadata\fP (\fBsegment_command_64\fP *seg_cmd)"
+.br
+.ti -1c
+.RI "void \fBprint_macho_segment32_metadata\fP (\fBsegment_command\fP *seg_cmd)"
+.br
+.ti -1c
+.RI "void \fBprint_macho_section64_metadata\fP (\fBsection_64\fP *s)"
+.br
+.ti -1c
+.RI "void \fBprint_macho_section32_metadata\fP (\fBsection\fP *s)"
+.br
+.ti -1c
+.RI "void \fBprint_macho_symbols_64\fP (const unsigned char *block, size_t file_size, uint32_t symoff, uint32_t nsyms, uint32_t stroff, uint32_t strsize)"
+.br
+.ti -1c
+.RI "void \fBprint_macho_symbols_32\fP (const unsigned char *block, size_t file_size, uint32_t symoff, uint32_t nsyms, uint32_t stroff, uint32_t strsize)"
+.br
+.ti -1c
+.RI "void \fBprint_tool_version\fP (uint32_t version)"
+.br
+.ti -1c
+.RI "void \fBprint_version_xyz\fP (uint32_t version)"
+.br
+.ti -1c
+.RI "void \fBprint_uuid\fP (const uint8_t uuid[16])"
+.br
+.ti -1c
+.RI "void \fBprint_source_version\fP (uint64_t packed_version)"
+.br
+.ti -1c
+.RI "const char * \fBplatform_to_string\fP (int platform)"
+.br
+.ti -1c
+.RI "const char * \fBtool_to_string\fP (int tool)"
+.br
+.ti -1c
+.RI "bool \fBmacho_section_is_executable\fP (uint32_t flags)"
+.br
+.ti -1c
+.RI "const char * \fBmacho_section_type_to_string\fP (uint32_t flags)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Utility functions for Mach-O binary analysis\&. 
+
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Baseer from the source code\&.

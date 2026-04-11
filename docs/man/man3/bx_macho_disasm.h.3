@@ -1,0 +1,49 @@
+.TH "modules/bx_macho_disasm/bx_macho_disasm.h" 3 "Version 0.2.0" "Baseer" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+modules/bx_macho_disasm/bx_macho_disasm.h \- Mach-O disassembly module for Baseer\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fR#include '\&.\&./bparser/bparser\&.h'\fP
+.br
+
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "bool \fBprint_macho_disasm\fP (\fBbparser\fP *parser, void *arg)"
+.br
+.RI "Disassemble executable sections of a Mach-O binary\&. "
+.in -1c
+.SH "Detailed Description"
+.PP 
+Mach-O disassembly module for Baseer\&. 
+
+Provides disassembly of executable sections in Mach-O files using the udis86 engine, with per-function symbol labeling\&. 
+.SH "Function Documentation"
+.PP 
+.SS "bool print_macho_disasm (\fBbparser\fP * parser, void * arg)"
+
+.PP
+Disassemble executable sections of a Mach-O binary\&. Iterates over all segments/sections, finds those with executable attributes (S_ATTR_PURE_INSTRUCTIONS), and disassembles them\&. If a symbol table is present, functions are labeled by name\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIparser\fP Pointer to the bparser with the file loaded in memory\&. 
+.br
+\fIarg\fP Pointer to inputs struct (unused for disasm)\&. 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+true on success, false on error\&. 
+.RE
+.PP
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Baseer from the source code\&.

@@ -1,0 +1,72 @@
+.TH "tests/test_baseer_core.c" 3 "Version 0.2.0" "Baseer" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+tests/test_baseer_core.c \- Unit tests for baseer core (open, close, execute)\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fR#include 'test_framework\&.h'\fP
+.br
+\fR#include '\&.\&./baseer\&.h'\fP
+.br
+
+.SS "Macros"
+
+.in +1c
+.ti -1c
+.RI "#define \fBTEST_ELF_64\fP   'examples/64bit_x86_64_gcc'"
+.br
+.ti -1c
+.RI "#define \fBTEST_ELF_32\fP   'examples/32bit_x86_gcc'"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBTEST\fP (test_open_null_path)"
+.br
+.ti -1c
+.RI "\fBTEST\fP (test_open_nonexistent_file)"
+.br
+.ti -1c
+.RI "\fBTEST\fP (test_open_memory_mode)"
+.br
+.ti -1c
+.RI "\fBTEST\fP (test_open_stream_mode)"
+.br
+.ti -1c
+.RI "\fBTEST\fP (test_open_both_mode)"
+.br
+.ti -1c
+.RI "\fBTEST\fP (test_close_null)"
+.br
+.ti -1c
+.RI "\fBTEST\fP (test_execute_null_target)"
+.br
+.ti -1c
+.RI "\fBTEST\fP (test_execute_null_callback)"
+.br
+.ti -1c
+.RI "\fBTEST\fP (test_execute_success)"
+.br
+.ti -1c
+.RI "\fBTEST\fP (test_execute_failure)"
+.br
+.ti -1c
+.RI "\fBTEST\fP (test_elf_magic_bytes)"
+.br
+.ti -1c
+.RI "int \fBmain\fP (void)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Unit tests for baseer core (open, close, execute)\&. 
+
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Baseer from the source code\&.

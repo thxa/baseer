@@ -337,12 +337,12 @@ Handle breakpoint hit logic\&. Handle breakpoint hit logic\&.
 Initialize context values from target binary\&. Initialize context values from target binary\&.
 
 .PP
-Reads ELF headers and symbol tables to populate context values\&.
+Reads ELF or Mach-O headers and symbol tables to populate context values\&.
 
 .PP
 \fBParameters\fP
 .RS 4
-\fItarget\fP Pointer to binary parser structure with ELF data\&. 
+\fItarget\fP Pointer to binary parser structure with file data\&. 
 .br
 \fIctx\fP Pointer to debugger context to initialize\&. 
 .RE

@@ -1,0 +1,90 @@
+.TH "md_CHANGELOG" 3 "Version 0.2.0" "Baseer" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+md_CHANGELOG \- Changelog 
+.PP
+
+
+.PP
+All notable changes to Baseer will be documented in this file\&.
+
+.PP
+The format is based on \fRKeep a Changelog\fP\&.
+.SH "[0\&.3\&.0] - Unreleased"
+.PP
+.SS "Added"
+.IP "\(bu" 2
+\fBTest suite\fP: Unit tests for hashmap, baseer core, and bparser modules using a custom single-header test framework (\fRtests/\fP)
+.IP "\(bu" 2
+\fBCI pipeline\fP: GitHub Actions workflow with both Release and Debug+Sanitizer builds (\fR\&.github/workflows/ci\&.yml\fP)
+.IP "\(bu" 2
+\fBLogging system\fP: Centralized leveled logging (ERROR/WARN/INFO/DEBUG) via \fR\fButils/b_log\&.h\fP\fP, controllable with \fRBASEER_LOG_LEVEL\fP environment variable
+.IP "\(bu" 2
+\fBConfigurable decompiler path\fP: RetDec binary location can now be overridden via \fRBASEER_RETDEC_BIN\fP environment variable
+.IP "\(bu" 2
+\fBMach-O build support\fP: Added Mach-O module sources and headers to CMakeLists\&.txt (was missing, causing linker errors)
+.IP "\(bu" 2
+\fBELF input validation\fP: Bounds checking for section headers, program headers, string table indices, and section body reads against file size
+.PP
+.SS "Fixed"
+.IP "\(bu" 2
+\fBCritical\fP: \fRmemset(ctx, 0, sizeof(ctx))\fP in debugger only cleared 8 bytes (pointer size) instead of full \fR\fBcontext\fP\fP struct -- now uses \fRsizeof(context)\fP
+.IP "\(bu" 2
+\fBCritical\fP: \fR\fBdestroy_bp_sym()\fP\fP used wrong loop variable (\fRptr\fP instead of \fRptr1\fP), causing symbol memory to never be freed
+.IP "\(bu" 2
+\fBCritical\fP: \fR\fBhandle_action()\fP\fP had no return value on fallthrough path -- undefined behavior, now returns \fRfalse\fP
+.IP "\(bu" 2
+\fBMemory leak\fP: \fR\fBparse_cmd()\fP\fP leaked \fRline\fP buffer when process had exited (early return without \fRfree(cmd)\fP)
+.IP "\(bu" 2
+\fBMemory leak\fP: CLI \fRargs\fP command called \fRstrdup()\fP without ever freeing previous arguments; now frees old args before overwriting
+.IP "\(bu" 2
+\fBMemory leak\fP: CLI \fRfree(line)\fP was only called in the final \fRelse\fP branch; now called on all \fRcontinue\fP paths
+.IP "\(bu" 2
+\fBNull deref\fP: \fRvmmap\fP command could dereference NULL if \fR/proc/pid/maps\fP failed to open; now checks \fRfopen\fP return
+.IP "\(bu" 2
+\fBBuffer overflow\fP: Replaced \fRsprintf\fP with \fRsnprintf\fP in debugger for \fR/proc/pid/maps\fP path construction
+.PP
+.SS "Changed"
+.IP "\(bu" 2
+\fBSecurity\fP: Replaced \fRsystem()\fP call in decompiler module with \fRfork()\fP/\fRexecl()\fP to avoid shell injection risks
+.IP "\(bu" 2
+\fBCode organization\fP: Moved static arrays (\fRcmds[]\fP, \fRflags[]\fP, \fRregs_64[]\fP, \fRregs_32[]\fP) from \fR\fBdebugger\&.h\fP\fP to \fR\fBdebugger\&.c\fP\fP to prevent duplicate symbols across translation units
+.PP
+.SS "Removed"
+.IP "\(bu" 2
+Large blocks of commented-out code in \fRbx_elf\&.c\fP, \fR\fBdebugger\&.c\fP\fP, \fR\fBbx_binhead\&.c\fP\fP, \fR\fBb_elf_metadata\&.c\fP\fP, and \fRmain\&.c\fP
+.PP
+.SS "Spelling Fixes"
+.IP "\(bu" 2
+"Closeing" -> "Closing" in \fR\fBbaseer\&.c\fP\fP
+.IP "\(bu" 2
+"faild" -> "failed" in \fR\fBdebugger\&.c\fP\fP
+.PP
+.SH "[0\&.2\&.0] - 2025"
+.PP
+.SS "Added"
+.IP "\(bu" 2
+Mach-O format support (metadata parsing)
+.IP "\(bu" 2
+Interactive CLI with tab completion
+.IP "\(bu" 2
+Decompiler integration (RetDec)
+.IP "\(bu" 2
+ptrace-based debugger with breakpoints and register inspection
+.IP "\(bu" 2
+TAR archive metadata parsing
+.PP
+.SH "[0\&.1\&.0] - 2025"
+.PP
+.SS "Added"
+.IP "\(bu" 2
+Initial release
+.IP "\(bu" 2
+ELF metadata, disassembly, and section/symbol parsing
+.IP "\(bu" 2
+Modular callback-tree architecture
+.IP "\(bu" 2
+Memory and streaming file access modes 
+.PP
+

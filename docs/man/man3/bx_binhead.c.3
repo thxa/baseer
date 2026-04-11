@@ -13,6 +13,10 @@ modules/binhead/bx_binhead.c \- Handle the magic number of a file header and tri
 .br
 \fR#include '\&.\&./bx_tar/bx_tar\&.h'\fP
 .br
+\fR#include '\&.\&./bx_macho/bx_macho\&.h'\fP
+.br
+\fR#include '\&.\&./bx_pdf/bx_pdf\&.h'\fP
+.br
 
 .SS "Functions"
 
@@ -25,6 +29,12 @@ modules/binhead/bx_binhead.c \- Handle the magic number of a file header and tri
 .br
 .ti -1c
 .RI "unsigned long long int \fBreverse_bytes\fP (unsigned long long int n)"
+.br
+.ti -1c
+.RI "unsigned int \fBNXSwapInt\fP (unsigned int inv)"
+.br
+.ti -1c
+.RI "unsigned long \fBNXSwapLong\fP (unsigned long inv)"
 .br
 .ti -1c
 .RI "bool \fBbx_binhead\fP (\fBbaseer_target_t\fP *target, void *arg)"

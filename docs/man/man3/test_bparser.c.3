@@ -1,0 +1,57 @@
+.TH "tests/test_bparser.c" 3 "Version 0.2.0" "Baseer" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+tests/test_bparser.c \- Unit tests for the bparser module\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fR#include 'test_framework\&.h'\fP
+.br
+\fR#include '\&.\&./modules/bparser/bparser\&.h'\fP
+.br
+
+.SS "Macros"
+
+.in +1c
+.ti -1c
+.RI "#define \fBTEST_ELF_64\fP   'examples/64bit_x86_64_gcc'"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBTEST\fP (test_bparser_load_null)"
+.br
+.ti -1c
+.RI "\fBTEST\fP (test_bparser_load_valid)"
+.br
+.ti -1c
+.RI "\fBTEST\fP (test_bparser_read_memory)"
+.br
+.ti -1c
+.RI "\fBTEST\fP (test_bparser_read_null_params)"
+.br
+.ti -1c
+.RI "\fBTEST\fP (test_bparser_read_beyond_bounds)"
+.br
+.ti -1c
+.RI "\fBTEST\fP (test_bparser_apply)"
+.br
+.ti -1c
+.RI "\fBTEST\fP (test_bparser_apply_null)"
+.br
+.ti -1c
+.RI "int \fBmain\fP (void)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Unit tests for the bparser module\&. 
+
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Baseer from the source code\&.

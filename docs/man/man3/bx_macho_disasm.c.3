@@ -1,0 +1,85 @@
+.TH "modules/bx_macho_disasm/bx_macho_disasm.c" 3 "Version 0.2.0" "Baseer" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+modules/bx_macho_disasm/bx_macho_disasm.c \- Mach-O disassembly module using udis86\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fR#include 'bx_macho_disasm\&.h'\fP
+.br
+\fR#include '\&.\&./\&.\&./baseer\&.h'\fP
+.br
+\fR#include '\&.\&./bparser/bparser\&.h'\fP
+.br
+\fR#include '\&.\&./bx_macho_utils/bx_macho_utils\&.h'\fP
+.br
+\fR#include '\&.\&./bx_elf_utils/bx_elf_utils\&.h'\fP
+.br
+\fR#include '\&.\&./\&.\&./utils/ui\&.h'\fP
+.br
+\fR#include 'macho\&.h'\fP
+.br
+\fR#include 'udis86\&.h'\fP
+.br
+\fR#include <stdio\&.h>\fP
+.br
+\fR#include <string\&.h>\fP
+.br
+\fR#include <stdlib\&.h>\fP
+.br
+
+.SS "Classes"
+
+.in +1c
+.ti -1c
+.RI "struct \fBmacho_sym_entry\fP"
+.br
+.RI "Symbol entry for sorting and lookup during disassembly\&. "
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "bool \fBprint_macho_disasm\fP (\fBbparser\fP *parser, void *arg)"
+.br
+.RI "Disassemble executable sections of a Mach-O binary\&. "
+.in -1c
+.SH "Detailed Description"
+.PP 
+Mach-O disassembly module using udis86\&. 
+
+Disassembles executable Mach-O sections with:
+.IP "\(bu" 2
+Per-function labels from the symbol table
+.IP "\(bu" 2
+Color-coded instruction output
+.IP "\(bu" 2
+Support for both 32-bit and 64-bit Mach-O files 
+.PP
+
+.SH "Function Documentation"
+.PP 
+.SS "bool print_macho_disasm (\fBbparser\fP * parser, void * arg)"
+
+.PP
+Disassemble executable sections of a Mach-O binary\&. Iterates over all segments/sections, finds those with executable attributes (S_ATTR_PURE_INSTRUCTIONS), and disassembles them\&. If a symbol table is present, functions are labeled by name\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIparser\fP Pointer to the bparser with the file loaded in memory\&. 
+.br
+\fIarg\fP Pointer to inputs struct (unused for disasm)\&. 
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+true on success, false on error\&. 
+.RE
+.PP
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Baseer from the source code\&.

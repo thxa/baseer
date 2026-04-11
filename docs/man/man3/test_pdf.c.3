@@ -1,0 +1,63 @@
+.TH "tests/test_pdf.c" 3 "Version 0.2.0" "Baseer" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+tests/test_pdf.c \- Unit tests for PDF parsing modules\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fR#include 'test_framework\&.h'\fP
+.br
+\fR#include <stdint\&.h>\fP
+.br
+\fR#include <string\&.h>\fP
+.br
+\fR#include '\&.\&./baseer\&.h'\fP
+.br
+\fR#include '\&.\&./modules/bparser/bparser\&.h'\fP
+.br
+
+.SS "Macros"
+
+.in +1c
+.ti -1c
+.RI "#define \fB_GNU_SOURCE\fP"
+.br
+.ti -1c
+.RI "#define \fBTEST_PDF\fP   'examples/test_pdf'"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBTEST\fP (test_pdf_file_opens)"
+.br
+.ti -1c
+.RI "\fBTEST\fP (test_pdf_magic)"
+.br
+.ti -1c
+.RI "\fBTEST\fP (test_pdf_version)"
+.br
+.ti -1c
+.RI "\fBTEST\fP (test_pdf_bparser_load)"
+.br
+.ti -1c
+.RI "\fBTEST\fP (test_pdf_has_trailer)"
+.br
+.ti -1c
+.RI "\fBTEST\fP (test_pdf_has_eof)"
+.br
+.ti -1c
+.RI "int \fBmain\fP (void)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Unit tests for PDF parsing modules\&. 
+
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Baseer from the source code\&.

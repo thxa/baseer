@@ -25,6 +25,37 @@
 var NAVTREE =
 [
   [ "Baseer", "index.html", [
+    [ "Changelog", "md_CHANGELOG.html", [
+      [ "[0.3.0] - Unreleased", "md_CHANGELOG.html#autotoc_md1", [
+        [ "Added", "md_CHANGELOG.html#autotoc_md2", null ],
+        [ "Fixed", "md_CHANGELOG.html#autotoc_md3", null ],
+        [ "Changed", "md_CHANGELOG.html#autotoc_md4", null ],
+        [ "Removed", "md_CHANGELOG.html#autotoc_md5", null ],
+        [ "Spelling Fixes", "md_CHANGELOG.html#autotoc_md6", null ]
+      ] ],
+      [ "[0.2.0] - 2025", "md_CHANGELOG.html#autotoc_md7", [
+        [ "Added", "md_CHANGELOG.html#autotoc_md8", null ]
+      ] ],
+      [ "[0.1.0] - 2025", "md_CHANGELOG.html#autotoc_md9", [
+        [ "Added", "md_CHANGELOG.html#autotoc_md10", null ]
+      ] ]
+    ] ],
+    [ "Contributing to Baseer", "md_CONTRIBUTING.html", [
+      [ "Understanding Baseer’s Extension System", "md_CONTRIBUTING.html#autotoc_md13", null ],
+      [ "Adding a New File Format", "md_CONTRIBUTING.html#autotoc_md15", [
+        [ "1. Create a New Module", "md_CONTRIBUTING.html#autotoc_md16", null ],
+        [ "2. Define the Format Callback", "md_CONTRIBUTING.html#autotoc_md17", null ],
+        [ "3. Implement Tool Functions", "md_CONTRIBUTING.html#autotoc_md18", null ],
+        [ "4. Register Your Format", "md_CONTRIBUTING.html#autotoc_md19", null ],
+        [ "5. Rebuild", "md_CONTRIBUTING.html#autotoc_md20", null ],
+        [ "6. Test Your Format", "md_CONTRIBUTING.html#autotoc_md21", null ]
+      ] ],
+      [ "Naming Conventions", "md_CONTRIBUTING.html#autotoc_md23", null ],
+      [ "Code Style Guidelines", "md_CONTRIBUTING.html#autotoc_md25", null ],
+      [ "Tips for New Developers", "md_CONTRIBUTING.html#autotoc_md27", null ],
+      [ "Future Contributions", "md_CONTRIBUTING.html#autotoc_md29", null ],
+      [ "Thanks", "md_CONTRIBUTING.html#autotoc_md31", null ]
+    ] ],
     [ "Classes", "annotated.html", [
       [ "Class List", "annotated.html", "annotated_dup" ],
       [ "Class Index", "classes.html", null ],
@@ -48,7 +79,8 @@ var NAVTREE =
 
 var NAVTREEINDEX =
 [
-"annotated.html"
+"annotated.html",
+"structElf64__Rela.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronization';

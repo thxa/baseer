@@ -9,7 +9,7 @@ modules/b_debugger/debugger.c \- Implementation of a lightweight debugger for EL
 .PP
 \fR#include <stdint\&.h>\fP
 .br
-\fR#include <elf\&.h>\fP
+\fR#include 'elf\&.h'\fP
 .br
 \fR#include <stdio\&.h>\fP
 .br
@@ -94,7 +94,7 @@ modules/b_debugger/debugger.c \- Implementation of a lightweight debugger for EL
 .ti -1c
 .RI "void \fBinit_values\fP (\fBbparser\fP *target, \fBcontext\fP *ctx)"
 .br
-.RI "Initialize the debugger context from a parsed ELF binary\&. "
+.RI "Initialize the debugger context from a parsed binary\&. "
 .ti -1c
 .RI "void \fBdestroy_bp_sym\fP (\fBcontext\fP *ctx)"
 .br
@@ -277,15 +277,15 @@ Handle a breakpoint hit by restoring the instruction and adjusting RIP\&. Handle
 .SS "void init_values (\fBbparser\fP * target, \fBcontext\fP * ctx)"
 
 .PP
-Initialize the debugger context from a parsed ELF binary\&. Initialize context values from target binary\&.
+Initialize the debugger context from a parsed binary\&. Initialize context values from target binary\&.
 
 .PP
-Reads ELF headers and symbol tables to populate context values\&.
+Reads ELF or Mach-O headers and symbol tables to populate context values\&.
 
 .PP
 \fBParameters\fP
 .RS 4
-\fItarget\fP Pointer to binary parser structure with ELF data\&. 
+\fItarget\fP Pointer to binary parser structure with file data\&. 
 .br
 \fIctx\fP Pointer to debugger context to initialize\&. 
 .RE

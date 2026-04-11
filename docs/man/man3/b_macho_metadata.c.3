@@ -1,0 +1,67 @@
+.TH "modules/b_macho_metadata/b_macho_metadata.c" 3 "Version 0.2.0" "Baseer" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+modules/b_macho_metadata/b_macho_metadata.c \- Mach-O metadata parser and pretty-printer\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fR#include '\&./b_macho_metadata\&.h'\fP
+.br
+\fR#include '\&.\&./bparser/bparser\&.h'\fP
+.br
+\fR#include '\&.\&./\&.\&./baseer\&.h'\fP
+.br
+\fR#include '\&.\&./bx_macho_utils/bx_macho_utils\&.h'\fP
+.br
+\fR#include '\&.\&./bx_elf_utils/bx_elf_utils\&.h'\fP
+.br
+\fR#include '\&.\&./\&.\&./utils/ui\&.h'\fP
+.br
+\fR#include <stdio\&.h>\fP
+.br
+\fR#include <string\&.h>\fP
+.br
+
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "bool \fBb_macho_metadata\fP (\fBbparser\fP *parser, void *arg)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Mach-O metadata parser and pretty-printer\&. 
+
+Parses and displays full metadata for Mach-O binaries including:
+.IP "\(bu" 2
+Header (magic, CPU type, file type, flags)
+.IP "\(bu" 2
+All load commands with detailed output
+.IP "\(bu" 2
+Segments and their sections
+.IP "\(bu" 2
+Symbol tables (LC_SYMTAB)
+.IP "\(bu" 2
+Dynamic symbol table summary (LC_DYSYMTAB)
+.IP "\(bu" 2
+Shared libraries (LC_LOAD_DYLIB)
+.IP "\(bu" 2
+Dynamic linker (LC_LOAD_DYLINKER)
+.IP "\(bu" 2
+Entry point (LC_MAIN)
+.IP "\(bu" 2
+UUID, build version, source version
+.IP "\(bu" 2
+Code signature and function starts info
+.IP "\(bu" 2
+Section hex dumps
+.PP
+
+.PP
+Supports both 32-bit and 64-bit Mach-O files with full input validation\&. 
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Baseer from the source code\&.

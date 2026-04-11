@@ -16,19 +16,19 @@ modules/bx_elf_disasm/bx_elf_disasm.c \- Functions for disassembling ELF files a
 
 .in +1c
 .ti -1c
-.RI "void \fBdump_disasm_elf32_shdr\fP (Elf32_Ehdr *elf, Elf32_Shdr *shdrs, \fBbparser\fP *parser)"
+.RI "void \fBdump_disasm_elf32_shdr\fP (\fBElf32_Ehdr\fP *elf, \fBElf32_Shdr\fP *shdrs, \fBbparser\fP *parser, void *arg)"
 .br
 .RI "Disassemble and print the ELF32 section headers\&. "
 .ti -1c
-.RI "void \fBdump_disasm_elf64_shdr\fP (Elf64_Ehdr *elf, Elf64_Shdr *shdrs, \fBbparser\fP *parser)"
+.RI "void \fBdump_disasm_elf64_shdr\fP (\fBElf64_Ehdr\fP *elf, \fBElf64_Shdr\fP *shdrs, \fBbparser\fP *parser)"
 .br
 .RI "Disassemble and print the ELF64 section headers\&. "
 .ti -1c
-.RI "void \fBdump_disasm_elf32_phdr\fP (Elf32_Ehdr *elf, Elf32_Phdr *phdr, \fBbparser\fP *parser)"
+.RI "void \fBdump_disasm_elf32_phdr\fP (\fBElf32_Ehdr\fP *elf, \fBElf32_Phdr\fP *phdr, \fBbparser\fP *parser)"
 .br
 .RI "Disassembles and prints the program headers of a 32-bit ELF file\&. "
 .ti -1c
-.RI "void \fBdump_disasm_elf64_phdr\fP (Elf64_Ehdr *elf, Elf64_Phdr *phdr, \fBbparser\fP *parser)"
+.RI "void \fBdump_disasm_elf64_phdr\fP (\fBElf64_Ehdr\fP *elf, \fBElf64_Phdr\fP *phdr, \fBbparser\fP *parser)"
 .br
 .RI "Disassembles and prints the program headers of a 64-bit ELF file\&. "
 .ti -1c
@@ -43,7 +43,7 @@ Functions for disassembling ELF files and printing metadata\&.
 
 .SH "Function Documentation"
 .PP 
-.SS "void dump_disasm_elf32_phdr (Elf32_Ehdr * elf, Elf32_Phdr * phdr, \fBbparser\fP * parser)"
+.SS "void dump_disasm_elf32_phdr (\fBElf32_Ehdr\fP * elf, \fBElf32_Phdr\fP * phdr, \fBbparser\fP * parser)"
 
 .PP
 Disassembles and prints the program headers of a 32-bit ELF file\&. This function iterates through all program headers in a 32-bit ELF file, prints their metadata (type, flags, addresses, sizes), and optionally disassembles the binary contents of loadable segments using udis86\&.
@@ -51,9 +51,9 @@ Disassembles and prints the program headers of a 32-bit ELF file\&. This functio
 .PP
 \fBParameters\fP
 .RS 4
-\fIelf\fP Pointer to the ELF header structure (Elf32_Ehdr)\&. 
+\fIelf\fP Pointer to the ELF header structure (\fBElf32_Ehdr\fP)\&. 
 .br
-\fIphdr\fP Pointer to the first program header (array of Elf32_Phdr)\&. 
+\fIphdr\fP Pointer to the first program header (array of \fBElf32_Phdr\fP)\&. 
 .br
 \fIparser\fP Pointer to the Baseer parser object used for reading file contents\&.
 .RE
@@ -84,7 +84,7 @@ Stops disassembly early when encountering \fRret\fP (\fRUD_Iret\fP)\&.
 .RE
 .PP
 
-.SS "void dump_disasm_elf32_shdr (Elf32_Ehdr * elf, Elf32_Shdr * shdrs, \fBbparser\fP * parser)"
+.SS "void dump_disasm_elf32_shdr (\fBElf32_Ehdr\fP * elf, \fBElf32_Shdr\fP * shdrs, \fBbparser\fP * parser, void * arg)"
 
 .PP
 Disassemble and print the ELF32 section headers\&. Iterates over all section headers in a 32-bit ELF file\&. Prints metadata (name, type, flags, address, size, etc\&.) and disassembles machine code sections using udis86\&. Metadata sections (e\&.g\&., \&.rela\&.dyn, \&.interp) are identified and not disassembled\&.
@@ -100,7 +100,7 @@ Disassemble and print the ELF32 section headers\&. Iterates over all section hea
 .RE
 .PP
 
-.SS "void dump_disasm_elf64_phdr (Elf64_Ehdr * elf, Elf64_Phdr * phdr, \fBbparser\fP * parser)"
+.SS "void dump_disasm_elf64_phdr (\fBElf64_Ehdr\fP * elf, \fBElf64_Phdr\fP * phdr, \fBbparser\fP * parser)"
 
 .PP
 Disassembles and prints the program headers of a 64-bit ELF file\&. This function iterates through all program headers in a 64-bit ELF file, prints their metadata (type, flags, addresses, sizes), and optionally disassembles the binary contents of loadable segments using udis86\&.
@@ -108,9 +108,9 @@ Disassembles and prints the program headers of a 64-bit ELF file\&. This functio
 .PP
 \fBParameters\fP
 .RS 4
-\fIelf\fP Pointer to the ELF header structure (Elf64_Ehdr)\&. 
+\fIelf\fP Pointer to the ELF header structure (\fBElf64_Ehdr\fP)\&. 
 .br
-\fIphdr\fP Pointer to the first program header (array of Elf64_Phdr)\&. 
+\fIphdr\fP Pointer to the first program header (array of \fBElf64_Phdr\fP)\&. 
 .br
 \fIparser\fP Pointer to the Baseer parser object used for reading file contents\&.
 .RE
@@ -141,7 +141,7 @@ Stops disassembly early when encountering \fRret\fP (\fRUD_Iret\fP)\&.
 .RE
 .PP
 
-.SS "void dump_disasm_elf64_shdr (Elf64_Ehdr * elf, Elf64_Shdr * shdrs, \fBbparser\fP * parser)"
+.SS "void dump_disasm_elf64_shdr (\fBElf64_Ehdr\fP * elf, \fBElf64_Shdr\fP * shdrs, \fBbparser\fP * parser)"
 
 .PP
 Disassemble and print the ELF64 section headers\&. Iterates over all section headers in a 64-bit ELF file\&. Prints metadata (name, type, flags, address, size, etc\&.) and disassembles machine code sections using udis86\&. Metadata sections (e\&.g\&., \&.rela\&.dyn, \&.interp) are identified and not disassembled\&.

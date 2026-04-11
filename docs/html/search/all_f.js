@@ -1,10 +1,15 @@
 var searchData=
 [
-  ['set_5fmem_5freg_0',['set_mem_reg',['../debugger_8c.html#a9d37cb08ac98ba7e8db761b99b49f779',1,'set_mem_reg(context *ctx, void *args):&#160;debugger.c'],['../debugger_8h.html#a9d37cb08ac98ba7e8db761b99b49f779',1,'set_mem_reg(context *ctx, void *args):&#160;debugger.c']]],
-  ['setbp_1',['setBP',['../debugger_8c.html#a46c28deefe27e450fe35881d5319bf93',1,'setBP(context *ctx, void *args):&#160;debugger.c'],['../debugger_8h.html#a46c28deefe27e450fe35881d5319bf93',1,'setBP(context *ctx, void *args):&#160;debugger.c']]],
-  ['sh_5ftype_5fto_5fstr_2',['sh_type_to_str',['../bx__elf__utils_8c.html#a9096314ce1db2baf79452271604bde5d',1,'bx_elf_utils.c']]],
-  ['size_3',['size',['../structbaseer__target__t.html#a6e0834aa134f59e0c304bf1279d55672',1,'baseer_target_t']]],
-  ['step_5fover_4',['step_over',['../debugger_8c.html#a0343f9c7a1e9135576e29c48c083683e',1,'step_over(context *ctx, void *args):&#160;debugger.c'],['../debugger_8h.html#a0343f9c7a1e9135576e29c48c083683e',1,'step_over(context *ctx, void *args):&#160;debugger.c']]],
-  ['sym_5',['sym',['../structcontext.html#a5afc55ccd9d3c95948d7585f5f47e0d7',1,'context']]],
-  ['sym_5flist_6',['sym_list',['../structsym__list.html',1,'']]]
+  ['id_0',['id',['../structbp.html#aaea9938b28550439bc899299e7550295',1,'bp']]],
+  ['ident_5fcommand_1',['ident_command',['../structident__command.html',1,'']]],
+  ['implement_20tool_20functions_2',['3. Implement Tool Functions',['../md_CONTRIBUTING.html#autotoc_md18',1,'']]],
+  ['info_3',['INFO',['../debugger_8h.html#a1482e48c7a5fd002739cc9b33f1a292d',1,'debugger.h']]],
+  ['info_4',['Write and Read process info',['../dir_881ab206e10a3ce1a13b73cfff848437.html#autotoc_md36',1,'']]],
+  ['info_20into_20named_20pipe_5',['Read info into named pipe',['../dir_881ab206e10a3ce1a13b73cfff848437.html#autotoc_md35',1,'']]],
+  ['init_5fvalues_6',['init_values',['../debugger_8c.html#a36d9996b85e1afb5811044fb0abda9a3',1,'init_values(bparser *target, context *ctx):&#160;debugger.c'],['../debugger_8h.html#a36d9996b85e1afb5811044fb0abda9a3',1,'init_values(bparser *target, context *ctx):&#160;debugger.c']]],
+  ['inputs_7',['inputs',['../structinputs.html',1,'']]],
+  ['insert_8',['insert',['../b__hashmap_8c.html#a2079b2eb2848b8918a4d8544971b1dd3',1,'b_hashmap.c']]],
+  ['into_20named_20pipe_9',['Read info into named pipe',['../dir_881ab206e10a3ce1a13b73cfff848437.html#autotoc_md35',1,'']]],
+  ['is_5fin_5flist_10',['is_in_list',['../bx__elf__utils_8c.html#a4c5fa9c6c10e34bc90915fe1c2e1661b',1,'bx_elf_utils.c']]],
+  ['is_5fnumber_11',['is_number',['../bx__elf__utils_8c.html#ad420e4358fb616acbdb452abdbd37ffe',1,'bx_elf_utils.c']]]
 ];

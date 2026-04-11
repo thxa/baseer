@@ -1,7 +1,5 @@
 var bx__elf__utils_8c =
 [
-    [ "display_byte", "bx__elf__utils_8c.html#af7f7792d74899bee4ac5f4e46e557889", null ],
-    [ "display_byte_char", "bx__elf__utils_8c.html#a2f183f4ad6c7c576cdf874bbbf0ce12c", null ],
     [ "elf_machine_to_str", "bx__elf__utils_8c.html#ab39fed2c618165a94bdf594641d1d0e2", null ],
     [ "elf_type_to_str", "bx__elf__utils_8c.html#af1ac76a0fd223266cc29482786630655", null ],
     [ "format_p_flags", "bx__elf__utils_8c.html#afd443efc0947c24e23acafa67d7287f4", null ],
@@ -11,7 +9,6 @@ var bx__elf__utils_8c =
     [ "is_number", "bx__elf__utils_8c.html#ad420e4358fb616acbdb452abdbd37ffe", null ],
     [ "print_body_bytes", "bx__elf__utils_8c.html#a16c277b4e869a07e7d95a36599af6844", null ],
     [ "print_disasm", "bx__elf__utils_8c.html#a168530ca48fb27d07a089f09d5534405", null ],
-    [ "print_hex_header", "bx__elf__utils_8c.html#a127425ab237c43e8daf2532fa0e33694", null ],
     [ "print_highlight_asm", "bx__elf__utils_8c.html#a206e7ac48e060432f6c13646929b1f0a", null ],
     [ "print_program_header_legend", "bx__elf__utils_8c.html#a233832a52de2831c6df99034697c1285", null ],
     [ "print_program_header_metadata_32bit", "bx__elf__utils_8c.html#a35c6c1faa22ba7d1da3038a9d130a963", null ],
@@ -23,6 +20,7 @@ var bx__elf__utils_8c =
     [ "print_symbols_64bit", "bx__elf__utils_8c.html#a67681d2d39de4fcb7f176fb1291ff875", null ],
     [ "print_symbols_with_disasm_32bit", "bx__elf__utils_8c.html#a26968cca01ded18c6dfc1a741fafbf96", null ],
     [ "print_symbols_with_disasm_64bit", "bx__elf__utils_8c.html#a0facfce3ffe6122176bbd08466d0183f", null ],
+    [ "rel_R_X86_64_type_to_str", "bx__elf__utils_8c.html#a4c519821be7a9dbf414b03444716b648", null ],
     [ "sh_type_to_str", "bx__elf__utils_8c.html#a9096314ce1db2baf79452271604bde5d", null ],
     [ "type_p_to_str", "bx__elf__utils_8c.html#a24193994739cfce963924f00b4c33939", null ]
 ];

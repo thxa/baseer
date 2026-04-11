@@ -23,6 +23,8 @@ baseer.h \- Core file handling and execution API for Baseer\&.
 .br
 \fR#include 'linenoise\&.h'\fP
 .br
+\fR#include 'modules/b_hashmap/b_hashmap\&.h'\fP
+.br
 
 .SS "Classes"
 
@@ -58,7 +60,7 @@ baseer.h \- Core file handling and execution API for Baseer\&.
 .RI "#define \fBBASEER_VERSION\fP"
 .br
 .ti -1c
-.RI "#define \fBBASEER_MAX_FILE_SIZE\fP   1024 * 1024 * 4"
+.RI "#define \fBBASEER_MAX_FILE_SIZE\fP   1024 * 1024 * 512"
 .br
 .ti -1c
 .RI "#define \fBRETURN_NULL_IF\fP(con)"
@@ -180,7 +182,7 @@ baseer.h \- Core file handling and execution API for Baseer\&.
 .ti -1c
 .RI "\fBbaseer_target_t\fP * \fBbaseer_open\fP (char *file_path, \fBbaseer_mode_t\fP mode)"
 .br
-.RI "Open a file in specified mode (memory, streaming, or both) "
+.RI "Open a file in specified mode (memory, streaming, or both)\&. "
 .ti -1c
 .RI "void \fBbaseer_close\fP (\fBbaseer_target_t\fP *target)"
 .br
@@ -208,24 +210,24 @@ Provides memory and streaming file access, as well as execution of analysis tool
 .PP
 .fi
 
-.SS "#define BASEER_MAX_FILE_SIZE   1024 * 1024 * 4"
+.SS "#define BASEER_MAX_FILE_SIZE   1024 * 1024 * 512"
 Max file size for memory mode 
 .SS "#define BASEER_VERSION"
 \fBValue:\fP
 .nf
-    TOSTRING(BASEER_VERSION_MAJOR) "\&." \\
-    TOSTRING(BASEER_VERSION_MINOR) "\&." \\
-    TOSTRING(BASEER_VERSION_MICRO)
+TOSTRING(BASEER_VERSION_MAJOR) "\&." \\
+TOSTRING(BASEER_VERSION_MINOR) "\&." \\
+TOSTRING(BASEER_VERSION_MICRO)
 .PP
 .fi
 
 .SS "#define RETURN_NULL_IF( con)"
 \fBValue:\fP
 .nf
-    if ((con))              \\
-    {                       \\
-        return NULL;        \\
-    }
+if ((con))              \\
+{                       \\
+    return NULL;        \\
+}
 .PP
 .fi
 
@@ -299,7 +301,7 @@ true on success, false on failure
 .SS "\fBbaseer_target_t\fP * baseer_open (char * file_path, \fBbaseer_mode_t\fP mode)"
 
 .PP
-Open a file in specified mode (memory, streaming, or both) 
+Open a file in specified mode (memory, streaming, or both)\&. 
 .PP
 \fBParameters\fP
 .RS 4

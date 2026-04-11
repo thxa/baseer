@@ -1,0 +1,90 @@
+.TH "utils/b_log.h" 3 "Version 0.2.0" "Baseer" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+utils/b_log.h \- Centralized logging macros for Baseer\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fR#include <stdio\&.h>\fP
+.br
+\fR#include <stdlib\&.h>\fP
+.br
+
+.SS "Macros"
+
+.in +1c
+.ti -1c
+.RI "#define \fBLOG_ERROR\fP(fmt, \&.\&.\&.)"
+.br
+.ti -1c
+.RI "#define \fBLOG_WARN\fP(fmt, \&.\&.\&.)"
+.br
+.ti -1c
+.RI "#define \fBLOG_INFO\fP(fmt, \&.\&.\&.)"
+.br
+.ti -1c
+.RI "#define \fBLOG_DEBUG\fP(fmt, \&.\&.\&.)"
+.br
+.in -1c
+.SS "Enumerations"
+
+.in +1c
+.ti -1c
+.RI "enum \fBbaseer_log_level_t\fP { \fBBASEER_LOG_ERROR\fP = 0, \fBBASEER_LOG_WARN\fP = 1, \fBBASEER_LOG_INFO\fP = 2, \fBBASEER_LOG_DEBUG\fP = 3 }"
+.br
+.RI "Log levels\&. "
+.in -1c
+.SH "Detailed Description"
+.PP 
+Centralized logging macros for Baseer\&. 
+
+Provides leveled logging (DEBUG, INFO, WARN, ERROR) with color-coded output and optional verbose mode controlled by the BASEER_VERBOSE environment variable\&.
+
+.PP
+Usage: LOG_ERROR("failed to open file: %s", path); LOG_WARN("section offset out of bounds"); LOG_INFO("loaded %d symbols", count); LOG_DEBUG("parsing section %d", i); 
+.SH "Macro Definition Documentation"
+.PP 
+.SS "#define LOG_DEBUG( fmt,  \&.\&.\&.)"
+\fBValue:\fP
+.nf
+    do { \\
+    if (baseer_log_level() >= BASEER_LOG_DEBUG) \\
+        printf("\\033[90m[DEBUG]\\033[0m " fmt "\\n", ##__VA_ARGS__); \\
+} while(0)
+.PP
+.fi
+
+.SS "#define LOG_ERROR( fmt,  \&.\&.\&.)"
+\fBValue:\fP
+.nf
+    do { \\
+    fprintf(stderr, "\\033[31m[ERROR]\\033[0m " fmt "\\n", ##__VA_ARGS__); \\
+} while(0)
+.PP
+.fi
+
+.SS "#define LOG_INFO( fmt,  \&.\&.\&.)"
+\fBValue:\fP
+.nf
+    do { \\
+    if (baseer_log_level() >= BASEER_LOG_INFO) \\
+        printf("\\033[34m[INFO]\\033[0m  " fmt "\\n", ##__VA_ARGS__); \\
+} while(0)
+.PP
+.fi
+
+.SS "#define LOG_WARN( fmt,  \&.\&.\&.)"
+\fBValue:\fP
+.nf
+    do { \\
+    if (baseer_log_level() >= BASEER_LOG_WARN) \\
+        fprintf(stderr, "\\033[33m[WARN]\\033[0m  " fmt "\\n", ##__VA_ARGS__); \\
+} while(0)
+.PP
+.fi
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Baseer from the source code\&.

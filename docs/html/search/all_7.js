@@ -1,7 +1,11 @@
 var searchData=
 [
-  ['handle_5faction_0',['handle_action',['../debugger_8c.html#a0cf63db5ac47b62a00e91d611a0fd07e',1,'handle_action(context *ctx, void *args):&#160;debugger.c'],['../debugger_8h.html#a0cf63db5ac47b62a00e91d611a0fd07e',1,'handle_action(context *ctx, void *args):&#160;debugger.c']]],
-  ['handle_5fbpoint_1',['handle_bpoint',['../debugger_8c.html#ac2fdceaf5836ab15d9512b534fa155fb',1,'handle_bpoint(context *ctx):&#160;debugger.c'],['../debugger_8h.html#ac2fdceaf5836ab15d9512b534fa155fb',1,'handle_bpoint(context *ctx):&#160;debugger.c']]],
-  ['hash_2',['hash',['../b__hashmap_8c.html#a7c9e0d90bc8135bbc9d94ee1979c01ee',1,'b_hashmap.c']]],
-  ['hashmap_5ft_3',['hashmap_t',['../structhashmap__t.html',1,'']]]
+  ['a_20new_20file_20format_0',['Adding a New File Format',['../md_CONTRIBUTING.html#autotoc_md15',1,'']]],
+  ['a_20new_20module_1',['1. Create a New Module',['../md_CONTRIBUTING.html#autotoc_md16',1,'']]],
+  ['abuf_2',['abuf',['../structabuf.html',1,'']]],
+  ['added_3',['Added',['../md_CHANGELOG.html#autotoc_md2',1,'Added'],['../md_CHANGELOG.html#autotoc_md8',1,'Added'],['../md_CHANGELOG.html#autotoc_md10',1,'Added']]],
+  ['adding_20a_20new_20file_20format_4',['Adding a New File Format',['../md_CONTRIBUTING.html#autotoc_md15',1,'']]],
+  ['addr_5',['addr',['../structCmd.html#ad207e0e1d7b8168ba5ec44fc61aa1a02',1,'Cmd::addr'],['../structsym__list.html#aa6d2039185a2bac18d1e25f226796b71',1,'sym_list::addr'],['../structbp.html#a3e32cb42a5a93d802c4865ee0410dd25',1,'bp::addr']]],
+  ['and_20read_20process_20info_6',['Write and Read process info',['../dir_881ab206e10a3ce1a13b73cfff848437.html#autotoc_md36',1,'']]],
+  ['arch_7',['arch',['../structcontext.html#ad4042bb3498baa4ffb4962724ba6dff4',1,'context']]]
 ];

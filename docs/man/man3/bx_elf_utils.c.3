@@ -38,14 +38,6 @@ modules/bx_elf_utils/bx_elf_utils.c \- Implementation of ELF parsing and display
 .br
 .RI "Converts a program header type (p_type) to a human-readable string with color\&. "
 .ti -1c
-.RI "void \fBdisplay_byte\fP (const unsigned char *byte)"
-.br
-.RI "Display a single byte in hexadecimal with color coding\&. "
-.ti -1c
-.RI "void \fBdisplay_byte_char\fP (const unsigned char *byte)"
-.br
-.RI "Display a single byte as a printable character with color coding\&. "
-.ti -1c
 .RI "int \fBis_in_list\fP (const char *word, const char *list[])"
 .br
 .RI "Check if a word exists in a null-terminated string list\&. "
@@ -66,39 +58,54 @@ modules/bx_elf_utils/bx_elf_utils.c \- Implementation of ELF parsing and display
 .br
 .RI "Format ELF section header flags into a colored string\&. "
 .ti -1c
-.RI "void \fBprint_symbols_32bit\fP (\fBbparser\fP *parser, Elf32_Ehdr *elf, Elf32_Shdr *shdrs, Elf32_Shdr *symtab, Elf32_Shdr *strtab)"
+.RI "void \fBprint_symbols_32bit\fP (\fBbparser\fP *parser, \fBElf32_Ehdr\fP *elf, \fBElf32_Shdr\fP *shdrs, \fBElf32_Shdr\fP *symtab, \fBElf32_Shdr\fP *strtab)"
 .br
 .RI "Print all symbols from a 32-bit ELF file (with colors)\&. "
 .ti -1c
-.RI "void \fBprint_symbols_64bit\fP (\fBbparser\fP *parser, Elf64_Ehdr *elf, Elf64_Shdr *shdrs, Elf64_Shdr *symtab, Elf64_Shdr *strtab)"
+.RI "void \fBprint_symbols_64bit\fP (\fBbparser\fP *parser, \fBElf64_Ehdr\fP *elf, \fBElf64_Shdr\fP *shdrs, \fBElf64_Shdr\fP *symtab, \fBElf64_Shdr\fP *strtab)"
 .br
 .RI "Print all symbols from a 64-bit ELF file (with colors)\&. "
 .ti -1c
-.RI "void \fBprint_symbols_with_disasm_32bit\fP (\fBbparser\fP *parser, Elf32_Ehdr *elf, Elf32_Shdr *shdrs, Elf32_Shdr *symtab, Elf32_Shdr *strtab)"
+.RI "const char * \fBrel_R_X86_64_type_to_str\fP (uint32_t type)"
+.br
+.RI "Convert an AMD x86-64 relocation type to its string representation\&. "
+.ti -1c
+.RI "const char * \fBdynamic_type\fP (uint32_t type)"
+.br
+.ti -1c
+.RI "void \fBprint_rela_32bit\fP (\fBbparser\fP *parser, \fBElf32_Ehdr\fP *elf, \fBElf32_Shdr\fP *shdrs, \fBElf32_Shdr\fP *reltab, \fBElf32_Shdr\fP *symtab)"
+.br
+.ti -1c
+.RI "void \fBprint_rela_64bit\fP (\fBbparser\fP *parser, \fBElf64_Ehdr\fP *elf, \fBElf64_Shdr\fP *shdrs, \fBElf64_Shdr\fP *reltab, \fBElf64_Shdr\fP *symtab)"
+.br
+.ti -1c
+.RI "void \fBprint_dynamic_table_32bit\fP (\fBbparser\fP *parser, \fBElf32_Ehdr\fP *elf, \fBElf32_Shdr\fP *shdrs, \fBElf32_Shdr\fP *dynmaictab, \fBElf32_Shdr\fP *strtab)"
+.br
+.ti -1c
+.RI "void \fBprint_dynamic_table_64bit\fP (\fBbparser\fP *parser, \fBElf64_Ehdr\fP *elf, \fBElf64_Shdr\fP *shdrs, \fBElf64_Shdr\fP *dynmaictab, \fBElf64_Shdr\fP *strtab)"
+.br
+.ti -1c
+.RI "void \fBprint_symbols_with_disasm_32bit\fP (\fBbparser\fP *parser, \fBElf32_Ehdr\fP *elf, \fBElf32_Shdr\fP *shdrs, \fBElf32_Shdr\fP *symtab, \fBElf32_Shdr\fP *strtab)"
 .br
 .RI "Print ELF32 symbols along with disassembly for functions\&. "
 .ti -1c
-.RI "void \fBprint_symbols_with_disasm_64bit\fP (\fBbparser\fP *parser, Elf64_Ehdr *elf, Elf64_Shdr *shdrs, Elf64_Shdr *symtab, Elf64_Shdr *strtab)"
+.RI "void \fBprint_symbols_with_disasm_64bit\fP (\fBbparser\fP *parser, \fBElf64_Ehdr\fP *elf, \fBElf64_Shdr\fP *shdrs, \fBElf64_Shdr\fP *symtab, \fBElf64_Shdr\fP *strtab)"
 .br
 .RI "Print ELF64 symbols along with disassembly for functions\&. "
 .ti -1c
-.RI "void \fBprint_hex_header\fP (unsigned long long offset)"
-.br
-.RI "Print the hex dump header row\&. "
-.ti -1c
-.RI "void \fBprint_section_header_metadata_32bit\fP (unsigned int id, const char *name, const char *type_str, const char *flags, Elf32_Shdr *shdrs)"
+.RI "void \fBprint_section_header_metadata_32bit\fP (unsigned int id, const char *name, const char *type_str, const char *flags, \fBElf32_Shdr\fP *shdrs)"
 .br
 .RI "Print metadata of a 32-bit ELF section header\&. "
 .ti -1c
-.RI "void \fBprint_section_header_metadata_64bit\fP (unsigned int id, const char *name, const char *type_str, const char *flags, Elf64_Shdr *shdrs)"
+.RI "void \fBprint_section_header_metadata_64bit\fP (unsigned int id, const char *name, const char *type_str, const char *flags, \fBElf64_Shdr\fP *shdrs)"
 .br
 .RI "Print metadata of a 64-bit ELF section header\&. "
 .ti -1c
-.RI "void \fBprint_program_header_metadata_32bit\fP (unsigned int id, const char *type_str, const char *flags, Elf32_Phdr *phdr)"
+.RI "void \fBprint_program_header_metadata_32bit\fP (unsigned int id, const char *type_str, const char *flags, \fBElf32_Phdr\fP *phdr)"
 .br
 .RI "Print metadata of a 32-bit ELF program header (segment)\&. "
 .ti -1c
-.RI "void \fBprint_program_header_metadata_64bit\fP (unsigned int id, const char *type_str, const char *flags, Elf64_Phdr *phdr)"
+.RI "void \fBprint_program_header_metadata_64bit\fP (unsigned int id, const char *type_str, const char *flags, \fBElf64_Phdr\fP *phdr)"
 .br
 .RI "Print metadata of a 64-bit ELF program header (segment)\&. "
 .ti -1c
@@ -137,52 +144,6 @@ Printing legends for ELF section and program header types and flags
 It supports both 32-bit and 64-bit ELF binaries and uses ANSI color codes to enhance terminal output readability\&. 
 .SH "Function Documentation"
 .PP 
-.SS "void display_byte (const unsigned char * byte)"
-
-.PP
-Display a single byte in hexadecimal with color coding\&. This function prints the value of a byte in hex format (two digits) and applies a color depending on its meaning:
-.IP "\(bu" 2
-Default (COLOR_YELLOW) for active instructions\&.
-.IP "\(bu" 2
-COLOR_RED for NOP (0x90), INT3 (0xCC), or filler bytes (0xFF)\&.
-.IP "\(bu" 2
-COLOR_GRAY for padding or null bytes (0x00)\&.
-.PP
-
-.PP
-\fBParameters\fP
-.RS 4
-\fIbyte\fP Pointer to the byte to display\&.
-.RE
-.PP
-\fBNote\fP
-.RS 4
-The color codes are ANSI escape sequences\&. The color is reset after printing each byte using COLOR_RESET\&. 
-.RE
-.PP
-
-.SS "void display_byte_char (const unsigned char * byte)"
-
-.PP
-Display a single byte as a printable character with color coding\&. This function prints the ASCII representation of a byte\&. Non-printable bytes are shown as a '\&.' character\&. The output is color-coded based on the byte value:
-.IP "\(bu" 2
-0x90, 0xCC, 0xFF → COLOR_RED (low / unused bytes)
-.IP "\(bu" 2
-0x00 → COLOR_GRAY (padding or null bytes)
-.IP "\(bu" 2
-All other bytes → COLOR_YELLOW (default / active instruction)
-.PP
-
-.PP
-Printable ASCII characters (32-126) are displayed as-is, while non-printable bytes are represented with '\&.'\&.
-
-.PP
-\fBParameters\fP
-.RS 4
-\fIbyte\fP Pointer to the byte to display\&. 
-.RE
-.PP
-
 .SS "const char * elf_machine_to_str (unsigned int machine)"
 
 .PP
@@ -253,7 +214,7 @@ Executable (X) → yellow
 .PP
 \fBParameters\fP
 .RS 4
-\fIp_flags\fP The flags from the ELF program header (p_flags field of Elf32_Phdr or Elf64_Phdr)\&. 
+\fIp_flags\fP The flags from the ELF program header (p_flags field of \fBElf32_Phdr\fP or \fBElf64_Phdr\fP)\&. 
 .br
 \fIbuf\fP Output buffer to store the formatted string\&. Must be preallocated\&. 
 .br
@@ -483,33 +444,6 @@ Example output:
 .fi
 .PP
  
-.SS "void print_hex_header (unsigned long long offset)"
-
-.PP
-Print the hex dump header row\&. This function prints the header line used in a hex dump, showing both the hexadecimal column labels (00–0F) and the ASCII column labels\&. It also highlights the header with green color using ANSI escape codes\&.
-
-.PP
-Example output (simplified): 
-.PP
-.nf
-|
-|    \-\-Offset\-\-   0 1 2 3 4 5 6 7 8 9 A B C D E F    0123456789ABCDEF
-
-.fi
-.PP
-
-.PP
-\fBParameters\fP
-.RS 4
-\fIoffset\fP Starting offset for the hex dump (not currently used in the header itself, but included for consistency)\&.
-.RE
-.PP
-\fBNote\fP
-.RS 4
-The function assumes ANSI color macros like COLOR_GREEN and COLOR_RESET are defined\&. 
-.RE
-.PP
-
 .SS "void print_highlight_asm (const char * line)"
 
 .PP
@@ -598,7 +532,7 @@ Uses ANSI color codes (COLOR_RED, COLOR_GREEN, COLOR_YELLOW, COLOR_CYAN, COLOR_M
 .RE
 .PP
 
-.SS "void print_program_header_metadata_32bit (unsigned int id, const char * type_str, const char * flags, Elf32_Phdr * phdr)"
+.SS "void print_program_header_metadata_32bit (unsigned int id, const char * type_str, const char * flags, \fBElf32_Phdr\fP * phdr)"
 
 .PP
 Print metadata of a 32-bit ELF program header (segment)\&. This function prints detailed information about a single ELF32 program segment, including type, flags, offset, virtual/physical addresses, file/memory size, and alignment\&. It uses ANSI color codes for visual distinction\&.
@@ -612,7 +546,7 @@ Print metadata of a 32-bit ELF program header (segment)\&. This function prints 
 .br
 \fIflags\fP A string representing the segment flags (e\&.g\&., "R E" for readable + executable)\&. 
 .br
-\fIphdr\fP Pointer to the array of ELF32 program headers (Elf32_Phdr[])\&.
+\fIphdr\fP Pointer to the array of ELF32 program headers (\fBElf32_Phdr\fP[])\&.
 .RE
 .PP
 \fBNote\fP
@@ -636,7 +570,7 @@ Example output:
 .fi
 .PP
  
-.SS "void print_program_header_metadata_64bit (unsigned int id, const char * type_str, const char * flags, Elf64_Phdr * phdr)"
+.SS "void print_program_header_metadata_64bit (unsigned int id, const char * type_str, const char * flags, \fBElf64_Phdr\fP * phdr)"
 
 .PP
 Print metadata of a 64-bit ELF program header (segment)\&. This function prints detailed information about a single ELF64 program segment, including type, flags, offset, virtual/physical addresses, file/memory size, and alignment\&. It uses ANSI color codes for visual distinction\&.
@@ -650,7 +584,7 @@ Print metadata of a 64-bit ELF program header (segment)\&. This function prints 
 .br
 \fIflags\fP A string representing the segment flags (e\&.g\&., "R E" for readable + executable)\&. 
 .br
-\fIphdr\fP Pointer to the array of ELF64 program headers (Elf64_Phdr[])\&.
+\fIphdr\fP Pointer to the array of ELF64 program headers (\fBElf64_Phdr\fP[])\&.
 .RE
 .PP
 \fBNote\fP
@@ -731,7 +665,7 @@ Uses ANSI color codes (COLOR_RED, COLOR_GREEN, COLOR_YELLOW, COLOR_CYAN, COLOR_M
 .RE
 .PP
 
-.SS "void print_section_header_metadata_32bit (unsigned int id, const char * name, const char * type_str, const char * flags, Elf32_Shdr * shdrs)"
+.SS "void print_section_header_metadata_32bit (unsigned int id, const char * name, const char * type_str, const char * flags, \fBElf32_Shdr\fP * shdrs)"
 
 .PP
 Print metadata of a 32-bit ELF section header\&. This function prints detailed information about a single ELF32 section, including type, flags, address, offset, size, link, info, alignment, and entry size\&. It uses ANSI color codes for visual distinction\&.
@@ -747,7 +681,7 @@ Print metadata of a 32-bit ELF section header\&. This function prints detailed i
 .br
 \fIflags\fP A string representing the section flags (e\&.g\&., "AX" for alloc+execute)\&. 
 .br
-\fIshdrs\fP Pointer to the array of ELF32 section headers (Elf32_Shdr[])\&.
+\fIshdrs\fP Pointer to the array of ELF32 section headers (\fBElf32_Shdr\fP[])\&.
 .RE
 .PP
 \fBNote\fP
@@ -772,7 +706,7 @@ Example output:
 .fi
 .PP
  
-.SS "void print_section_header_metadata_64bit (unsigned int id, const char * name, const char * type_str, const char * flags, Elf64_Shdr * shdrs)"
+.SS "void print_section_header_metadata_64bit (unsigned int id, const char * name, const char * type_str, const char * flags, \fBElf64_Shdr\fP * shdrs)"
 
 .PP
 Print metadata of a 64-bit ELF section header\&. This function prints detailed information about a single ELF64 section, including type, flags, address, offset, size, link, info, alignment, and entry size\&. It uses ANSI color codes for visual distinction\&.
@@ -788,7 +722,7 @@ Print metadata of a 64-bit ELF section header\&. This function prints detailed i
 .br
 \fIflags\fP A string representing the section flags (e\&.g\&., "AX" for alloc+execute)\&. 
 .br
-\fIshdrs\fP Pointer to the array of ELF64 section headers (Elf64_Shdr[])\&.
+\fIshdrs\fP Pointer to the array of ELF64 section headers (\fBElf64_Shdr\fP[])\&.
 .RE
 .PP
 \fBNote\fP
@@ -813,7 +747,7 @@ Example output:
 .fi
 .PP
  
-.SS "void print_symbols_32bit (\fBbparser\fP * parser, Elf32_Ehdr * elf, Elf32_Shdr * shdrs, Elf32_Shdr * symtab, Elf32_Shdr * strtab)"
+.SS "void print_symbols_32bit (\fBbparser\fP * parser, \fBElf32_Ehdr\fP * elf, \fBElf32_Shdr\fP * shdrs, \fBElf32_Shdr\fP * symtab, \fBElf32_Shdr\fP * strtab)"
 
 .PP
 Print all symbols from a 32-bit ELF file (with colors)\&. This function iterates over the ELF32 symbol table (\fRsymtab\fP) and its associated string table (\fRstrtab\fP) to display information about each symbol\&. It prints a nicely formatted and colorized table that includes:
@@ -860,7 +794,7 @@ Output uses ANSI color codes, so results may look odd in non-color terminals\&.
 .RE
 .PP
 
-.SS "void print_symbols_64bit (\fBbparser\fP * parser, Elf64_Ehdr * elf, Elf64_Shdr * shdrs, Elf64_Shdr * symtab, Elf64_Shdr * strtab)"
+.SS "void print_symbols_64bit (\fBbparser\fP * parser, \fBElf64_Ehdr\fP * elf, \fBElf64_Shdr\fP * shdrs, \fBElf64_Shdr\fP * symtab, \fBElf64_Shdr\fP * strtab)"
 
 .PP
 Print all symbols from a 64-bit ELF file (with colors)\&. This function iterates over the ELF64 symbol table (\fRsymtab\fP) and its associated string table (\fRstrtab\fP) to display information about each symbol\&. It prints a formatted and colorized table including:
@@ -907,7 +841,7 @@ Output uses ANSI color codes, so results may appear incorrect in terminals witho
 .RE
 .PP
 
-.SS "void print_symbols_with_disasm_32bit (\fBbparser\fP * parser, Elf32_Ehdr * elf, Elf32_Shdr * shdrs, Elf32_Shdr * symtab, Elf32_Shdr * strtab)"
+.SS "void print_symbols_with_disasm_32bit (\fBbparser\fP * parser, \fBElf32_Ehdr\fP * elf, \fBElf32_Shdr\fP * shdrs, \fBElf32_Shdr\fP * symtab, \fBElf32_Shdr\fP * strtab)"
 
 .PP
 Print ELF32 symbols along with disassembly for functions\&. This function iterates over the symbol table of a 32-bit ELF file, printing information about each symbol and disassembling function symbols\&. It highlights the type of each symbol using ANSI color codes\&.
@@ -917,13 +851,13 @@ Print ELF32 symbols along with disassembly for functions\&. This function iterat
 .RS 4
 \fIparser\fP Pointer to a bparser structure containing the loaded ELF data\&. 
 .br
-\fIelf\fP Pointer to the ELF32 file header (Elf32_Ehdr)\&. 
+\fIelf\fP Pointer to the ELF32 file header (\fBElf32_Ehdr\fP)\&. 
 .br
-\fIshdrs\fP Pointer to the section header array (Elf32_Shdr[])\&. 
+\fIshdrs\fP Pointer to the section header array (\fBElf32_Shdr\fP[])\&. 
 .br
-\fIsymtab\fP Pointer to the section header of the symbol table (Elf32_Shdr)\&. 
+\fIsymtab\fP Pointer to the section header of the symbol table (\fBElf32_Shdr\fP)\&. 
 .br
-\fIstrtab\fP Pointer to the section header of the associated string table (Elf32_Shdr)\&.
+\fIstrtab\fP Pointer to the section header of the associated string table (\fBElf32_Shdr\fP)\&.
 .RE
 .PP
 \fBNote\fP
@@ -932,7 +866,7 @@ The function assumes:
 .IP "\(bu" 2
 ANSI color macros (COLOR_RESET, COLOR_YELLOW, COLOR_BLUE, etc\&.) are defined\&.
 .IP "\(bu" 2
-Helper function \fRprint_disasm\fP exists to disassemble memory regions\&.
+Helper function \fR\fBprint_disasm\fP\fP exists to disassemble memory regions\&.
 .IP "\(bu" 2
 ELF macros like \fRELF32_ST_TYPE\fP, and constants like \fRSTT_FUNC\fP, \fRSTT_OBJECT\fP are defined\&.
 .IP "\(bu" 2
@@ -951,7 +885,7 @@ Example output:
 .fi
 .PP
  
-.SS "void print_symbols_with_disasm_64bit (\fBbparser\fP * parser, Elf64_Ehdr * elf, Elf64_Shdr * shdrs, Elf64_Shdr * symtab, Elf64_Shdr * strtab)"
+.SS "void print_symbols_with_disasm_64bit (\fBbparser\fP * parser, \fBElf64_Ehdr\fP * elf, \fBElf64_Shdr\fP * shdrs, \fBElf64_Shdr\fP * symtab, \fBElf64_Shdr\fP * strtab)"
 
 .PP
 Print ELF64 symbols along with disassembly for functions\&. This function iterates over the symbol table of a 64-bit ELF file, printing information about each symbol and disassembling function symbols\&. It highlights the type of each symbol using ANSI color codes\&.
@@ -961,13 +895,13 @@ Print ELF64 symbols along with disassembly for functions\&. This function iterat
 .RS 4
 \fIparser\fP Pointer to a bparser structure containing the loaded ELF data\&. 
 .br
-\fIelf\fP Pointer to the ELF64 file header (Elf64_Ehdr)\&. 
+\fIelf\fP Pointer to the ELF64 file header (\fBElf64_Ehdr\fP)\&. 
 .br
-\fIshdrs\fP Pointer to the section header array (Elf64_Shdr[])\&. 
+\fIshdrs\fP Pointer to the section header array (\fBElf64_Shdr\fP[])\&. 
 .br
-\fIsymtab\fP Pointer to the section header of the symbol table (Elf64_Shdr)\&. 
+\fIsymtab\fP Pointer to the section header of the symbol table (\fBElf64_Shdr\fP)\&. 
 .br
-\fIstrtab\fP Pointer to the section header of the associated string table (Elf64_Shdr)\&.
+\fIstrtab\fP Pointer to the section header of the associated string table (\fBElf64_Shdr\fP)\&.
 .RE
 .PP
 \fBNote\fP
@@ -976,7 +910,7 @@ The function assumes:
 .IP "\(bu" 2
 ANSI color macros (COLOR_RESET, COLOR_YELLOW, COLOR_BLUE, etc\&.) are defined\&.
 .IP "\(bu" 2
-Helper function \fRprint_disasm\fP exists to disassemble memory regions\&.
+Helper function \fR\fBprint_disasm\fP\fP exists to disassemble memory regions\&.
 .IP "\(bu" 2
 ELF macros like \fRELF64_ST_TYPE\fP, and constants like \fRSTT_FUNC\fP, \fRSTT_OBJECT\fP are defined\&.
 .IP "\(bu" 2
@@ -992,6 +926,34 @@ Example output:
   0x00401000:  mov rax, rbx
   \&.\&.\&.
 
+.fi
+.PP
+ 
+.SS "const char * rel_R_X86_64_type_to_str (uint32_t type)"
+
+.PP
+Convert an AMD x86-64 relocation type to its string representation\&. This function takes a relocation type constant (R_X86_64_*) and returns a human-readable string describing the type\&. If the type is unknown, it returns "UNKNOWN"\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fItype\fP The relocation type value (uint32_t), typically extracted from the r_info field of an \fBElf64_Rela\fP or \fBElf64_Rel\fP entry using ELF64_R_TYPE()\&.
+.RE
+.PP
+\fBReturns\fP
+.RS 4
+A constant string representing the relocation type name\&.
+.RE
+.PP
+\fBNote\fP
+.RS 4
+This only covers standard AMD x86-64 relocation types\&.
+.RE
+.PP
+.PP
+.nf
+uint32_t type = ELF64_R_TYPE(rela_entry\&.r_info);
+printf("Relocation type: %s\\n", rel_R_X86_64_type_to_str(type));
 .fi
 .PP
  

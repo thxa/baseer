@@ -1,0 +1,192 @@
+.TH "md_CONTRIBUTING" 3 "Version 0.2.0" "Baseer" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+md_CONTRIBUTING \- Contributing to Baseer 
+.PP
+
+
+.PP
+Thank you for your interest in contributing to \fBBaseer\fP! This guide explains how to add new features, extend file format support, and follow project standards\&.
+
+.PP
+.PP
+.SH "Understanding Baseer’s Extension System"
+.PP
+Baseer operates using \fBcallbacks\fP tied to \fBmagic numbers\fP\&. Each supported file format (like ELF or TAR) has a specific magic number that triggers a handler function when detected\&.
+
+.PP
+When Baseer opens a file:
+
+.PP
+.IP "1." 4
+It reads the header\&.
+.IP "2." 4
+Matches it against entries in the \fR\fBbmagic\fP\fP array\&.
+.IP "3." 4
+Executes the corresponding parser callback (\fRbx_<format>\fP)\&.
+.PP
+
+.PP
+Each \fRbx_<format>\fP function can apply multiple tool callbacks (like metadata, disassembler, or debugger)\&.
+
+.PP
+.PP
+.SH "Adding a New File Format"
+.PP
+Follow these steps to add support for a new file type (e\&.g\&., PDF, PE, PNG, \&.\&.\&.):
+.SS "1\&. Create a New Module"
+Inside the \fRmodules/\fP directory, create a folder for your format:
+
+.PP
+.PP
+.nf
+modules/pdf/
+.fi
+.PP
+
+.PP
+Then add a new file:
+
+.PP
+.PP
+.nf
+modules/pdf/bx_pdf\&.c
+.fi
+.PP
+.SS "2\&. Define the Format Callback"
+Your callback should follow the same pattern as other formats (e\&.g\&., \fRbx_elf\fP):
+
+.PP
+.PP
+.nf
+bool bx_pdf(bparser* parser, void* arg)
+{
+    int argc = *((inputs*)arg)\->argc;
+    char** args = ((inputs*)arg)\->args;
+
+    for (int i = 2; i < argc; i++) {
+        if (strcmp("\-m", args[i]) == 0)
+            bparser_apply(parser, b_pdf_metadata, arg);
+        else if (strcmp("\-c", args[i]) == 0)
+            bparser_apply(parser, b_pdf_content, arg);
+        else
+            fprintf(stderr, "[!] Unsupported flag: %s\\n", args[i]);
+    }
+
+    return true;
+}
+.fi
+.PP
+.SS "3\&. Implement Tool Functions"
+Create tool callbacks for specific operations:
+
+.PP
+.PP
+.nf
+bool b_pdf_metadata(bparser* parser, void* arg)
+{
+    printf("PDF metadata reader not implemented yet\&.\\n");
+    return true;
+}
+
+bool b_pdf_content(bparser* parser, void* arg)
+{
+    printf("PDF content extractor not implemented yet\&.\\n");
+    return true;
+}
+.fi
+.PP
+.SS "4\&. Register Your Format"
+Edit the \fRmagics\fP array (usually in \fR\fBbaseer\&.c\fP\fP):
+
+.PP
+.PP
+.nf
+bmagic magics[] = {
+    {"ELF", ELF_MAGIC, reverse_bytes(ELF_MAGIC), bx_elf, 0},
+    {"TAR", TAR_MAGIC, reverse_bytes(TAR_MAGIC), bx_tar, 257},
+    {"PDF", PDF_MAGIC, reverse_bytes(PDF_MAGIC), bx_pdf, 0},
+    {NULL, 0, 0, NULL, 0}
+};
+.fi
+.PP
+.SS "5\&. Rebuild"
+.PP
+.nf
+make clean
+make
+.fi
+.PP
+.SS "6\&. Test Your Format"
+Run Baseer with your new format:
+
+.PP
+.PP
+.nf
+\&./baseer sample\&.pdf \-m
+.fi
+.PP
+
+.PP
+.PP
+.SH "Naming Conventions"
+.PP
+Type  Example  Description  Format callback  \fRbx_<format>\fP  Main entry for file format  Tool callback  \fRb_<tool>\fP  Function used inside format callback  Header dump  \fRdump_<format>hdr()\fP  Function for metadata output  Debugger  \fR\fBb_debugger()\fP\fP  Core debugging tool  Decompiler  \fRb_decompiler()\fP  Decompiler module  
+
+.PP
+.PP
+.SH "Code Style Guidelines"
+.PP
+.IP "\(bu" 2
+Use \fBC99\fP standard\&.
+.IP "\(bu" 2
+Follow existing formatting and naming conventions\&.
+.IP "\(bu" 2
+Keep functions small and modular\&.
+.IP "\(bu" 2
+Always return \fRtrue\fP or \fRfalse\fP for callback success/failure\&.
+.IP "\(bu" 2
+Use \fRfprintf(stderr, …)\fP for error messages\&.
+.IP "\(bu" 2
+Keep console outputs colored using defined macros (e\&.g\&., \fRCOLOR_RED\fP, \fRCOLOR_GREEN\fP, \fRCOLOR_BLUE\fP)\&.
+.PP
+
+.PP
+.PP
+.SH "Tips for New Developers"
+.PP
+.IP "\(bu" 2
+Start by reading existing implementations in \fRmodules/elf/\fP and \fRmodules/tar/\fP\&.
+.IP "\(bu" 2
+Understand how \fR\fBbparser_apply()\fP\fP dispatches functions\&.
+.IP "\(bu" 2
+Use the \fBhashmap\fP inside \fR\fBinputs\fP\fP for sharing data between callbacks\&.
+.IP "\(bu" 2
+Test your module with small, well-known files\&.
+.IP "\(bu" 2
+If your format requires byte-order conversion, use \fRreverse_bytes()\fP\&.
+.PP
+
+.PP
+.PP
+.SH "Future Contributions"
+.PP
+You’re encouraged to contribute:
+
+.PP
+.IP "\(bu" 2
+New format handlers (Mach-O, PDF, PNG, ZIP, etc\&.)
+.IP "\(bu" 2
+Additional tools (debuggers, extractors, analyzers)
+.IP "\(bu" 2
+Improvements to the CLI and parser
+.IP "\(bu" 2
+Documentation and tutorials
+.PP
+
+.PP
+.PP
+.SH "Thanks"
+.PP
+Your contributions make Baseer stronger and more flexible\&. Feel free to open issues or pull requests anytime! 

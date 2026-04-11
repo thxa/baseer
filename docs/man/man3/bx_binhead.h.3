@@ -37,7 +37,19 @@ modules/binhead/bx_binhead.h \- Functions to handle and identify file types usin
 .RI "#define \fBPDF_MAGIC\fP   0x255044462D"
 .br
 .ti -1c
-.RI "#define \fBMACHO_MAGIC\fP   0xCEFAEDFE"
+.RI "#define \fBFAT_MAGIC\fP   0xCAFEBABE"
+.br
+.ti -1c
+.RI "#define \fBMH_MAGIC\fP   0xfeedface /* the mach magic number */"
+.br
+.ti -1c
+.RI "#define \fBMH_CIGAM\fP   0xcefaedfe /* NXSwapInt(MH_MAGIC) */"
+.br
+.ti -1c
+.RI "#define \fBMH_MAGIC_64\fP   0xfeedfacf /* the 64\-bit mach magic number */"
+.br
+.ti -1c
+.RI "#define \fBMH_CIGAM_64\fP   0xcffaedfe /* NXSwapInt(MH_MAGIC_64) */"
 .br
 .ti -1c
 .RI "#define \fBTAR_MAGIC\fP   0x7573746172"

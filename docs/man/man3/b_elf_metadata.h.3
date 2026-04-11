@@ -11,7 +11,7 @@ modules/b_elf_metadata/b_elf_metadata.h \- ELF metadata extraction and printing 
 .br
 \fR#include '\&.\&./\&.\&./baseer\&.h'\fP
 .br
-\fR#include <elf\&.h>\fP
+\fR#include 'elf\&.h'\fP
 .br
 \fR#include <string\&.h>\fP
 .br
@@ -24,27 +24,27 @@ modules/b_elf_metadata/b_elf_metadata.h \- ELF metadata extraction and printing 
 
 .in +1c
 .ti -1c
-.RI "void \fBdump_elf32hdr\fP (Elf32_Ehdr *elf)"
+.RI "void \fBdump_elf32hdr\fP (\fBElf32_Ehdr\fP *elf)"
 .br
 .RI "Dump the ELF header information for a 32-bit ELF file\&. "
 .ti -1c
-.RI "void \fBdump_elf64hdr\fP (Elf64_Ehdr *elf)"
+.RI "void \fBdump_elf64hdr\fP (\fBElf64_Ehdr\fP *elf)"
 .br
 .RI "Dump the ELF header information for a 64-bit ELF file\&. "
 .ti -1c
-.RI "void \fBdump_elf32_shdr\fP (Elf32_Ehdr *elf, Elf32_Shdr *shdrs, \fBbparser\fP *parser)"
+.RI "void \fBdump_elf32_shdr\fP (\fBElf32_Ehdr\fP *elf, \fBElf32_Shdr\fP *shdrs, \fBbparser\fP *parser, void *arg)"
 .br
 .RI "Dump the section header table of a 32-bit ELF file\&. "
 .ti -1c
-.RI "void \fBdump_elf64_shdr\fP (Elf64_Ehdr *elf, Elf64_Shdr *shdrs, \fBbparser\fP *parser)"
+.RI "void \fBdump_elf64_shdr\fP (\fBElf64_Ehdr\fP *elf, \fBElf64_Shdr\fP *shdrs, \fBbparser\fP *parser, void *arg)"
 .br
 .RI "Dump the section header table of a 64-bit ELF file\&. "
 .ti -1c
-.RI "void \fBdump_elf32_phdr\fP (Elf32_Ehdr *elf, Elf32_Phdr *phdr, \fBbparser\fP *parser)"
+.RI "void \fBdump_elf32_phdr\fP (\fBElf32_Ehdr\fP *elf, \fBElf32_Phdr\fP *phdr, \fBbparser\fP *parser)"
 .br
 .RI "Dump the program header table of a 32-bit ELF file\&. "
 .ti -1c
-.RI "void \fBdump_elf64_phdr\fP (Elf64_Ehdr *elf, Elf64_Phdr *phdr, \fBbparser\fP *parser)"
+.RI "void \fBdump_elf64_phdr\fP (\fBElf64_Ehdr\fP *elf, \fBElf64_Phdr\fP *phdr, \fBbparser\fP *parser)"
 .br
 .RI "Dump the program header table of a 64-bit ELF file\&. "
 .ti -1c
@@ -81,7 +81,7 @@ Supports both 32bit and 64bit binaries\&.
 
 .SH "Function Documentation"
 .PP 
-.SS "void dump_elf32_phdr (Elf32_Ehdr * elf, Elf32_Phdr * phdr, \fBbparser\fP * parser)"
+.SS "void dump_elf32_phdr (\fBElf32_Ehdr\fP * elf, \fBElf32_Phdr\fP * phdr, \fBbparser\fP * parser)"
 
 .PP
 Dump the program header table of a 32-bit ELF file\&. This function iterates over the program headers of a 32-bit ELF file and prints metadata and raw contents for each segment\&. 
@@ -118,9 +118,9 @@ If a segment has file size > 0, its raw bytes are read from the ELF file using \
 .PP
 \fBParameters\fP
 .RS 4
-\fIelf\fP Pointer to the ELF header (Elf32_Ehdr)\&. 
+\fIelf\fP Pointer to the ELF header (\fBElf32_Ehdr\fP)\&. 
 .br
-\fIphdr\fP Pointer to the program header table (array of Elf32_Phdr)\&. 
+\fIphdr\fP Pointer to the program header table (array of \fBElf32_Phdr\fP)\&. 
 .br
 \fIparser\fP Pointer to a bparser structure that provides access to the file data\&.
 .RE
@@ -136,7 +136,7 @@ Output is color formatted and written to standard output\&.
 .RE
 .PP
 
-.SS "void dump_elf32_shdr (Elf32_Ehdr * elf, Elf32_Shdr * shdrs, \fBbparser\fP * parser)"
+.SS "void dump_elf32_shdr (\fBElf32_Ehdr\fP * elf, \fBElf32_Shdr\fP * shdrs, \fBbparser\fP * parser, void * arg)"
 
 .PP
 Dump the section header table of a 32-bit ELF file\&. This function iterates over the section headers of a 32-bit ELF file and prints human-readable information for each section\&. 
@@ -167,9 +167,9 @@ If a section has size > 0, its contents are read from the ELF file using \fBbpar
 .PP
 \fBParameters\fP
 .RS 4
-\fIelf\fP Pointer to the ELF header (Elf32_Ehdr)\&. 
+\fIelf\fP Pointer to the ELF header (\fBElf32_Ehdr\fP)\&. 
 .br
-\fIshdrs\fP Pointer to the section header table (array of Elf32_Shdr)\&. 
+\fIshdrs\fP Pointer to the section header table (array of \fBElf32_Shdr\fP)\&. 
 .br
 \fIparser\fP Pointer to a bparser structure that provides access to the file data\&.
 .RE
@@ -185,7 +185,7 @@ Output is color formatted and written to standard output\&.
 .RE
 .PP
 
-.SS "void dump_elf32hdr (Elf32_Ehdr * elf)"
+.SS "void dump_elf32hdr (\fBElf32_Ehdr\fP * elf)"
 
 .PP
 Dump the ELF header information for a 32-bit ELF file\&. This function prints human-readable information about the provided 32-bit ELF header, including:
@@ -206,7 +206,7 @@ File type and machine type (both as strings and raw values)
 .PP
 \fBParameters\fP
 .RS 4
-\fIelf\fP Pointer to an Elf32_Ehdr structure representing the ELF header\&.
+\fIelf\fP Pointer to an \fBElf32_Ehdr\fP structure representing the ELF header\&.
 .RE
 .PP
 \fBNote\fP
@@ -220,7 +220,7 @@ The output is printed to standard output with color formatting\&.
 .RE
 .PP
 
-.SS "void dump_elf64_phdr (Elf64_Ehdr * elf, Elf64_Phdr * phdr, \fBbparser\fP * parser)"
+.SS "void dump_elf64_phdr (\fBElf64_Ehdr\fP * elf, \fBElf64_Phdr\fP * phdr, \fBbparser\fP * parser)"
 
 .PP
 Dump the program header table of a 64-bit ELF file\&. This function iterates over the program headers of a 64-bit ELF file and prints metadata and raw contents for each segment\&. 
@@ -257,9 +257,9 @@ If a segment has file size > 0, its raw bytes are read from the ELF file using \
 .PP
 \fBParameters\fP
 .RS 4
-\fIelf\fP Pointer to the ELF header (Elf64_Ehdr)\&. 
+\fIelf\fP Pointer to the ELF header (\fBElf64_Ehdr\fP)\&. 
 .br
-\fIphdr\fP Pointer to the program header table (array of Elf64_Phdr)\&. 
+\fIphdr\fP Pointer to the program header table (array of \fBElf64_Phdr\fP)\&. 
 .br
 \fIparser\fP Pointer to a bparser structure that provides access to the file data\&.
 .RE
@@ -275,7 +275,7 @@ Output is color formatted and written to standard output\&.
 .RE
 .PP
 
-.SS "void dump_elf64_shdr (Elf64_Ehdr * elf, Elf64_Shdr * shdrs, \fBbparser\fP * parser)"
+.SS "void dump_elf64_shdr (\fBElf64_Ehdr\fP * elf, \fBElf64_Shdr\fP * shdrs, \fBbparser\fP * parser, void * arg)"
 
 .PP
 Dump the section header table of a 64-bit ELF file\&. This function iterates over the section headers of a 64-bit ELF file and prints human-readable information for each section\&. 
@@ -306,9 +306,9 @@ If a section has size > 0, its contents are read from the ELF file using \fBbpar
 .PP
 \fBParameters\fP
 .RS 4
-\fIelf\fP Pointer to the ELF header (Elf64_Ehdr)\&. 
+\fIelf\fP Pointer to the ELF header (\fBElf64_Ehdr\fP)\&. 
 .br
-\fIshdrs\fP Pointer to the section header table (array of Elf64_Shdr)\&. 
+\fIshdrs\fP Pointer to the section header table (array of \fBElf64_Shdr\fP)\&. 
 .br
 \fIparser\fP Pointer to a bparser structure that provides access to the file data\&.
 .RE
@@ -324,7 +324,7 @@ Output is color formatted and written to standard output\&.
 .RE
 .PP
 
-.SS "void dump_elf64hdr (Elf64_Ehdr * elf)"
+.SS "void dump_elf64hdr (\fBElf64_Ehdr\fP * elf)"
 
 .PP
 Dump the ELF header information for a 64-bit ELF file\&. This function prints human-readable information about the provided 64-bit ELF header, including:
@@ -345,7 +345,7 @@ File type and machine type (both as strings and raw values)
 .PP
 \fBParameters\fP
 .RS 4
-\fIelf\fP Pointer to an Elf64_Ehdr structure representing the ELF header\&.
+\fIelf\fP Pointer to an \fBElf64_Ehdr\fP structure representing the ELF header\&.
 .RE
 .PP
 \fBNote\fP
@@ -359,7 +359,7 @@ The output is printed to standard output with color formatting\&.
 .RE
 .PP
 
-.SS "bool print_meta_data (\fBbparser\fP * parser, void * args)"
+.SS "bool print_meta_data (\fBbparser\fP * parser, void * arg)"
 
 .PP
 Print high-level metadata of an ELF file and dispatch detailed dump functions\&. This function reads the ELF identification bytes from the parser source memory to determine:

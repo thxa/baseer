@@ -1,0 +1,246 @@
+/* Baseer — Custom Doxygen Stylesheet
+ * Improves fonts, spacing, and overall layout readability.
+ * Loaded via HTML_EXTRA_STYLESHEET so it overrides doxygen.css.
+ */
+
+/* ===== Font overrides ===== */
+html {
+  --font-family-normal: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-family-monospace: 'Fira Code', 'JetBrains Mono', Consolas, 'Ubuntu Mono', monospace;
+  --font-family-nav: 'Inter', 'Lucida Grande', Geneva, Helvetica, Arial, sans-serif;
+  --font-family-title: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-family-toc: 'Inter', Verdana, 'DejaVu Sans', Geneva, sans-serif;
+  --font-family-search: 'Inter', Arial, Verdana, sans-serif;
+  --font-family-tooltip: 'Inter', Roboto, sans-serif;
+
+  /* Slightly larger nav font sizes for readability */
+  --nav-font-size-level1: 14px;
+  --nav-font-size-level2: 12px;
+  --nav-font-size-level3: 11px;
+}
+
+/* ===== Base body typography ===== */
+body {
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== Project title area ===== */
+#titlearea {
+  padding: 12px 16px;
+  border-bottom: 2px solid var(--title-separator-color);
+}
+
+#projectname {
+  font-size: 1.8em;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+
+#projectnumber {
+  font-weight: 400;
+  opacity: 0.6;
+  font-size: 0.55em;
+  margin-left: 4px;
+}
+
+#projectbrief {
+  font-size: 0.95em;
+  line-height: 1.5;
+  margin-top: 4px;
+  opacity: 0.75;
+  font-weight: 400;
+}
+
+#projectlogo img {
+  max-height: 56px;
+  margin-right: 14px;
+}
+
+/* ===== Page headings ===== */
+div.headertitle .title {
+  font-size: 1.75em;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  padding-bottom: 8px;
+}
+
+.title .ingroups {
+  font-size: 0.6em;
+  font-weight: 400;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+h2.groupheader {
+  font-size: 1.25em;
+  padding-bottom: 6px;
+  margin-top: 1.5em;
+}
+
+/* ===== Content area spacing ===== */
+div.contents {
+  padding: 16px 24px;
+  max-width: 960px;
+}
+
+div.contents p,
+div.contents li {
+  line-height: 1.65;
+}
+
+/* ===== Member documentation ===== */
+.memtitle {
+  font-size: 1.05em;
+  font-weight: 600;
+  padding: 8px 12px;
+}
+
+.memname {
+  font-size: 0.95em;
+  font-weight: 500;
+}
+
+.memproto {
+  padding: 10px 14px;
+}
+
+.memdoc {
+  padding: 12px 16px;
+  line-height: 1.6;
+}
+
+td.paramname {
+  font-weight: 500;
+  font-size: 0.9em;
+}
+
+/* ===== Code fragments ===== */
+div.fragment,
+pre.fragment {
+  font-size: 0.88em;
+  line-height: 1.55;
+  padding: 14px 16px;
+  border-radius: 6px;
+}
+
+code, .code {
+  font-size: 0.9em;
+}
+
+/* ===== Navigation tree (sidebar) ===== */
+#nav-tree .label {
+  font-size: var(--nav-font-size-level1);
+  line-height: 1.5;
+  padding: 3px 0;
+}
+
+#nav-tree .item {
+  padding: 2px 0;
+}
+
+#side-nav {
+  width: 280px;
+}
+
+/* ===== Top navigation bar ===== */
+.sm-dox a,
+.sm-dox a:hover,
+.sm-dox a:focus {
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 14px;
+  letter-spacing: 0.01em;
+}
+
+/* ===== Tables ===== */
+table.memberdecls {
+  border-spacing: 0 2px;
+}
+
+.mdescLeft, .mdescRight,
+.memItemLeft, .memItemRight {
+  padding: 6px 10px;
+  font-size: 0.92em;
+}
+
+.memItemLeft, .memTemplItemLeft {
+  font-size: 0.88em;
+  white-space: nowrap;
+}
+
+/* ===== Directory / file list ===== */
+.directory td.entry {
+  padding: 4px 8px;
+  font-size: 0.93em;
+}
+
+/* ===== Footer ===== */
+.navpath ul {
+  font-size: 0.8em;
+  padding: 6px 16px;
+}
+
+li.footer {
+  font-size: 0.85em;
+  opacity: 0.7;
+}
+
+/* ===== Search box ===== */
+#MSearchBox {
+  border-radius: 6px;
+}
+
+#MSearchField {
+  font-size: 13px;
+}
+
+/* ===== Breadcrumb path ===== */
+.navpath li.navelem a {
+  font-size: 0.85em;
+  font-weight: 500;
+}
+
+/* ===== Scrollbar refinement (Webkit) ===== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-background-color);
+}
+
+/* ===== Tooltip ===== */
+.ttc {
+  font-size: 0.88em;
+  line-height: 1.5;
+  border-radius: 6px;
+}
+
+/* ===== Responsive: slightly tighter on small screens ===== */
+@media (max-width: 768px) {
+  div.contents {
+    padding: 12px 14px;
+  }
+
+  #projectname {
+    font-size: 1.4em;
+  }
+
+  #side-nav {
+    width: 220px;
+  }
+}

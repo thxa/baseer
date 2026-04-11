@@ -1,0 +1,41 @@
+.TH "modules/bx_macho/bx_macho.c" 3 "Version 0.2.0" "Baseer" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+modules/bx_macho/bx_macho.c \- Mach-O format handler for Baseer\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fR#include '\&./bx_macho\&.h'\fP
+.br
+\fR#include '\&.\&./\&.\&./baseer\&.h'\fP
+.br
+\fR#include '\&.\&./b_macho_metadata/b_macho_metadata\&.h'\fP
+.br
+\fR#include '\&.\&./bx_macho_disasm/bx_macho_disasm\&.h'\fP
+.br
+\fR#include '\&.\&./b_debugger/debugger\&.h'\fP
+.br
+\fR#include '\&.\&./bx_deElf/bx_deElf\&.h'\fP
+.br
+\fR#include <string\&.h>\fP
+.br
+\fR#include <stdio\&.h>\fP
+.br
+
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "bool \fBbx_macho\fP (\fBbparser\fP *parser, void *arg)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Mach-O format handler for Baseer\&. 
+
+Dispatches Mach-O analysis based on command-line flags: -m Metadata (headers, load commands, segments, symbols) -a Disassembly (executable sections with symbol labels) -d Debugger (ptrace-based, same as ELF) -c Decompiler (RetDec integration, same as ELF) 
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Baseer from the source code\&.

@@ -1,0 +1,141 @@
+.TH "tests/test_framework.h" 3 "Version 0.2.0" "Baseer" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+tests/test_framework.h \- Minimal single-header unit test framework for Baseer\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fR#include <stdio\&.h>\fP
+.br
+\fR#include <string\&.h>\fP
+.br
+\fR#include <stdlib\&.h>\fP
+.br
+
+.SS "Macros"
+
+.in +1c
+.ti -1c
+.RI "#define \fBTEST\fP(name)"
+.br
+.ti -1c
+.RI "#define \fBRUN_TEST\fP(name)"
+.br
+.ti -1c
+.RI "#define \fBASSERT\fP(cond)"
+.br
+.ti -1c
+.RI "#define \fBASSERT_EQ\fP(a,  b)"
+.br
+.ti -1c
+.RI "#define \fBASSERT_NEQ\fP(a,  b)"
+.br
+.ti -1c
+.RI "#define \fBASSERT_NULL\fP(p)"
+.br
+.ti -1c
+.RI "#define \fBASSERT_NOT_NULL\fP(p)"
+.br
+.ti -1c
+.RI "#define \fBASSERT_STR_EQ\fP(a,  b)"
+.br
+.ti -1c
+.RI "#define \fBTEST_REPORT\fP()"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Minimal single-header unit test framework for Baseer\&. 
+
+Usage: #include "test_framework\&.h" TEST(test_name) { ASSERT(1 == 1); } int main(void) { RUN_TEST(test_name); TEST_REPORT(); } 
+.SH "Macro Definition Documentation"
+.PP 
+.SS "#define ASSERT( cond)"
+\fBValue:\fP
+.nf
+    do { \\
+    if (!(cond)) { \\
+        printf("\\033[31mFAIL\\033[0m\\n"); \\
+        fprintf(stderr, "    Assertion failed: %s\\n    at %s:%d\\n", #cond, __FILE__, __LINE__); \\
+        _tf_fail++; \\
+        _tf_pass\-\-; /* undo the pre\-increment in RUN_TEST */ \\
+        return; \\
+    } \\
+} while(0)
+.PP
+.fi
+
+.SS "#define ASSERT_EQ( a,  b)"
+\fBValue:\fP
+.nf
+ASSERT((a) == (b))
+.PP
+.fi
+
+.SS "#define ASSERT_NEQ( a,  b)"
+\fBValue:\fP
+.nf
+ASSERT((a) != (b))
+.PP
+.fi
+
+.SS "#define ASSERT_NOT_NULL( p)"
+\fBValue:\fP
+.nf
+ASSERT((p) != NULL)
+.PP
+.fi
+
+.SS "#define ASSERT_NULL( p)"
+\fBValue:\fP
+.nf
+ASSERT((p) == NULL)
+.PP
+.fi
+
+.SS "#define ASSERT_STR_EQ( a,  b)"
+\fBValue:\fP
+.nf
+ASSERT(strcmp((a), (b)) == 0)
+.PP
+.fi
+
+.SS "#define RUN_TEST( name)"
+\fBValue:\fP
+.nf
+    do { \\
+    _tf_total++; \\
+    printf("  [RUN ] %s \&.\&.\&. ", #name); \\
+    fflush(stdout); \\
+    name(); \\
+    _tf_pass++; \\
+    printf("\\033[32mPASS\\033[0m\\n"); \\
+} while(0)
+.PP
+.fi
+
+.SS "#define TEST( name)"
+\fBValue:\fP
+.nf
+static void name(void)
+.PP
+.fi
+
+.SS "#define TEST_REPORT()"
+\fBValue:\fP
+.nf
+    do { \\
+    printf("\\n  ================================\\n"); \\
+    printf("  Results: %d/%d passed", _tf_pass, _tf_total); \\
+    if (_tf_fail > 0) printf(", \\033[31m%d failed\\033[0m", _tf_fail); \\
+    printf("\\n  ================================\\n"); \\
+    return (_tf_fail > 0) ? 1 : 0; \\
+} while(0)
+.PP
+.fi
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Baseer from the source code\&.

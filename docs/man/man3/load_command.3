@@ -1,0 +1,27 @@
+.TH "load_command" 3 "Version 0.2.0" "Baseer" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+load_command
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fR#include <macho\&.h>\fP
+.SS "Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "uint32_t \fBcmd\fP"
+.br
+.ti -1c
+.RI "uint32_t \fBcmdsize\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+The load commands directly follow the \fBmach_header\fP\&. The total size of all of the commands is given by the sizeofcmds field in the \fBmach_header\fP\&. All load commands must have as their first two fields cmd and cmdsize\&. The cmd field is filled in with a constant for that command type\&. Each command type has a structure specifically for it\&. The cmdsize field is the size in bytes of the particular load command structure plus anything that follows it that is a part of the load command (i\&.e\&. section structures, strings, etc\&.)\&. To advance to the next load command the cmdsize can be added to the offset or pointer of the current load command\&. The cmdsize for 32-bit architectures MUST be a multiple of 4 bytes and for 64-bit architectures MUST be a multiple of 8 bytes (these are forever the maximum alignment of any load commands)\&. The padded bytes must be zero\&. All tables in the object file must also follow these rules so the file can be memory mapped\&. Otherwise the pointers to these tables will not work well or at all on some machines\&. With all padding zeroed like objects will compare byte for byte\&. 
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Baseer from the source code\&.

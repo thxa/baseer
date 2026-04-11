@@ -1,0 +1,58 @@
+.TH "tests/test_macho.c" 3 "Version 0.2.0" "Baseer" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+tests/test_macho.c \- Unit tests for Mach-O parsing modules\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fR#include 'test_framework\&.h'\fP
+.br
+\fR#include <stdint\&.h>\fP
+.br
+\fR#include '\&.\&./baseer\&.h'\fP
+.br
+\fR#include '\&.\&./modules/bparser/bparser\&.h'\fP
+.br
+
+.SS "Macros"
+
+.in +1c
+.ti -1c
+.RI "#define \fBTEST_MACHO\fP   'examples/macho'"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBTEST\fP (test_macho_file_opens)"
+.br
+.ti -1c
+.RI "\fBTEST\fP (test_macho_magic_64)"
+.br
+.ti -1c
+.RI "\fBTEST\fP (test_macho_header_size)"
+.br
+.ti -1c
+.RI "\fBTEST\fP (test_macho_ncmds_sane)"
+.br
+.ti -1c
+.RI "\fBTEST\fP (test_macho_bparser_load)"
+.br
+.ti -1c
+.RI "\fBTEST\fP (test_macho_too_small_rejected)"
+.br
+.ti -1c
+.RI "int \fBmain\fP (void)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Unit tests for Mach-O parsing modules\&. 
+
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Baseer from the source code\&.

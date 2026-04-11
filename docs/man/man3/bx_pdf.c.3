@@ -1,0 +1,35 @@
+.TH "modules/bx_pdf/bx_pdf.c" 3 "Version 0.2.0" "Baseer" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+modules/bx_pdf/bx_pdf.c \- PDF format handler for Baseer\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fR#include '\&./bx_pdf\&.h'\fP
+.br
+\fR#include '\&.\&./\&.\&./baseer\&.h'\fP
+.br
+\fR#include '\&.\&./b_pdf_metadata/b_pdf_metadata\&.h'\fP
+.br
+\fR#include <string\&.h>\fP
+.br
+\fR#include <stdio\&.h>\fP
+.br
+
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "bool \fBbx_pdf\fP (\fBbparser\fP *parser, void *arg)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+PDF format handler for Baseer\&. 
+
+Dispatches PDF analysis based on command-line flags: -m Metadata (header, trailer, xref, objects summary) 
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Baseer from the source code\&.

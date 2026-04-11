@@ -20,6 +20,18 @@ utils/ui.h \- User interface utilities for Baseer\&.
 .ti -1c
 .RI "void \fBprint_usage\fP (void)"
 .br
+.ti -1c
+.RI "void \fBdisplay_byte\fP (const unsigned char *byte)"
+.br
+.RI "Display a single byte in hexadecimal with color coding\&. "
+.ti -1c
+.RI "void \fBdisplay_byte_char\fP (const unsigned char *byte)"
+.br
+.RI "Display a single byte as a printable character with color coding\&. "
+.ti -1c
+.RI "void \fBprint_hex_header\fP (unsigned long long offset)"
+.br
+.RI "Print the hex dump header row\&. "
 .in -1c
 .SH "Detailed Description"
 .PP 
@@ -28,6 +40,52 @@ User interface utilities for Baseer\&.
 
 .SH "Function Documentation"
 .PP 
+.SS "void display_byte (const unsigned char * byte)"
+
+.PP
+Display a single byte in hexadecimal with color coding\&. This function prints the value of a byte in hex format (two digits) and applies a color depending on its meaning:
+.IP "\(bu" 2
+Default (COLOR_YELLOW) for active instructions\&.
+.IP "\(bu" 2
+COLOR_RED for NOP (0x90), INT3 (0xCC), or filler bytes (0xFF)\&.
+.IP "\(bu" 2
+COLOR_GRAY for padding or null bytes (0x00)\&.
+.PP
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIbyte\fP Pointer to the byte to display\&.
+.RE
+.PP
+\fBNote\fP
+.RS 4
+The color codes are ANSI escape sequences\&. The color is reset after printing each byte using COLOR_RESET\&. 
+.RE
+.PP
+
+.SS "void display_byte_char (const unsigned char * byte)"
+
+.PP
+Display a single byte as a printable character with color coding\&. This function prints the ASCII representation of a byte\&. Non-printable bytes are shown as a '\&.' character\&. The output is color-coded based on the byte value:
+.IP "\(bu" 2
+0x90, 0xCC, 0xFF → COLOR_RED (low / unused bytes)
+.IP "\(bu" 2
+0x00 → COLOR_GRAY (padding or null bytes)
+.IP "\(bu" 2
+All other bytes → COLOR_YELLOW (default / active instruction)
+.PP
+
+.PP
+Printable ASCII characters (32-126) are displayed as-is, while non-printable bytes are represented with '\&.'\&.
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIbyte\fP Pointer to the byte to display\&. 
+.RE
+.PP
+
 .SS "void print_banner (void )"
 
 .PP
@@ -35,6 +93,33 @@ Prints the Baseer banner\&. Prints the Baseer banner\&.
 
 .PP
 Used when program is run with insufficient arguments or for branding\&. 
+.SS "void print_hex_header (unsigned long long offset)"
+
+.PP
+Print the hex dump header row\&. This function prints the header line used in a hex dump, showing both the hexadecimal column labels (00–0F) and the ASCII column labels\&. It also highlights the header with green color using ANSI escape codes\&.
+
+.PP
+Example output (simplified): 
+.PP
+.nf
+|
+|    \-\-Offset\-\-   0 1 2 3 4 5 6 7 8 9 A B C D E F    0123456789ABCDEF
+
+.fi
+.PP
+
+.PP
+\fBParameters\fP
+.RS 4
+\fIoffset\fP Starting offset for the hex dump (not currently used in the header itself, but included for consistency)\&.
+.RE
+.PP
+\fBNote\fP
+.RS 4
+The function assumes ANSI color macros like COLOR_GREEN and COLOR_RESET are defined\&. 
+.RE
+.PP
+
 .SH "Author"
 .PP 
 Generated automatically by Doxygen for Baseer from the source code\&.

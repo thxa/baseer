@@ -142,7 +142,15 @@ static char *capture_tool(AppState *st, const char *flag)
         }
     }
 
+    /* Temporarily restore default SIGCHLD so that tools using fork+waitpid
+     * (e.g. the decompiler's run_retdec) work correctly.  SIG_IGN causes
+     * automatic child reaping, which makes waitpid() return -1/ECHILD. */
+    struct sigaction old_sa;
+    sigaction(SIGCHLD, &(struct sigaction){ .sa_handler = SIG_DFL }, &old_sa);
+
     baseer_execute(st->target, bx_binhead, &input);
+
+    sigaction(SIGCHLD, &old_sa, NULL);
 
     free_map(input.map);
 

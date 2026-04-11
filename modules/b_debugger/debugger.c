@@ -14,6 +14,28 @@
 #include <sys/ptrace.h>
 #include "../bx_elf_utils/bx_elf_utils.h"
 
+#define BOX_WIDTH 66
+
+static void print_box_header(const char *title, int width){
+	int title_len = strlen(title);
+	int pad = width - 5 - title_len - 1;
+	printf(COLOR_YELLOW " ┌─── " COLOR_BWHITE "%s" COLOR_YELLOW " ", title);
+	for(int i = 0; i < pad; i++) printf("─");
+	printf("┐\n" COLOR_RESET);
+}
+
+static void print_box_footer(int width){
+	printf(COLOR_YELLOW " └");
+	for(int i = 0; i < width; i++) printf("─");
+	printf("┘\n" COLOR_RESET);
+}
+
+static void print_box_separator(int width){
+	printf(COLOR_YELLOW " ├");
+	for(int i = 0; i < width; i++) printf("─");
+	printf("┤\n" COLOR_RESET);
+}
+
 /* Command dispatch table */
 static func_list cmds[] = {
     {"bp",setBP},
@@ -108,7 +130,7 @@ void parse_cmd(context *ctx){
 	if(ctx == NULL)
 		return;
 	bool flag = false;
-        char *cmd = linenoise(COLOR_WHITE"Baseer-\033[5;34mDBG"COLOR_RESET"-> "COLOR_RESET);
+        char *cmd = linenoise(COLOR_BWHITE "baseer" COLOR_YELLOW "(" COLOR_BCYAN "dbg" COLOR_YELLOW ")" COLOR_RESET COLOR_BWHITE "> " COLOR_RESET);
         if(!cmd) return;
 	cmd[strcspn(cmd, "\n")] = 0;
 	if(*cmd){
@@ -191,8 +213,11 @@ bool handle_action(context *ctx,void *args){
 		size_t size = 0;
 		getdelim(&ctx->mmaps,&size,'\0' , file);
 		fclose(file);
-		if (ctx->mmaps)
-			printf("%s\n",ctx->mmaps);
+		if (ctx->mmaps) {
+			print_box_header("Memory Maps", BOX_WIDTH);
+			printf("%s",ctx->mmaps);
+			print_box_footer(BOX_WIDTH);
+		}
 		ctx->do_wait = false;
 		return true;
 	}else if (strcmp(ctx->cmd.op,"c") == 0) {
@@ -211,9 +236,15 @@ bool handle_action(context *ctx,void *args){
 		return true;
 	}else if (strcmp(ctx->cmd.op,"i") == 0) {
 		sym_list *sym = ctx->sym;
-		while (sym != NULL) {
-			printf("function %s 0x%lx\n",sym->name,sym->addr);
-			sym = sym->next;
+		if(sym == NULL){
+			INFO("no symbols loaded\n");
+		} else {
+			print_box_header("Functions", BOX_WIDTH);
+			while (sym != NULL) {
+				printf(COLOR_YELLOW " │ " COLOR_BBLUE " 0x%016lx  " COLOR_BCYAN "%-42s" COLOR_YELLOW "│\n" COLOR_RESET,sym->addr,sym->name);
+				sym = sym->next;
+			}
+			print_box_footer(BOX_WIDTH);
 		}
 		ctx->do_wait = false;
 		return true;
@@ -226,19 +257,43 @@ bool handle_action(context *ctx,void *args){
  * @brief Print the list of available debugger commands.
  */
 void print_helpCMD(){
+	typedef struct { const char *cmd; const char *color; const char *desc; const char *example; } help_entry;
+
+	static const help_entry entries[] = {
+		{"bp",    COLOR_BCYAN,    "Set breakpoint",            "bp 0x1234 | bp func_name"},
+		{"dp",    COLOR_BCYAN,    "Delete breakpoint",         "dp <breakpoint_id>"},
+		{"lp",    COLOR_BCYAN,    "List all breakpoints",      "lp"},
+		{NULL, NULL, NULL, NULL},
+		{"si",    COLOR_BGREEN,   "Step into (single step)",   "si"},
+		{"so",    COLOR_BGREEN,   "Step over (skip calls)",    "so"},
+		{"c",     COLOR_BGREEN,   "Continue execution",        "c"},
+		{NULL, NULL, NULL, NULL},
+		{"vmmap", COLOR_BBLUE,    "Display memory maps",       "vmmap"},
+		{"i",     COLOR_BBLUE,    "List functions & addresses", "i"},
+		{"x",     COLOR_BBLUE,    "Examine memory",            "x 0x1234 10"},
+		{"set",   COLOR_BBLUE,    "Set register/memory value",  "set $rax=0x20 | set 0x.."},
+		{NULL, NULL, NULL, NULL},
+		{"q",     COLOR_BRED,     "Quit the debugger",         "q"},
+		{"h",     COLOR_BMAGENTA, "Show this help",            "h"},
+	};
+
 	printf("\n");
-	printf(COLOR_BLUE "bp   " COLOR_RESET " : set breakpoint {ex: bp 0x12354 or bp func_name}\n");
-	printf(COLOR_BLUE "dp   " COLOR_RESET " : delete breakpoint {ex: dp breakpoint_id}\n");
-	printf(COLOR_BLUE "lp   " COLOR_RESET " : list all breakpoints {ex: lp}\n");
-	printf(COLOR_BLUE "si   " COLOR_RESET " : take one step execution (step into) {ex: si}\n");
-	printf(COLOR_BLUE "so   " COLOR_RESET " : take one step execution (step over){ex: so}\n");
-	printf(COLOR_BLUE "c    " COLOR_RESET " : continue execution {ex: c}\n");
-	printf(COLOR_BLUE "h    " COLOR_RESET " : display help commands {ex: h}\n");
-	printf(COLOR_BLUE "vmmap" COLOR_RESET " : display maps memory {ex: vmmap}\n");
-	printf(COLOR_BLUE "i    " COLOR_RESET " : display functions name and address {ex: i}\n");
-	printf(COLOR_BLUE "x    " COLOR_RESET " : examin value in memory {ex: x addr size : x 0x1234 10}\n");
-	printf(COLOR_BLUE "set  " COLOR_RESET " : change memory or register value {ex: set $eax=0x20 : set 0x1234=0x20}\n");
-	printf(COLOR_BLUE "q    " COLOR_RESET " : for quit the debugger \n");
+	printf(COLOR_YELLOW " ╔══════════════════════════════════════════════════════════════════════╗\n" COLOR_RESET);
+	printf(COLOR_YELLOW " ║" COLOR_BWHITE "                        Debugger Commands                          " COLOR_YELLOW "║\n" COLOR_RESET);
+	printf(COLOR_YELLOW " ╠════════╦═════════════════════════════════════════════════════════════╣\n" COLOR_RESET);
+
+	int count = sizeof(entries) / sizeof(entries[0]);
+	for(int i = 0; i < count; i++){
+		if(entries[i].cmd == NULL){
+			printf(COLOR_YELLOW " ╠════════╬═════════════════════════════════════════════════════════════╣\n" COLOR_RESET);
+			continue;
+		}
+		printf(COLOR_YELLOW " ║" "%s %-6s " COLOR_YELLOW "║" COLOR_RESET " %-28s" COLOR_GRAY "%-25s" COLOR_YELLOW "║\n" COLOR_RESET,
+			entries[i].color, entries[i].cmd, entries[i].desc, entries[i].example);
+	}
+
+	printf(COLOR_YELLOW " ╚════════╩═════════════════════════════════════════════════════════════╝\n" COLOR_RESET);
+	printf("\n");
 }
 
 /**
@@ -339,23 +394,27 @@ bool examin_mem(context *ctx,void *args){
 		size = 1;
 	}
 
-	char *fmt = (ctx->arch == 64) ? " 0x%016llx" : " 0x%08x";
+	char *fmt = (ctx->arch == 64) ? "0x%016llx" : "0x%08x";
 	for (int i = 0; i < size; i++) {
 
-		long v = ptrace(PTRACE_PEEKTEXT, ctx->pid, 
+		long v = ptrace(PTRACE_PEEKTEXT, ctx->pid,
 				(void*)(addr + i*(ctx->arch / 8 )), NULL);
 		if(v == -1){
 			ERROR("wrong address \n");
 			return true;
 		}
 		if(i % 2 == 0 ){
-			printf(COLOR_YELLOW "0x%lx" COLOR_RESET " : " , 
+			printf(COLOR_YELLOW " 0x%lx" COLOR_RESET COLOR_GRAY " │ " COLOR_RESET,
 				(addr + i * (ctx->arch / 8 )));
+			printf(COLOR_BBLUE);
 			printf(fmt,v);
+			printf(COLOR_RESET);
 
 		}else {
+			printf("  ");
+			printf(COLOR_BBLUE);
 			printf(fmt ,v);
-			printf("\n");
+			printf(COLOR_RESET "\n");
 		}
 	}
 	if(size % 2 == 1)
@@ -577,18 +636,19 @@ bool listBP(context *ctx,void *args){
 	ptrace(PTRACE_GETREGS, ctx->pid, NULL, &ctx->regs);
 	ctx->do_wait = false;
 	if(ctx->list->first == NULL){
-		INFO("")
-		printf("there is no break points\n");
+		INFO("no breakpoints set\n")
 		return true;
 	}
 
-	bp *head = ctx->list->first;
-	bp *ptr = head;
+	print_box_header("Breakpoints", BOX_WIDTH);
+	printf(COLOR_YELLOW " │  " COLOR_GRAY "ID     Address                                             " COLOR_YELLOW "│\n" COLOR_RESET);
+	print_box_separator(BOX_WIDTH);
+	bp *ptr = ctx->list->first;
 	while (ptr != NULL) {
-		INFO("")
-		printf("break point id: %d at : 0x%lx\n",ptr->id,ptr->addr);
+		printf(COLOR_YELLOW " │  " COLOR_BWHITE "%-6d " COLOR_BRED "0x%016lx                                  " COLOR_YELLOW "│\n" COLOR_RESET,ptr->id,ptr->addr);
 		ptr = ptr->next;
 	}
+	print_box_footer(BOX_WIDTH);
 	return true;
 }
 /**
@@ -632,25 +692,45 @@ void dis_ctx(context *ctx){
 	ptrace(PTRACE_GETREGS, ctx->pid, NULL, &ctx->regs);
 	ud_t ud_obj;
 	uint8_t data[160];
-	printf(COLOR_YELLOW "------------- regs ----------------\n" COLOR_RESET);
+
+	print_box_header("Registers", BOX_WIDTH);
 	int len = sizeof(regs_64)/sizeof(pos_name);
 	pos_name *regs = (ctx->arch == 64) ? regs_64 : regs_32;
 
-	for (int i = 0 ; i < len; i++) {
-		printf(COLOR_CYAN "\t%s" COLOR_RESET "=> " COLOR_BLUE "0x%lx\n"COLOR_RESET, regs[i].name ,*(uint64_t*)((char*)&ctx->regs+regs[i].pos) );
+	for (int i = 0 ; i < len - 1; i += 2) {
+		uint64_t v1 = *(uint64_t*)((char*)&ctx->regs+regs[i].pos);
+		uint64_t v2 = *(uint64_t*)((char*)&ctx->regs+regs[i+1].pos);
+		printf(COLOR_YELLOW " │ " COLOR_BCYAN " %s" COLOR_RESET COLOR_GRAY "= " COLOR_BBLUE "0x%016lx"COLOR_RESET
+		       "    " COLOR_BCYAN "%s" COLOR_RESET COLOR_GRAY "= " COLOR_BBLUE "0x%016lx"COLOR_RESET
+		       COLOR_YELLOW "  │\n" COLOR_RESET,
+		       regs[i].name, v1, regs[i+1].name, v2);
 	}
-	len =sizeof(flags)/sizeof(pos_name) ;
-	printf("FLAGS: ");
+	if (len % 2 == 1) {
+		uint64_t v = *(uint64_t*)((char*)&ctx->regs+regs[len-1].pos);
+		printf(COLOR_YELLOW " │ " COLOR_BCYAN " %s" COLOR_RESET COLOR_GRAY "= " COLOR_BBLUE "0x%016lx"COLOR_RESET
+		       "                                      "
+		       COLOR_YELLOW "  │\n" COLOR_RESET,
+		       regs[len-1].name, v);
+	}
+	print_box_header("Flags", BOX_WIDTH);
+	len = sizeof(flags)/sizeof(pos_name);
+	printf(COLOR_YELLOW " │ " COLOR_RESET);
+	int flags_printed = 0;
 	for (int i = 0 ; i<len ; i++) {
 		int is_set = (ctx->regs.eflags >> flags[i].pos) & 1;
 		if(is_set){
-			printf(COLOR_GREEN  "%s " COLOR_RESET, flags[i].name);
+			printf(COLOR_BG_GREEN COLOR_BLACK " %s " COLOR_RESET " ", flags[i].name);
 		}else {
-			printf(COLOR_RED    "%s " COLOR_RESET, flags[i].name);
+			printf(COLOR_GRAY " %s " COLOR_RESET " ", flags[i].name);
 		}
+		flags_printed += strlen(flags[i].name) + 4;
 	}
-	printf("\n");
-	printf(COLOR_YELLOW "------------- disass ----------------\n" COLOR_RESET);
+	int pad = BOX_WIDTH - 2 - flags_printed;
+	for(int i = 0; i < pad; i++) putchar(' ');
+	printf(COLOR_YELLOW "│\n" COLOR_RESET);
+	print_box_footer(BOX_WIDTH);
+
+	print_box_header("Disassembly", BOX_WIDTH);
 	for(int i = 0; i < 20; i++) {
 		long inst = ptrace(PTRACE_PEEKTEXT, ctx->pid, (void*)(ctx->regs.rip + i*8), NULL);
 		memcpy((void*)&data[i*8], (void*)&inst , sizeof(inst));
@@ -661,32 +741,34 @@ void dis_ctx(context *ctx){
 	ud_set_syntax(&ud_obj, UD_SYN_INTEL);
 	ud_set_pc(&ud_obj, ctx->regs.rip);
         while(ud_disassemble(&ud_obj)){
-            // if(ud_insn_off(&ud_obj) == ctx->regs.rip){
-            // 	printf(COLOR_GREEN "    --> 0x%llx: %s\n"COLOR_RESET,(uint64_t)ud_insn_off(&ud_obj),ud_insn_asm(&ud_obj));
-            // }else {
-            // 	printf(COLOR_MAGENTA "\t0x%llx: %s\n"COLOR_RESET,(uint64_t)ud_insn_off(&ud_obj),ud_insn_asm(&ud_obj));
-            // }
             if(ud_insn_off(&ud_obj) == ctx->regs.rip){
-                printf(COLOR_GREEN "    --> 0x%lx: "COLOR_RESET,(uint64_t)ud_insn_off(&ud_obj));
+                printf(COLOR_YELLOW " │" COLOR_BG_GREEN COLOR_BLACK " ► " COLOR_RESET COLOR_BGREEN " 0x%lx  "COLOR_RESET,(uint64_t)ud_insn_off(&ud_obj));
                 print_highlight_asm(ud_insn_asm(&ud_obj));
             }else {
-                printf(COLOR_MAGENTA "\t0x%lx: " COLOR_RESET,(uint64_t)ud_insn_off(&ud_obj));
+                printf(COLOR_YELLOW " │" COLOR_RESET "   " COLOR_GRAY "0x%lx  " COLOR_RESET,(uint64_t)ud_insn_off(&ud_obj));
                 print_highlight_asm(ud_insn_asm(&ud_obj));
             }
 
             if(ud_insn_mnemonic(&ud_obj)  == UD_Iret || ud_insn_off(&ud_obj) >= (ctx->regs.rip + 0x20))
                 break;
         }
+	print_box_footer(BOX_WIDTH);
 
-	printf(COLOR_YELLOW "------------- stack ----------------\n" COLOR_RESET);
-	char *fmt = (ctx->arch == 64) ? " 0x%llx" : " 0x%x";
+	print_box_header("Stack", BOX_WIDTH);
+	char *fmt = (ctx->arch == 64) ? "0x%016llx" : "0x%08x";
 	int data_len = ctx->arch / 8;
 	for(int i = 0; i < 10; i++) {
 		long v = ptrace(PTRACE_PEEKTEXT, ctx->pid, (void*)(ctx->regs.rsp + i*data_len), NULL);
-		printf(COLOR_YELLOW "\t0x%llx" COLOR_RESET " =>" COLOR_BLUE , (ctx->regs.rsp + i *data_len));
+		printf(COLOR_YELLOW " │ " COLOR_RESET);
+		if(i == 0)
+			printf(COLOR_BGREEN "► ");
+		else
+			printf("  ");
+		printf(COLOR_YELLOW "0x%llx" COLOR_RESET COLOR_GRAY " → " COLOR_BBLUE, (ctx->regs.rsp + i *data_len));
 		printf(fmt,v);
-		printf("\n" COLOR_RESET);
+		printf(COLOR_RESET "\n");
 	}
+	print_box_footer(BOX_WIDTH);
 
 }
 

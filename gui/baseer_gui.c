@@ -9,6 +9,7 @@
  * Run:   ./build/baseer-gui [file]
  */
 
+#define _GNU_SOURCE
 #include "raylib.h"
 
 #define RAYGUI_IMPLEMENTATION
@@ -20,6 +21,7 @@
 
 #include <signal.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/wait.h>
 
 #define INIT_WIDTH       1280
@@ -29,8 +31,10 @@
 #define PADDING          10
 #define BTN_H            32
 #define INPUT_H          28
-#define OUTPUT_FONT_SIZE 16
+#define OUTPUT_FONT_SIZE 18
 #define LINE_HEIGHT      (OUTPUT_FONT_SIZE + 4)
+#define FONT_LOAD_SIZE   36   /* Load at 2x for crisp rendering with bilinear filter */
+#define FONT_GLYPH_COUNT 1024 /* Covers Latin, box-drawing, arrows, math symbols */
 #define MAX_OUTPUT       (4 * 1024 * 1024)
 
 #define COL_BG           CLITERAL(Color){ 22, 22, 38, 255 }
@@ -218,20 +222,78 @@ static void launch_debugger(AppState *st)
         return;
     }
 
-    char cmd[1024];
-    snprintf(cmd, sizeof(cmd), "baseer %s -d", st->filepath);
+    /* Resolve baseer CLI path: look next to baseer-gui, fall back to PATH. */
+    char self_path[512] = {0};
+    char baseer_bin[512] = "baseer";
+    ssize_t len = readlink("/proc/self/exe", self_path, sizeof(self_path) - 1);
+    if (len > 0) {
+        self_path[len] = '\0';
+        char *slash = strrchr(self_path, '/');
+        if (slash) {
+            char candidate[512];
+            *(slash + 1) = '\0';
+            snprintf(candidate, sizeof(candidate), "%sbaseer", self_path);
+            if (access(candidate, X_OK) == 0)
+                memcpy(baseer_bin, candidate, sizeof(baseer_bin));
+        }
+    }
+
+    char cmd[1536];
+    if (snprintf(cmd, sizeof(cmd), "%s %s -d", baseer_bin, st->filepath) >= (int)sizeof(cmd)) {
+        snprintf(st->status, sizeof(st->status), "[!] File path too long for debugger command.");
+        return;
+    }
+
+    /* O_CLOEXEC: on successful exec, write end auto-closes (parent sees EOF = success).
+     * On all-exec-fail, child writes a byte before _exit (parent sees data = failure). */
+    int pipefd[2];
+    if (pipe2(pipefd, O_CLOEXEC) == -1) {
+        snprintf(st->status, sizeof(st->status), "[!] Failed to create pipe.");
+        return;
+    }
 
     pid_t pid = fork();
     if (pid == 0) {
+        close(pipefd[0]);
+
         execlp("x-terminal-emulator", "x-terminal-emulator", "-e", "sh", "-c", cmd, NULL);
         execlp("alacritty", "alacritty", "-e", "sh", "-c", cmd, NULL);
         execlp("kitty", "kitty", "sh", "-c", cmd, NULL);
         execlp("foot", "foot", "sh", "-c", cmd, NULL);
+        execlp("wezterm", "wezterm", "start", "--", "sh", "-c", cmd, NULL);
         execlp("gnome-terminal", "gnome-terminal", "--", "sh", "-c", cmd, NULL);
         execlp("konsole", "konsole", "-e", "sh", "-c", cmd, NULL);
+        execlp("st", "st", "-e", "sh", "-c", cmd, NULL);
         execlp("xterm", "xterm", "-e", "sh", "-c", cmd, NULL);
+
+        /* All execlp calls failed — signal parent */
+        (void)!write(pipefd[1], "\1", 1);
         _exit(1);
     } else if (pid > 0) {
+        close(pipefd[1]);
+
+        /* Non-blocking read: if child already failed, we get the byte immediately.
+         * If exec succeeded, the CLOEXEC write end is gone and read returns 0/EAGAIN. */
+        int fl = fcntl(pipefd[0], F_GETFL);
+        if (fl != -1) fcntl(pipefd[0], F_SETFL, fl | O_NONBLOCK);
+        char fail_byte;
+        ssize_t n = read(pipefd[0], &fail_byte, 1);
+        close(pipefd[0]);
+
+        if (n == 1) {
+            snprintf(st->status, sizeof(st->status),
+                     "[!] No terminal emulator found. Run manually: %s", cmd);
+            set_output(st, strdup(
+                "=== Debugger Launch Failed ===\n\n"
+                "Could not find a terminal emulator to launch the debugger.\n\n"
+                "Searched for: x-terminal-emulator, alacritty, kitty, foot,\n"
+                "              wezterm, gnome-terminal, konsole, st, xterm\n\n"
+                "To run the debugger manually, open a terminal and run:\n\n"
+                "  baseer <file> -d\n"
+            ), "Debugger");
+            return;
+        }
+
         snprintf(st->status, sizeof(st->status), "Debugger launched in terminal (PID %d)", pid);
         set_output(st, strdup(
             "=== Debugger ===\n\n"
@@ -255,10 +317,10 @@ static void launch_debugger(AppState *st)
             "  General:\n"
             "    h               Show help\n"
             "    q               Quit debugger\n\n"
-            "If no terminal was found, run manually:\n"
-            "  baseer <file> -d\n"
         ), "Debugger");
     } else {
+        close(pipefd[0]);
+        close(pipefd[1]);
         snprintf(st->status, sizeof(st->status), "[!] Failed to fork for debugger.");
     }
 }
@@ -361,7 +423,36 @@ int main(int argc, char **argv)
     SetExitKey(0);
 
     Font mono = { 0 };
+    /* Load at 2x size for crisp bilinear-filtered rendering at OUTPUT_FONT_SIZE. */
     static const char *font_paths[] = {
+        /* JetBrains Mono */
+        "/usr/share/fonts/TTF/JetBrainsMonoNerdFont-Regular.ttf",
+        "/usr/share/fonts/TTF/JetBrainsMono-Regular.ttf",
+        "/usr/share/fonts/truetype/jetbrains-mono/JetBrainsMono-Regular.ttf",
+        "/usr/share/fonts/jetbrains-mono/JetBrainsMono-Regular.ttf",
+        /* Fira Code */
+        "/usr/share/fonts/TTF/FiraCodeNerdFont-Regular.ttf",
+        "/usr/share/fonts/TTF/FiraCode-Regular.ttf",
+        "/usr/share/fonts/truetype/firacode/FiraCode-Regular.ttf",
+        "/usr/share/fonts/fira-code/FiraCode-Regular.ttf",
+        /* Hack */
+        "/usr/share/fonts/TTF/HackNerdFont-Regular.ttf",
+        "/usr/share/fonts/TTF/Hack-Regular.ttf",
+        "/usr/share/fonts/truetype/hack/Hack-Regular.ttf",
+        /* Cascadia Code */
+        "/usr/share/fonts/TTF/CascadiaCode.ttf",
+        "/usr/share/fonts/truetype/cascadia-code/CascadiaCode.ttf",
+        /* Source Code Pro */
+        "/usr/share/fonts/TTF/SourceCodePro-Regular.ttf",
+        "/usr/share/fonts/adobe-source-code-pro/SourceCodePro-Regular.ttf",
+        "/usr/share/fonts/truetype/adobe/SourceCodePro-Regular.ttf",
+        /* IBM Plex Mono */
+        "/usr/share/fonts/TTF/IBMPlexMono-Regular.ttf",
+        "/usr/share/fonts/truetype/ibm-plex/IBMPlexMono-Regular.ttf",
+        /* Iosevka */
+        "/usr/share/fonts/TTF/Iosevka-Regular.ttf",
+        "/usr/share/fonts/truetype/iosevka/Iosevka-Regular.ttf",
+        /* Classic fallbacks */
         "/usr/share/fonts/TTF/DejaVuSansMono.ttf",
         "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",
         "/usr/share/fonts/noto/NotoSansMono-Regular.ttf",
@@ -372,7 +463,7 @@ int main(int argc, char **argv)
     };
     for (int i = 0; font_paths[i]; i++) {
         if (FileExists(font_paths[i])) {
-            mono = LoadFontEx(font_paths[i], OUTPUT_FONT_SIZE, NULL, 256);
+            mono = LoadFontEx(font_paths[i], FONT_LOAD_SIZE, NULL, FONT_GLYPH_COUNT);
             if (mono.glyphCount > 0) {
                 SetTextureFilter(mono.texture, TEXTURE_FILTER_BILINEAR);
                 break;

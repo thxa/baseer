@@ -230,7 +230,7 @@ if(BUILD_GUI)
         ${raygui_SOURCE_DIR}/src
     )
 
-    target_link_libraries(baseer-gui raylib dl m)
+    target_link_libraries(baseer-gui raylib dl m util)
 
     # Install GUI alongside CLI
     install(TARGETS baseer-gui DESTINATION ${BINDIR})

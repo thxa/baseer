@@ -23,6 +23,9 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/wait.h>
+#include <pty.h>
+#include <sys/ioctl.h>
+#include <errno.h>
 
 #define INIT_WIDTH       1280
 #define INIT_HEIGHT      720
@@ -37,6 +40,9 @@
 #define FONT_GLYPH_COUNT 1024 /* Covers Latin, box-drawing, arrows, math symbols */
 #define MAX_OUTPUT       (4 * 1024 * 1024)
 
+#define DBG_INPUT_H      30
+#define DBG_BUF_SIZE     (2 * 1024 * 1024)
+
 #define COL_BG           CLITERAL(Color){ 22, 22, 38, 255 }
 #define COL_SIDEBAR      CLITERAL(Color){ 28, 28, 48, 255 }
 #define COL_PANEL        CLITERAL(Color){ 16, 20, 34, 255 }
@@ -48,9 +54,26 @@
 #define COL_GREEN        CLITERAL(Color){ 80, 200, 120, 255 }
 #define COL_RED          CLITERAL(Color){ 233, 69, 96, 255 }
 #define COL_SEPARATOR    CLITERAL(Color){ 50, 50, 75, 255 }
+#define COL_INPUT_BG     CLITERAL(Color){ 30, 30, 50, 255 }
+#define COL_PROMPT       CLITERAL(Color){ 100, 200, 255, 255 }
 
 static const char *MSG_NO_FILE = "[!] No file open. Open a file first.";
 static const char *TOOL_NONE   = "None";
+
+/* ── Debugger state (embedded PTY) ─────────────────────────────────── */
+typedef struct {
+    int   master_fd;       /* PTY master file descriptor              */
+    pid_t pid;             /* Debugger child process PID              */
+    bool  running;         /* True while debugger process is alive    */
+    char *buf;             /* Accumulated output buffer               */
+    int   buf_len;         /* Current length of output in buf         */
+    int   buf_cap;         /* Allocated capacity of buf               */
+    int   line_count;      /* Cached newline count (updated in dbg_append) */
+    char  cmd[512];        /* Current command being typed             */
+    bool  cmd_edit;        /* Whether the command input is focused    */
+    bool  auto_scroll;     /* Auto-scroll to bottom on new output    */
+    Vector2 scroll;        /* Scroll position (independent from normal output) */
+} DbgState;
 
 typedef struct {
     baseer_target_t *target;
@@ -67,6 +90,8 @@ typedef struct {
     int     content_h;
 
     const char *active_tool;
+
+    DbgState dbg;
 } AppState;
 
 static void strip_ansi(char *s)
@@ -223,11 +248,131 @@ static void run_tool(AppState *st, const char *flag, const char *name)
              name, st->filepath, st->target ? st->target->size : 0, lines);
 }
 
+/* ── Embedded debugger (PTY-based) ─────────────────────────────────── */
+
+static void dbg_stop(AppState *st)
+{
+    DbgState *d = &st->dbg;
+    if (!d->running) return;
+
+    if (d->pid > 0) {
+        kill(d->pid, SIGKILL);
+        waitpid(d->pid, NULL, 0);
+    }
+    if (d->master_fd >= 0) {
+        close(d->master_fd);
+        d->master_fd = -1;
+    }
+    d->running = false;
+    d->pid = 0;
+    d->cmd[0] = '\0';
+    d->cmd_edit = false;
+
+    snprintf(st->status, sizeof(st->status), "Debugger stopped.");
+}
+
+static void dbg_append(DbgState *d, const char *data, int len)
+{
+    if (len <= 0) return;
+
+    /* Grow buffer if needed */
+    while (d->buf_len + len + 1 > d->buf_cap) {
+        int new_cap = d->buf_cap * 2;
+        if (new_cap < 4096) new_cap = 4096;
+        char *nb = realloc(d->buf, new_cap);
+        if (!nb) return;
+        d->buf = nb;
+        d->buf_cap = new_cap;
+    }
+
+    memcpy(d->buf + d->buf_len, data, len);
+    d->buf_len += len;
+    d->buf[d->buf_len] = '\0';
+
+    /* Update cached line count for the appended data */
+    for (int i = 0; i < len; i++)
+        if (data[i] == '\n') d->line_count++;
+
+    /* Trim if too large: keep the last half, recount lines */
+    if (d->buf_len > DBG_BUF_SIZE) {
+        int keep = DBG_BUF_SIZE / 2;
+        memmove(d->buf, d->buf + d->buf_len - keep, keep);
+        d->buf_len = keep;
+        d->buf[d->buf_len] = '\0';
+        d->line_count = count_lines(d->buf);
+    }
+}
+
+/* Read any available output from the PTY master (non-blocking).
+ * Caps reads per frame to avoid stalling the render loop. */
+#define DBG_MAX_READ_PER_FRAME (16 * 1024)
+
+static void dbg_poll(AppState *st)
+{
+    DbgState *d = &st->dbg;
+    if (!d->running || d->master_fd < 0) return;
+
+    int wstatus;
+    pid_t w = waitpid(d->pid, &wstatus, WNOHANG);
+    if (w > 0 || (w < 0 && errno == ECHILD)) {
+        /* Child exited — drain remaining output */
+        char tmp[4096];
+        for (;;) {
+            ssize_t n = read(d->master_fd, tmp, sizeof(tmp) - 1);
+            if (n <= 0) break;
+            tmp[n] = '\0';
+            strip_ansi(tmp);
+            dbg_append(d, tmp, (int)strlen(tmp));
+        }
+        close(d->master_fd);
+        d->master_fd = -1;
+        d->running = false;
+        d->pid = 0;
+        dbg_append(d, "\n[Debugger exited]\n", 18);
+        d->auto_scroll = true;
+        snprintf(st->status, sizeof(st->status), "Debugger exited.");
+        return;
+    }
+
+    char tmp[4096];
+    int total = 0;
+    while (total < DBG_MAX_READ_PER_FRAME) {
+        ssize_t n = read(d->master_fd, tmp, sizeof(tmp) - 1);
+        if (n <= 0) break;
+        tmp[n] = '\0';
+        strip_ansi(tmp);
+        int slen = (int)strlen(tmp);
+        dbg_append(d, tmp, slen);
+        total += slen;
+        d->auto_scroll = true;
+    }
+}
+
+static void dbg_send(AppState *st, const char *cmd)
+{
+    DbgState *d = &st->dbg;
+    if (!d->running || d->master_fd < 0) return;
+
+    int len = (int)strlen(cmd);
+    if (len > 0 && write(d->master_fd, cmd, len) < 0) {
+        snprintf(st->status, sizeof(st->status), "[!] Failed to send command to debugger.");
+        return;
+    }
+    if (write(d->master_fd, "\n", 1) < 0) {
+        snprintf(st->status, sizeof(st->status), "[!] Failed to send command to debugger.");
+    }
+}
+
 static void launch_debugger(AppState *st)
 {
     if (!st->file_open) {
         snprintf(st->status, sizeof(st->status), "%s", MSG_NO_FILE);
         return;
+    }
+
+    /* If debugger is already running, stop it first */
+    if (st->dbg.running) {
+        dbg_stop(st);
     }
 
     /* Resolve baseer CLI path: look next to baseer-gui, fall back to PATH. */
@@ -246,95 +391,80 @@ static void launch_debugger(AppState *st)
         }
     }
 
-    char cmd[1536];
-    if (snprintf(cmd, sizeof(cmd), "%s %s -d", baseer_bin, st->filepath) >= (int)sizeof(cmd)) {
-        snprintf(st->status, sizeof(st->status), "[!] File path too long for debugger command.");
-        return;
-    }
-
-    /* O_CLOEXEC: on successful exec, write end auto-closes (parent sees EOF = success).
-     * On all-exec-fail, child writes a byte before _exit (parent sees data = failure). */
-    int pipefd[2];
-    if (pipe2(pipefd, O_CLOEXEC) == -1) {
-        snprintf(st->status, sizeof(st->status), "[!] Failed to create pipe.");
+    int master_fd, slave_fd;
+    if (openpty(&master_fd, &slave_fd, NULL, NULL, NULL) == -1) {
+        snprintf(st->status, sizeof(st->status), "[!] Failed to create PTY.");
         return;
     }
 
     pid_t pid = fork();
     if (pid == 0) {
-        close(pipefd[0]);
+        /* ── CHILD: run debugger with PTY slave as terminal ── */
+        close(master_fd);
 
-        execlp("x-terminal-emulator", "x-terminal-emulator", "-e", "sh", "-c", cmd, NULL);
-        execlp("alacritty", "alacritty", "-e", "sh", "-c", cmd, NULL);
-        execlp("kitty", "kitty", "sh", "-c", cmd, NULL);
-        execlp("foot", "foot", "sh", "-c", cmd, NULL);
-        execlp("wezterm", "wezterm", "start", "--", "sh", "-c", cmd, NULL);
-        execlp("gnome-terminal", "gnome-terminal", "--", "sh", "-c", cmd, NULL);
-        execlp("konsole", "konsole", "-e", "sh", "-c", cmd, NULL);
-        execlp("st", "st", "-e", "sh", "-c", cmd, NULL);
-        execlp("xterm", "xterm", "-e", "sh", "-c", cmd, NULL);
+        /* Create a new session and set slave as controlling terminal */
+        setsid();
+        ioctl(slave_fd, TIOCSCTTY, 0);
 
-        /* All execlp calls failed — signal parent */
-        (void)!write(pipefd[1], "\1", 1);
+        dup2(slave_fd, STDIN_FILENO);
+        dup2(slave_fd, STDOUT_FILENO);
+        dup2(slave_fd, STDERR_FILENO);
+        if (slave_fd > STDERR_FILENO)
+            close(slave_fd);
+
+        /* Set TERM so linenoise/ncurses work */
+        setenv("TERM", "xterm-256color", 1);
+
+        execlp(baseer_bin, "baseer", st->filepath, "-d", NULL);
+
+        /* If exec fails */
+        perror("exec baseer failed");
         _exit(1);
     } else if (pid > 0) {
-        close(pipefd[1]);
+        /* ── PARENT: store master fd, set non-blocking ── */
+        close(slave_fd);
 
-        /* Non-blocking read: if child already failed, we get the byte immediately.
-         * If exec succeeded, the CLOEXEC write end is gone and read returns 0/EAGAIN. */
-        int fl = fcntl(pipefd[0], F_GETFL);
-        if (fl != -1) fcntl(pipefd[0], F_SETFL, fl | O_NONBLOCK);
-        char fail_byte;
-        ssize_t n = read(pipefd[0], &fail_byte, 1);
-        close(pipefd[0]);
+        int fl = fcntl(master_fd, F_GETFL);
+        if (fl != -1) fcntl(master_fd, F_SETFL, fl | O_NONBLOCK);
 
-        if (n == 1) {
-            snprintf(st->status, sizeof(st->status),
-                     "[!] No terminal emulator found. Run manually: %s", cmd);
-            set_output(st, strdup(
-                "=== Debugger Launch Failed ===\n\n"
-                "Could not find a terminal emulator to launch the debugger.\n\n"
-                "Searched for: x-terminal-emulator, alacritty, kitty, foot,\n"
-                "              wezterm, gnome-terminal, konsole, st, xterm\n\n"
-                "To run the debugger manually, open a terminal and run:\n\n"
-                "  baseer <file> -d\n"
-            ), "Debugger");
-            return;
+        DbgState *d = &st->dbg;
+        d->master_fd = master_fd;
+        d->pid = pid;
+        d->running = true;
+        d->cmd[0] = '\0';
+        d->cmd_edit = true;  /* Auto-focus the command input */
+        d->auto_scroll = true;
+
+        if (!d->buf) {
+            d->buf_cap = 8192;
+            d->buf = malloc(d->buf_cap);
         }
+        if (d->buf) {
+            d->buf[0] = '\0';
+            d->buf_len = 0;
+        }
+        d->line_count = 0;
+        d->scroll = (Vector2){ 0, 0 };
 
-        snprintf(st->status, sizeof(st->status), "Debugger launched in terminal (PID %d)", pid);
-        set_output(st, strdup(
-            "=== Debugger ===\n\n"
-            "The debugger has been launched in an external terminal.\n"
-            "It uses ptrace and requires interactive input.\n\n"
-            "Debugger Commands\n"
-            "----------------------------------------------\n"
-            "  Breakpoints:\n"
-            "    bp <addr|name>  Set breakpoint at address or function\n"
-            "    dp <id>         Delete breakpoint by ID\n"
-            "    lp              List all breakpoints\n\n"
-            "  Execution:\n"
-            "    si              Step into (single instruction)\n"
-            "    so              Step over (skip calls)\n"
-            "    c               Continue execution\n\n"
-            "  Inspection:\n"
-            "    x <addr> [n]    Examine memory (n words)\n"
-            "    set <tgt>=<val> Set register ($reg) or memory value\n"
-            "    vmmap           Show process memory maps\n"
-            "    i               List functions & addresses\n\n"
-            "  General:\n"
-            "    h               Show help\n"
-            "    q               Quit debugger\n\n"
-        ), "Debugger");
+        snprintf(st->status, sizeof(st->status), "Debugger running (PID %d) — type commands below", pid);
+        st->active_tool = "Debugger";
+
     } else {
-        close(pipefd[0]);
-        close(pipefd[1]);
+        close(master_fd);
+        close(slave_fd);
         snprintf(st->status, sizeof(st->status), "[!] Failed to fork for debugger.");
     }
 }
 
 static void clear_output(AppState *st)
 {
+    if (st->dbg.running) {
+        st->dbg.buf_len = 0;
+        st->dbg.line_count = 0;
+        if (st->dbg.buf) st->dbg.buf[0] = '\0';
+        snprintf(st->status, sizeof(st->status), "Debugger output cleared.");
+        return;
+    }
     set_output(st, NULL, TOOL_NONE);
     snprintf(st->status, sizeof(st->status), "Output cleared.");
 }
@@ -414,10 +544,8 @@ static void draw_sep(int x, int y, int w)
 
 int main(int argc, char **argv)
 {
-    /* Auto-reap child processes (debugger terminals) */
-    signal(SIGCHLD, SIG_IGN);
-
     AppState st = { 0 };
+    st.dbg.master_fd = -1;
     snprintf(st.status, sizeof(st.status), "Ready. Open a file or drag & drop.");
     st.active_tool = TOOL_NONE;
 
@@ -489,14 +617,29 @@ int main(int argc, char **argv)
         int W = GetScreenWidth();
         int H = GetScreenHeight();
 
+        /* Poll debugger PTY for new output */
+        if (st.dbg.running) {
+            dbg_poll(&st);
+        }
+
         if (IsFileDropped()) {
             FilePathList files = LoadDroppedFiles();
             if (files.count > 0) {
+                if (st.dbg.running) dbg_stop(&st);
                 if (st.file_open) close_file(&st);
                 strncpy(st.filepath, files.paths[0], sizeof(st.filepath) - 1);
                 open_file(&st);
             }
             UnloadDroppedFiles(files);
+        }
+
+        /* Handle debugger command input: Enter key sends command */
+        if (st.dbg.running && st.dbg.cmd_edit) {
+            if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_KP_ENTER)) {
+                dbg_send(&st, st.dbg.cmd);
+                st.dbg.cmd[0] = '\0';
+                st.dbg.auto_scroll = true;
+            }
         }
 
         if (IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL)) {
@@ -561,8 +704,14 @@ int main(int argc, char **argv)
             run_tool(&st, "-c", "Decompiler");
         sy += BTN_H + 4;
 
-        if (GuiButton((Rectangle){ sx, sy, sw, BTN_H }, "#152#  Debugger     (Ctrl+D)"))
-            launch_debugger(&st);
+        if (GuiButton((Rectangle){ sx, sy, sw, BTN_H },
+                       st.dbg.running ? "#152#  Stop Debugger (Ctrl+D)"
+                                      : "#152#  Debugger     (Ctrl+D)")) {
+            if (st.dbg.running)
+                dbg_stop(&st);
+            else
+                launch_debugger(&st);
+        }
         sy += BTN_H + 10;
 
         draw_sep(0, sy, SIDEBAR_W);
@@ -591,6 +740,7 @@ int main(int argc, char **argv)
         sy += BTN_H + 4;
 
         if (GuiButton((Rectangle){ sx, sy, sw, BTN_H }, "Help")) {
+            if (st.dbg.running) dbg_stop(&st);
             set_output(&st, strdup(
                 "=== Baseer GUI Help ===\n\n"
                 "GUI Action           | CLI Equivalent\n"
@@ -610,7 +760,7 @@ int main(int argc, char **argv)
                 "  Ctrl+M   Run Metadata\n"
                 "  Ctrl+A   Run Disassembler\n"
                 "  Ctrl+E   Run Decompiler\n"
-                "  Ctrl+D   Launch Debugger (in terminal)\n"
+                "  Ctrl+D   Launch/Stop Debugger\n"
                 "  Ctrl+W   Close file\n"
                 "  Ctrl+L   Clear output\n"
                 "  Ctrl+Q   Quit\n"
@@ -623,41 +773,96 @@ int main(int argc, char **argv)
                        "#113#  Quit  (Ctrl+Q)"))
             break;
 
+        /* ── Main output panel ───────────────────────────────────── */
         int main_x = SIDEBAR_W + 1;
         int main_w = W - main_x;
         int main_h = H - STATUSBAR_H;
 
+        /* Title bar */
         DrawRectangle(main_x, 0, main_w, 30, COL_STATUS_BG);
         {
             char title[128];
-            snprintf(title, sizeof(title), "  Output: %s", st.active_tool);
+            if (st.dbg.running)
+                snprintf(title, sizeof(title), "  Debugger (PID %d)", st.dbg.pid);
+            else
+                snprintf(title, sizeof(title), "  Output: %s", st.active_tool);
             DrawTextEx(mono, title, (Vector2){ main_x + 8, 6 }, 18, 1, COL_ACCENT_HOT);
         }
 
-        Rectangle panel_bounds = { main_x, 30, main_w, main_h - 30 };
-        Rectangle content_rect = { 0, 0, main_w - 20, st.content_h > 0 ? st.content_h + 20 : main_h - 30 };
-        Rectangle view = { 0 };
+        if (st.dbg.running || (st.dbg.buf && st.dbg.buf_len > 0 && strcmp(st.active_tool, "Debugger") == 0)) {
+            /* ── Debugger mode: show PTY output + command input ── */
+            int input_area_h = DBG_INPUT_H + 8; /* input field + padding */
+            int panel_top = 30;
+            int panel_h = main_h - panel_top - input_area_h;
 
-        GuiScrollPanel(panel_bounds, NULL, content_rect, &st.scroll, &view);
+            const char *dbg_text = st.dbg.buf ? st.dbg.buf : "";
+            int dbg_content_h = (st.dbg.line_count + 1) * LINE_HEIGHT;
 
-        BeginScissorMode((int)view.x, (int)view.y, (int)view.width, (int)view.height);
-        DrawRectangle((int)view.x, (int)view.y, (int)view.width, (int)view.height, COL_PANEL);
+            Rectangle panel_bounds = { main_x, panel_top, main_w, panel_h };
+            Rectangle content_rect = { 0, 0, main_w - 20,
+                                        dbg_content_h > panel_h ? dbg_content_h + 20 : panel_h };
+            Rectangle view = { 0 };
 
-        if (st.output && st.output[0]) {
-            draw_output(st.output, mono, view, st.scroll);
+            if (st.dbg.auto_scroll && dbg_content_h > panel_h) {
+                st.dbg.scroll.y = -(dbg_content_h - panel_h + 20);
+                st.dbg.auto_scroll = false;
+            }
+
+            GuiScrollPanel(panel_bounds, NULL, content_rect, &st.dbg.scroll, &view);
+
+            BeginScissorMode((int)view.x, (int)view.y, (int)view.width, (int)view.height);
+            DrawRectangle((int)view.x, (int)view.y, (int)view.width, (int)view.height, COL_PANEL);
+            draw_output(dbg_text, mono, view, st.dbg.scroll);
+            EndScissorMode();
+
+            /* ── Command input area at the bottom ── */
+            int input_y = panel_top + panel_h + 2;
+            DrawRectangle(main_x, input_y, main_w, input_area_h, COL_INPUT_BG);
+            DrawLine(main_x, input_y, main_x + main_w, input_y, COL_SEPARATOR);
+
+            /* Prompt label */
+            const char *prompt = "dbg>";
+            int prompt_w = 45;
+            DrawTextEx(mono, prompt,
+                       (Vector2){ main_x + 8, input_y + (input_area_h - OUTPUT_FONT_SIZE) / 2.0f },
+                       OUTPUT_FONT_SIZE, 1, COL_PROMPT);
+
+            /* Command text box */
+            Rectangle cmd_rect = { main_x + prompt_w + 4, input_y + 4,
+                                    main_w - prompt_w - 12, DBG_INPUT_H };
+            if (GuiTextBox(cmd_rect, st.dbg.cmd, sizeof(st.dbg.cmd), st.dbg.cmd_edit))
+                st.dbg.cmd_edit = !st.dbg.cmd_edit;
+
         } else {
-            DrawTextEx(mono, "No output yet. Open a file and run a tool.",
-                       (Vector2){ view.x + 20, view.y + 20 }, OUTPUT_FONT_SIZE, 1, COL_TEXT_DIM);
-            DrawTextEx(mono, "You can drag & drop a file onto this window.",
-                       (Vector2){ view.x + 20, view.y + 50 }, OUTPUT_FONT_SIZE, 1, COL_TEXT_DIM);
+            /* ── Normal output mode ── */
+            Rectangle panel_bounds = { main_x, 30, main_w, main_h - 30 };
+            Rectangle content_rect = { 0, 0, main_w - 20, st.content_h > 0 ? st.content_h + 20 : main_h - 30 };
+            Rectangle view = { 0 };
+
+            GuiScrollPanel(panel_bounds, NULL, content_rect, &st.scroll, &view);
+
+            BeginScissorMode((int)view.x, (int)view.y, (int)view.width, (int)view.height);
+            DrawRectangle((int)view.x, (int)view.y, (int)view.width, (int)view.height, COL_PANEL);
+
+            if (st.output && st.output[0]) {
+                draw_output(st.output, mono, view, st.scroll);
+            } else {
+                DrawTextEx(mono, "No output yet. Open a file and run a tool.",
+                           (Vector2){ view.x + 20, view.y + 20 }, OUTPUT_FONT_SIZE, 1, COL_TEXT_DIM);
+                DrawTextEx(mono, "You can drag & drop a file onto this window.",
+                           (Vector2){ view.x + 20, view.y + 50 }, OUTPUT_FONT_SIZE, 1, COL_TEXT_DIM);
+            }
+            EndScissorMode();
         }
-        EndScissorMode();
 
         GuiStatusBar((Rectangle){ 0, H - STATUSBAR_H, W, STATUSBAR_H }, st.status);
 
         EndDrawing();
     }
 
+    /* Cleanup */
+    if (st.dbg.running) dbg_stop(&st);
+    free(st.dbg.buf);
     free(st.output);
     if (st.file_open && st.target) baseer_close(st.target);
     if (mono_loaded) UnloadFont(mono);

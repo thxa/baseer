@@ -117,6 +117,27 @@ cmake -S . -B build && cmake --build build && ./build/baseer examples/32bit_x86 
 cmake -S . -B build && cmake --build build --target check
 ```
 
+### Build the GUI (optional)
+
+Baseer ships with an optional GUI frontend (`baseer-gui`) built on top of
+[raylib](https://github.com/raysan5/raylib) and
+[raygui](https://github.com/raysan5/raygui). The source lives at
+`gui/baseer_gui.c` and the CMake target is defined in `CMakeLists.txt`.
+
+The GUI is **disabled by default** and gated behind the `BUILD_GUI` CMake
+option, so a plain `cmake --build build` will only produce the CLI `baseer`
+binary. To build the GUI, enable the option at configure time:
+
+```bash
+cmake -S . -B build -DBUILD_GUI=ON
+cmake --build build --target baseer-gui
+```
+
+On the first configure with `-DBUILD_GUI=ON`, CMake will fetch raylib 5.5 and
+raygui 4.0 via `FetchContent`, so an internet connection is required. The
+resulting binary is placed at `./build/baseer-gui` and is installed alongside
+the CLI when you run the `install` target.
+
 --- 
 
 ## Environment Variables

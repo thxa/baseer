@@ -110,6 +110,7 @@ struct context {
     bool do_wait;               /**< Whether to wait for process stop */
     bool pie;                   /**< True if the target binary is Position Independent Executable (PIE) */
     bool do_exit;               /**< Set when the debugger should terminate */
+    char *last_cmd;             /**< Last entered command line (for Enter repeat) */
 };
 
 /* ==== Function Prototypes ==== */

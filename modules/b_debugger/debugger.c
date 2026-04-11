@@ -110,8 +110,18 @@ void parse_cmd(context *ctx){
 	bool flag = false;
         char *cmd = linenoise(COLOR_WHITE"Baseer-\033[5;34mDBG"COLOR_RESET"-> "COLOR_RESET);
         if(!cmd) return;
-        if(*cmd) linenoiseHistoryAdd(cmd);
 	cmd[strcspn(cmd, "\n")] = 0;
+	if(*cmd){
+		linenoiseHistoryAdd(cmd);
+		free(ctx->last_cmd);
+		ctx->last_cmd = strdup(cmd);
+	} else if(ctx->last_cmd){
+		free(cmd);
+		cmd = strdup(ctx->last_cmd);
+	} else {
+		free(cmd);
+		return;
+	}
 	char *op ;
 	char *args ;
 
@@ -956,6 +966,8 @@ void destroy_all(context *ctx){
 	destroy_bp_sym(ctx);
 	free(ctx->list);
 	ctx->list = NULL;
+	free(ctx->last_cmd);
+	ctx->last_cmd = NULL;
 	free(ctx);
 	ctx = NULL;
 }
